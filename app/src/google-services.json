@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "407693131447",
+    "project_id": "kozzilzzile-d1124",
+    "storage_bucket": "kozzilzzile-d1124.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407693131447:android:500096b142e4db57fb1732",
+        "android_client_info": {
+          "package_name": "com.example.fe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqkf52zIE9iXVAiicxbr2-xxvjsw-Km0I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

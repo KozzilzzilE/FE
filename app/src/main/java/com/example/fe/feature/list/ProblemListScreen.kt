@@ -22,9 +22,9 @@ import com.example.fe.data.Problem
 
 @Composable
 fun ProblemListScreen(
-    problems: List<Problem>,
-    onProblemClick: (Problem) -> Unit,
-    onNavigate: (String) -> Unit
+    problems: List<Problem>, // 문제 리스트
+    onProblemClick: (Problem) -> Unit, // 클릭이벤트
+    onNavigate: (String) -> Unit //
 ) {
     Scaffold(
         topBar = {

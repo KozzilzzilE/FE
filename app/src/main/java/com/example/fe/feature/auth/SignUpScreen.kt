@@ -1,0 +1,244 @@
+package com.example.fe.feature.auth
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun SignUpScreen(
+    onNavigateBack: () -> Unit,
+    onSignUpComplete: (String, String, String) -> Unit // 이름, 아이디, 비번
+) {
+    var name by remember { mutableStateOf("") }
+    var id by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    
+    val scrollState = rememberScrollState()
+
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+                Text(
+                    text = "회원 가입",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp)
+                .verticalScroll(scrollState)
+        ) {
+            // 1. 소셜 로그인 버튼들
+            SocialLoginButton(text = "Github로 회원가입", iconResId =  null) // 아이콘은 일단 생략
+            Spacer(modifier = Modifier.height(12.dp))
+            SocialLoginButton(text = "Google로 회원가입", iconResId = null)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 2. 구분선 (또는)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFEEEEEE))
+                Text(
+                    text = "또는",
+                    color = Color.Gray,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFEEEEEE))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 3. 입력 폼
+            InputSection(label = "이름", placeholder = "이름을 입력해주세요", value = name, onValueChange = { name = it }, required = true)
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            InputSection(label = "아이디", placeholder = "아이디를 입력해주세요", value = id, onValueChange = { id = it })
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            InputSection(label = "비밀번호", placeholder = "비밀번호", value = password, onValueChange = { password = it }, isPassword = true, required = true)
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            InputSection(label = "비밀번호 확인", placeholder = "비밀번호 확인", value = confirmPassword, onValueChange = { confirmPassword = it }, isPassword = true, required = true)
+            
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 4. 사용 언어 (드롭다운 흉내)
+            Text(text = "사용 언어", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .background(Color.White, RoundedCornerShape(8.dp))
+                    .run { 
+                        shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)) 
+                            .background(Color.White, RoundedCornerShape(8.dp)) // 그림자 위 배경
+                    }
+                    .background(Color.White) // 배경 확실히
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                 Row(
+                     modifier = Modifier.fillMaxWidth(),
+                     horizontalArrangement = Arrangement.SpaceBetween,
+                     verticalAlignment = Alignment.CenterVertically
+                 ) {
+                     Text("Java", fontSize = 16.sp)
+                     Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Gray)
+                 }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // 5. 완료 버튼
+            Button(
+                onClick = { onSignUpComplete(name, id, password) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent 
+                )
+            ) {
+                // 그라데이션 버튼 배경
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(Color(0xFF4A90E2), Color(0xFF50C9C3))
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("회원 가입 완료", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+fun InputSection(
+    label: String,
+    placeholder: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    isPassword: Boolean = false,
+    required: Boolean = false
+) {
+    Column {
+        Row {
+            Text(text = label, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            if (required) {
+                Text(text = "*", color = Color(0xFFFF6B6B), modifier = Modifier.padding(start = 4.dp))
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { Text(placeholder, color = Color.Gray, fontSize = 14.sp) },
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)), // 미세한 그림자
+            shape = RoundedCornerShape(8.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            singleLine = true
+        )
+    }
+}
+
+@Composable
+fun SocialLoginButton(text: String, iconResId: Int?) {
+    OutlinedButton(
+        onClick = { },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE)),
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+    ) {
+        // 아이콘 + 텍스트 Row
+        Text(text, color = Color.Black, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SignUpScreenPreview() {
+    SignUpScreen(onNavigateBack = {}, onSignUpComplete = { _, _, _ -> })
+}

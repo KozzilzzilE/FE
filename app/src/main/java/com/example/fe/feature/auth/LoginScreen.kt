@@ -41,6 +41,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 
 @Composable
 fun LoginScreen(
@@ -85,7 +87,7 @@ fun LoginScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Lock, // Code 아이콘 대신 Lock 사용 (기본 포함됨)
+                        imageVector = Icons.Default.Lock,
                         contentDescription = "Logo",
                         tint = Color.White,
                         modifier = Modifier.size(32.dp)

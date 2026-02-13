@@ -57,9 +57,9 @@ class MainActivity : ComponentActivity() {
                         composable("signup") {
                             SignUpScreen(
                                 onNavigateBack = { navController.popBackStack() },
-                                onSignUpComplete = { name, id, password ->
-                                    // 여기서는 일단 Firebase 이메일로 가입시킴 (아이디는 차후 처리)
-                                    authViewModel.signUp(id, password) 
+                                onSignUpComplete = { name, email, password, language ->
+                                    // Firebase 가입 시 이메일과 비번 사용
+                                    authViewModel.signUp(email, password) 
                                 }
                             )
                         }

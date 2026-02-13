@@ -98,7 +98,7 @@ fun LoginScreen(
 
                 // 2. 앱 이름
                 Text(
-                    text = "AlgoLearn",
+                    text = "PocketCo",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black

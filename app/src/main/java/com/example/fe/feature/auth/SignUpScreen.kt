@@ -45,18 +45,20 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 fun SignUpScreen(
     onNavigateBack: () -> Unit,
-    onSignUpComplete: (String, String, String) -> Unit // 이름, 아이디, 비번
+    onSignUpComplete: (String, String, String, String) -> Unit // 이름, 이메일, 비번, 사용언어
 ) {
     var name by remember { mutableStateOf("") }
-    var id by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+    var language by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") } // 비밀번호 확인
     
-    val scrollState = rememberScrollState()
+    val scrollState = rememberScrollState() // 스크롤 기능 구현을 위함
 
     Scaffold(
         containerColor = Color.White,
@@ -78,7 +80,7 @@ fun SignUpScreen(
                 )
             }
         }
-    ) { innerPadding ->
+    ) { innerPadding -> 
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -114,7 +116,7 @@ fun SignUpScreen(
             InputSection(label = "이름", placeholder = "이름을 입력해주세요", value = name, onValueChange = { name = it }, required = true)
             Spacer(modifier = Modifier.height(16.dp))
             
-            InputSection(label = "아이디", placeholder = "아이디를 입력해주세요", value = id, onValueChange = { id = it })
+            InputSection(label = "이메일", placeholder = "이메일을 입력해주세요", value = email, onValueChange = { email = it }, required = true)
             Spacer(modifier = Modifier.height(16.dp))
             
             InputSection(label = "비밀번호", placeholder = "비밀번호", value = password, onValueChange = { password = it }, isPassword = true, required = true)
@@ -124,7 +126,7 @@ fun SignUpScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 4. 사용 언어 (드롭다운 흉내)
+            // 4. 사용 언어 (드롭다운)
             Text(text = "사용 언어", fontSize = 14.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Box(
@@ -145,7 +147,7 @@ fun SignUpScreen(
                      horizontalArrangement = Arrangement.SpaceBetween,
                      verticalAlignment = Alignment.CenterVertically
                  ) {
-                     Text("Java", fontSize = 16.sp)
+                     Text(if (language.isEmpty()) "Java" else language, fontSize = 16.sp)
                      Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Gray)
                  }
             }
@@ -154,10 +156,11 @@ fun SignUpScreen(
 
             // 5. 완료 버튼
             Button(
-                onClick = { onSignUpComplete(name, id, password) },
+                onClick = { onSignUpComplete(name, email, password, language.ifEmpty { "Java" }) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp), // 내부 여백 제거해야 그라데이션이 꽉 참
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent 
@@ -204,7 +207,7 @@ fun InputSection(
             value = value,
             onValueChange = onValueChange,
             placeholder = { Text(placeholder, color = Color.Gray, fontSize = 14.sp) },
-            visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
@@ -240,5 +243,5 @@ fun SocialLoginButton(text: String, iconResId: Int?) {
 @Preview(showBackground = true)
 @Composable
 fun SignUpScreenPreview() {
-    SignUpScreen(onNavigateBack = {}, onSignUpComplete = { _, _, _ -> })
+    SignUpScreen(onNavigateBack = {}, onSignUpComplete = { _, _, _, _ -> })
 }

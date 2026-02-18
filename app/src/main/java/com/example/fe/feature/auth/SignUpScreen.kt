@@ -69,7 +69,7 @@ fun SignUpScreen(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onNavigateBack) {
+                IconButton(onClick = onNavigateBack) { // 화살표 아이콘
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
                 Text(
@@ -160,7 +160,7 @@ fun SignUpScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp), // 내부 여백 제거해야 그라데이션이 꽉 참
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp), // 내부 여백 제거
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent 
@@ -187,7 +187,7 @@ fun SignUpScreen(
 }
 
 @Composable
-fun InputSection(
+fun InputSection( // 회원가입 정보 입력창
     label: String,
     placeholder: String,
     value: String,

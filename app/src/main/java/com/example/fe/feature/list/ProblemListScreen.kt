@@ -4,7 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
@@ -23,14 +25,14 @@ import com.example.fe.data.Problem
 @Composable
 fun ProblemListScreen(
     problems: List<Problem>,
-    onProblemClick: (Problem) -> Unit,
+    onItemClick: (Problem) -> Unit,
     onNavigate: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
             CommonTopAppBar(
                 title = "알고리즘 학습",
-                canNavigateBack = true
+                canNavigateBack = false,
             )
         },
         bottomBar = {
@@ -47,17 +49,19 @@ fun ProblemListScreen(
                 .padding(innerPadding)
                 .background(Color(0xFFF7F9FB)) // Light background
         ) {
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    contentPadding = PaddingValues(vertical = 8.dp)
+                ) {
                 items(problems) { problem ->
                     ProblemCard(
                         problem = problem,
-                        onClick = { onProblemClick(problem) }
+                        onClick = { onItemClick(problem) }
                     )
                 }
             }
         }
+    }
     }
 }
 
@@ -74,7 +78,7 @@ fun ProblemListScreenPreview() {
     
     ProblemListScreen(
         problems = sampleProblems,
-        onProblemClick = {},
+        onItemClick = {},
         onNavigate = {}
     )
 }

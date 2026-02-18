@@ -12,6 +12,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,10 +24,15 @@ import com.example.fe.common.bottomNavItems
 import com.example.fe.data.Difficulty
 import com.example.fe.data.Problem
 import com.example.fe.feature.auth.AuthViewModel
+import com.example.fe.feature.auth.AuthState
+import androidx.compose.runtime.LaunchedEffect
 import com.example.fe.feature.auth.LoginScreen
 import com.example.fe.feature.auth.SignUpScreen
 import com.example.fe.feature.list.ProblemListScreen
 import com.example.fe.ui.theme.FETheme
+
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +46,29 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     val authViewModel: AuthViewModel = viewModel()
+                    val authState by authViewModel.authState.collectAsState()
+                    val context = LocalContext.current
+
+                    // 인증 상태 모니터링 및 화면 전환
+                    LaunchedEffect(authState) {
+                        when (val state = authState) {
+                            is AuthState.Success -> {
+                                navController.navigate("problem_list") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            }
+                            is AuthState.SignedUp -> {
+                                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                                navController.navigate("login") {
+                                    popUpTo("signup") { inclusive = true }
+                                }
+                            }
+                            is AuthState.Error -> {
+                                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                            }
+                            else -> {}
+                        }
+                    }
                     
                     NavHost(navController = navController, startDestination = "login") {
                         // 1. 로그인 화면
@@ -58,8 +88,7 @@ class MainActivity : ComponentActivity() {
                             SignUpScreen(
                                 onNavigateBack = { navController.popBackStack() },
                                 onSignUpComplete = { name, email, password, language ->
-                                    // Firebase 가입 시 이메일과 비번 사용
-                                    authViewModel.signUp(email, password) 
+                                    authViewModel.signUp(name, email, password, language) 
                                 }
                             )
                         }
@@ -77,7 +106,7 @@ class MainActivity : ComponentActivity() {
                             
                             ProblemListScreen(
                                 problems = sampleProblems,
-                                onProblemClick = {},
+                                onItemClick = {},
                                 onNavigate = {}
                             )
                         }

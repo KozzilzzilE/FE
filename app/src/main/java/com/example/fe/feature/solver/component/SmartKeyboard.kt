@@ -1,6 +1,3 @@
-// =====================================
-// SmartKeyboardPanel.kt (수정본 전체)
-// =====================================
 package com.example.fe.feature.solver.component
 
 import androidx.compose.foundation.clickable
@@ -16,11 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * [SmartKeyboardPanel]
- * 에디터에서 자주 사용하는 기호와 특수 기능을 빠르게 입력할 수 있는 패널입니다.
- * 시스템 키보드 상단에 밀착되어 작동하도록 설계되었습니다.
- */
 @Composable
 fun SmartKeyboardPanel(
     onInsert: (String) -> Unit,
@@ -29,9 +21,6 @@ fun SmartKeyboardPanel(
     val pageCount = 3
     var page by remember { mutableStateOf(0) }
 
-    // ✅ 핵심 수정:
-    // - padding(bottom = 8.dp) 제거 (하단 흰 공백 원인)
-    // - background(Color.White) 제거 (바깥 Surface가 배경 담당)
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -45,7 +34,7 @@ fun SmartKeyboardPanel(
         val canPrev = page > 0
         val canNext = page < pageCount - 1
 
-        // 1) 상단 기호 열
+        // 상단 기호
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -62,7 +51,7 @@ fun SmartKeyboardPanel(
 
         Spacer(modifier = Modifier.height(2.dp))
 
-        // 2) 하단 기능 버튼 열
+        // 하단 기능 버튼
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,8 +72,6 @@ fun SmartKeyboardPanel(
             }
         }
 
-        // ✅ 필요하면 아주 조금만
-        // Spacer(Modifier.height(4.dp))
     }
 }
 

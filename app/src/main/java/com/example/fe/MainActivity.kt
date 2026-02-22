@@ -79,6 +79,12 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onSignUpClick = {
                                     navController.navigate("signup")
+                                },
+                                onGoogleLoginClick = { idToken ->
+                                    authViewModel.signInWithGoogle(idToken)
+                                },
+                                onGithubLoginClick = { activity ->
+                                    authViewModel.signInWithGithub(activity)
                                 }
                             )
                         }
@@ -89,6 +95,12 @@ class MainActivity : ComponentActivity() {
                                 onNavigateBack = { navController.popBackStack() },
                                 onSignUpComplete = { name, email, password, language ->
                                     authViewModel.signUp(name, email, password, language) 
+                                },
+                                onGoogleSignUpClick = { idToken ->
+                                    authViewModel.signInWithGoogle(idToken)
+                                },
+                                onGithubSignUpClick = { activity ->
+                                    authViewModel.signInWithGithub(activity)
                                 }
                             )
                         }

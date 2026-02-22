@@ -44,13 +44,47 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 
+import android.app.Activity
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.example.fe.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+
 @Composable
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
-    onSignUpClick: () -> Unit
+    onSignUpClick: () -> Unit,
+    onGoogleLoginClick: (String) -> Unit = {},
+    onGithubLoginClick: (Activity) -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+
+    // 구글 로그인 런처 설정
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account?.idToken
+                if (idToken != null) {
+                    onGoogleLoginClick(idToken)
+                } else {
+                    Log.e("GoogleLogin", "idToken is null")
+                }
+            } catch (e: ApiException) {
+                Log.e("GoogleLogin", "Google Sign In Failed", e)
+            }
+        }
+    }
 
     // 배경색 설정 (약간 회색빛)
     Box(
@@ -144,9 +178,60 @@ fun LoginScreen(
                     Text("로그인", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // 5-1. 구글 소셜 로그인 버튼
+                    Button(
+                        onClick = {
+                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(context.getString(R.string.default_web_client_id))
+                                .requestEmail()
+                                .build()
+                            val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                            launcher.launch(googleSignInClient.signInIntent)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF4A90E2)
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    ) {
+                        Text("Google", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    // 5-2. 깃허브 소셜 로그인 버튼
+                    Button(
+                        onClick = {
+                            val activity = context as? Activity
+                            if (activity != null) {
+                                onGithubLoginClick(activity)
+                            } else {
+                                Log.e("GithubLogin", "Context is not an Activity")
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF4A90E2)
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    ) {
+                        Text("Github", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 6. 하단 링크 (회원가입, 비번찾기)
+                // 6. 하단 링크 (회원가입, 비번찾기)ß
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -195,6 +280,8 @@ fun GrayTextField(
 fun LoginScreenPreview() {
     LoginScreen(
         onLoginClick = { _, _ -> },
-        onSignUpClick = {}
+        onSignUpClick = {},
+        onGoogleLoginClick = {},
+        onGithubLoginClick = {}
     )
 }

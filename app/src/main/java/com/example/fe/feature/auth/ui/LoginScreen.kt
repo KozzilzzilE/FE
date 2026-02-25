@@ -1,4 +1,4 @@
-package com.example.fe.feature.auth
+package com.example.fe.feature.auth.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import com.example.fe.feature.auth.component.GrayTextField
 
 import android.app.Activity
 import android.util.Log
@@ -248,32 +249,7 @@ fun LoginScreen(
     }
 }
 
-// 회색 배경의 둥근 입력창 (재사용 컴포넌트)
-@Composable
-fun GrayTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    isPassword: Boolean = false
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = { Text(placeholder, color = Color.Gray, fontSize = 14.sp) },
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFFF5F6F8),
-            unfocusedContainerColor = Color(0xFFF5F6F8),
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        ),
-        singleLine = true
-    )
-}
+
 
 @Preview(showBackground = true)
 @Composable

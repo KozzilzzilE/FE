@@ -1,4 +1,4 @@
-package com.example.fe.feature.auth
+package com.example.fe.feature.auth.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -49,6 +49,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.VisualTransformation
+import com.example.fe.feature.auth.component.InputSection
+import com.example.fe.feature.auth.component.SocialLoginButton
 
 import android.app.Activity
 import android.util.Log
@@ -261,59 +263,7 @@ fun SignUpScreen(
     }
 }
 
-@Composable
-fun InputSection( // 회원가입 정보 입력창
-    label: String,
-    placeholder: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    isPassword: Boolean = false,
-    required: Boolean = false
-) {
-    Column {
-        Row {
-            Text(text = label, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            if (required) {
-                Text(text = "*", color = Color(0xFFFF6B6B), modifier = Modifier.padding(start = 4.dp))
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = Color.Gray, fontSize = 14.sp) },
-            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)), // 미세한 그림자
-            shape = RoundedCornerShape(8.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
-            singleLine = true
-        )
-    }
-}
 
-@Composable
-fun SocialLoginButton(text: String, iconResId: Int?, onClick: () -> Unit) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(12.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE)),
-        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
-    ) {
-        // 아이콘 + 텍스트 Row
-        Text(text, color = Color.Black, fontWeight = FontWeight.SemiBold)
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

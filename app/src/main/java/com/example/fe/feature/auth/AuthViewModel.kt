@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import android.app.Activity
 import com.example.fe.data.dto.UserRequest
 import com.example.fe.api.RetrofitClient
+import com.example.fe.feature.auth.model.AuthState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.OAuthProvider
@@ -152,13 +153,4 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
         auth.signOut()
         _authState.value = AuthState.Idle
     }
-}
-
-// 인증 상태 (성공, 실패, 로딩 등)
-sealed class AuthState {
-    object Idle : AuthState()
-    object Loading : AuthState()
-    object Success : AuthState()
-    data class SignedUp(val message: String) : AuthState() // 회원가입 완료 상태 (메세지 포함)
-    data class Error(val message: String) : AuthState()
 }

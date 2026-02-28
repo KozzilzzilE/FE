@@ -4,6 +4,7 @@ object Routes {
     // Auth
     const val LOGIN = "login"
     const val SIGNUP = "signup"
+    const val SOCIAL_SIGNUP = "social_signup"
 
     // Bottom / Top level
     const val HOME = "home"

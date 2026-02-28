@@ -146,7 +146,14 @@ fun SignUpScreen(
                     .requestEmail()
                     .build()
                 val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                
+                // 테스트용 캐시 강제 삭제 : 버튼 클릭 시마다 구글 회원가입 캐시 강제 삭제 (매번 계정 선택창 띄우기)
+                googleSignInClient.signOut().addOnCompleteListener {
+                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                }
+                
+                // 계정 선택 창 없이 캐시 사용 자동 로그인
+                // googleSignInLauncher.launch(googleSignInClient.signInIntent)
             })
 
             Spacer(modifier = Modifier.height(24.dp))

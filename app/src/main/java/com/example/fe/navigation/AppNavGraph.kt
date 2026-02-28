@@ -34,10 +34,13 @@ fun AppNavGraph() {
                 }
             }
             is AuthState.SignedUp -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "회원가입이 완료되었습니다.", Toast.LENGTH_LONG).show()
                 navController.navigate(Routes.LOGIN) {
-                    popUpTo(Routes.SIGNUP) { inclusive = true }
+                    popUpTo(Routes.LOGIN) { inclusive = true }
                 }
+            }
+            is AuthState.NeedsExtraInfo -> {
+                navController.navigate(Routes.SOCIAL_SIGNUP)
             }
             is AuthState.Error -> {
                 Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
@@ -57,10 +60,10 @@ fun AppNavGraph() {
                     navController.navigate(Routes.SIGNUP)
                 },
                 onGoogleLoginClick = { idToken ->
-                    authViewModel.signInWithGoogle(idToken)
+                    authViewModel.signInWithGoogleLogin(idToken)
                 },
                 onGithubLoginClick = { activity ->
-                    authViewModel.signInWithGithub(activity)
+                    authViewModel.signInWithGithubLogin(activity)
                 }
             )
         }
@@ -73,15 +76,31 @@ fun AppNavGraph() {
                     authViewModel.signUp(name, email, password, language) 
                 },
                 onGoogleSignUpClick = { idToken ->
-                    authViewModel.signInWithGoogle(idToken)
+                    authViewModel.signInWithGoogleSignUp(idToken)
                 },
                 onGithubSignUpClick = { activity ->
-                    authViewModel.signInWithGithub(activity)
+                    authViewModel.signInWithGithubSignUp(activity)
                 }
             )
         }
 
-        // 3. 메인 문제 목록 화면 (로그인 성공 시 이동할 곳)
+        // 3. 소셜 회원가입 시 추가 정보 입력 화면
+        composable(Routes.SOCIAL_SIGNUP) {
+            val currentState = authState
+            val initialName = if (currentState is AuthState.NeedsExtraInfo) currentState.name else ""
+            val initialEmail = if (currentState is AuthState.NeedsExtraInfo) currentState.email else ""
+            
+            com.example.fe.feature.auth.ui.SocialSignUpScreen(
+                initialName = initialName,
+                initialEmail = initialEmail,
+                onNavigateBack = { navController.popBackStack() },
+                onSignUpComplete = { name, email, lang ->
+                    authViewModel.completeSocialSignUp(name, email, lang)
+                }
+            )
+        }
+
+        // 4. 메인 문제 목록 화면 (로그인 성공 시 이동할 곳)
         composable(Routes.STUDY) {
             val sampleProblems = listOf(
                 Problem(1, "두 수의 합", Difficulty.EASY, false),

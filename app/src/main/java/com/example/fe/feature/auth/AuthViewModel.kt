@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.app.Activity
 import com.example.fe.data.dto.UserRequest
+import com.example.fe.data.dto.LoginRequest
 import com.example.fe.api.RetrofitClient
 import com.example.fe.feature.auth.model.AuthState
 import com.google.firebase.auth.FirebaseAuth
@@ -34,11 +35,28 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
 
     // 로그인
     fun login(email: String, pass: String) {
+        if (email.isBlank() || pass.isBlank()) {
+            _authState.value = AuthState.Error("이메일과 비밀번호를 입력해주세요.")
+            return
+        }
+        
         _authState.value = AuthState.Loading
         auth.signInWithEmailAndPassword(email, pass)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _authState.value = AuthState.Success
+                    val user = task.result?.user
+                    if (user != null) {
+                        user.getIdToken(true).addOnCompleteListener { tokenTask ->
+                            if (tokenTask.isSuccessful) {
+                                val firebaseToken = tokenTask.result?.token ?: ""
+                                loginToServer(firebaseToken)
+                            } else {
+                                _authState.value = AuthState.Error("토큰 발급 실패")
+                            }
+                        }
+                    } else {
+                        _authState.value = AuthState.Error("유저 정보를 찾을 수 없습니다.")
+                    }
                 } else {
                     _authState.value = AuthState.Error(task.exception?.message ?: "Login failed")
                 }
@@ -66,25 +84,47 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
             }
     }
 
-    // 구글 소셜 로그인
-    fun signInWithGoogle(idToken: String) {
+    // [회원가입용] 구글 소셜 연동 -> 추가 정보 필요 (NeedsExtraInfo) 방출
+    fun signInWithGoogleSignUp(idToken: String) {
         _authState.value = AuthState.Loading
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    val user = auth.currentUser
+                    val result = task.result
+                    val user = result?.user
                     if (user != null) {
-                        // 소셜 로그인 성공 시, 서버에 유저 정보 등록 시도 (디폴트 언어 "Java" 사용)
-                        val name = user.displayName ?: "User"
+                        val name = user.displayName ?: ""
                         val email = user.email ?: ""
-                        
-                        registerUserToServer(name, email, "Java") { isSuccess, message ->
-                            if (isSuccess) {
-                                _authState.value = AuthState.Success
+                        _authState.value = AuthState.NeedsExtraInfo(name, email)
+                    } else {
+                        _authState.value = AuthState.Error("유저 정보를 가져올 수 없습니다.")
+                    }
+                } else {
+                    _authState.value = AuthState.Error(task.exception?.message ?: "Google Sign-In failed")
+                }
+            }
+    }
+
+    // [로그인용] 구글 소셜 연동 -> 즉시 성공 (Success) 방출
+    fun signInWithGoogleLogin(idToken: String) {
+        _authState.value = AuthState.Loading
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val result = task.result
+                    val user = result?.user
+                    if (user != null) {
+                        // 로그인 시 서버에 토큰 유효성 검사 요청
+                        user.getIdToken(true).addOnCompleteListener { tokenTask ->
+                            if (tokenTask.isSuccessful) {
+                                val firebaseToken = tokenTask.result?.token ?: ""
+                                loginToServer(firebaseToken)
                             } else {
-                                _authState.value = AuthState.Error("서버 등록 실패: $message")
+                                _authState.value = AuthState.Error("구글 토큰 발급 실패")
                             }
                         }
                     } else {
@@ -96,8 +136,8 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
             }
     }
 
-    // 깃허브 소셜 로그인
-    fun signInWithGithub(activity: Activity) {
+    // [회원가입용] 깃허브 소셜 연동 -> 추가 정보 필요 (NeedsExtraInfo) 방출
+    fun signInWithGithubSignUp(activity: Activity) {
         _authState.value = AuthState.Loading
         val provider = OAuthProvider.newBuilder("github.com")
 
@@ -105,14 +145,33 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
             .addOnSuccessListener { authResult ->
                 val user = authResult.user
                 if (user != null) {
-                    val name = user.displayName ?: "User"
+                    val name = user.displayName ?: ""
                     val email = user.email ?: ""
-                    
-                    registerUserToServer(name, email, "Java") { isSuccess, message ->
-                        if (isSuccess) {
-                            _authState.value = AuthState.Success
+                    _authState.value = AuthState.NeedsExtraInfo(name, email)
+                } else {
+                    _authState.value = AuthState.Error("유저 정보를 가져올 수 없습니다.")
+                }
+            }
+            .addOnFailureListener { e ->
+                _authState.value = AuthState.Error(e.message ?: "GitHub Sign-In failed")
+            }
+    }
+
+    // [로그인용] 깃허브 소셜 연동 -> 즉시 성공 (Success) 방출
+    fun signInWithGithubLogin(activity: Activity) {
+        _authState.value = AuthState.Loading
+        val provider = OAuthProvider.newBuilder("github.com")
+
+        auth.startActivityForSignInWithProvider(activity, provider.build())
+            .addOnSuccessListener { authResult ->
+                val user = authResult.user
+                if (user != null) {
+                    user.getIdToken(true).addOnCompleteListener { tokenTask ->
+                        if (tokenTask.isSuccessful) {
+                            val firebaseToken = tokenTask.result?.token ?: ""
+                            loginToServer(firebaseToken)
                         } else {
-                            _authState.value = AuthState.Error("서버 등록 실패: $message")
+                            _authState.value = AuthState.Error("깃허브 토큰 발급 실패")
                         }
                     }
                 } else {
@@ -122,6 +181,19 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
             .addOnFailureListener { e ->
                 _authState.value = AuthState.Error(e.message ?: "GitHub Sign-In failed")
             }
+    }
+
+    // 소셜 로그인 회원의 추가 정보 취합 후 최종 백엔드 저장
+    fun completeSocialSignUp(name: String, email: String, language: String) {
+        _authState.value = AuthState.Loading
+        registerUserToServer(name, email, language) { isSuccess, message ->
+            if (isSuccess) {
+                // 저장 성공 시 회원가입 완료 알림을 띄우기 위해 SignedUp 상태 발행
+                _authState.value = AuthState.SignedUp(message)
+            } else {
+                _authState.value = AuthState.Error("서버 등록 실패: $message")
+            }
+        }
     }
 
     /**
@@ -144,6 +216,30 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
                 }
             } catch (e: Exception) {
                 onComplete(false, "네트워크 오류: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * 우리 서버 DB에 로그인 유효성을 검사하는 로직 (기존 회원의 로컬/소셜 로그인용)
+     */
+    private fun loginToServer(firebaseToken: String) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.instance.login(
+                    LoginRequest(firebaseToken = firebaseToken)
+                )
+                if (response.isSuccessful && response.body()?.isSuccess == true) {
+                    // 서버 인증 성공 시 최종 클라이언트 로그인 승인
+                    _authState.value = AuthState.Success
+                } else {
+                    // 서버에서 인증 실패 (미가입 상태 등) 처리
+                    auth.signOut()
+                    _authState.value = AuthState.Error(response.body()?.message ?: "서버 로그인 인증 실패")
+                }
+            } catch (e: Exception) {
+                auth.signOut()
+                _authState.value = AuthState.Error(e.message ?: "네트워크 오류 발생")
             }
         }
     }

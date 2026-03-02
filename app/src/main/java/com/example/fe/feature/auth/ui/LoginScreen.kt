@@ -60,7 +60,8 @@ fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit,
     onGoogleLoginClick: (String) -> Unit = {},
-    onGithubLoginClick: (Activity) -> Unit = {}
+    onGithubLoginClick: (Activity) -> Unit = {},
+    onSkipLoginClick: () -> Unit = {} // 개발용 스킵 버튼 콜백
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -239,7 +240,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 6. 하단 링크 (회원가입, 비번찾기)ß
+                // 6. 하단 링크 (회원가입, 비번찾기)
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -250,6 +251,13 @@ fun LoginScreen(
                     TextButton(onClick = { /* 비밀번호 찾기 */ }) {
                         Text("비밀번호 찾기", color = Color.Gray, fontSize = 12.sp)
                     }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // 개발 및 테스트용: 로그인 건너뛰기 버튼
+                TextButton(onClick = onSkipLoginClick) {
+                    Text("🛠 테스트용: 로그인 건너뛰고 홈 화면 보기", color = Color.LightGray, fontSize = 12.sp)
                 }
             }
         }
@@ -265,6 +273,7 @@ fun LoginScreenPreview() {
         onLoginClick = { _, _ -> },
         onSignUpClick = {},
         onGoogleLoginClick = {},
-        onGithubLoginClick = {}
+        onGithubLoginClick = {},
+        onSkipLoginClick = {}
     )
 }

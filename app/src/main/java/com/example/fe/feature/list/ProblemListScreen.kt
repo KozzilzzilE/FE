@@ -24,9 +24,9 @@ import com.example.fe.data.Problem
 
 @Composable
 fun ProblemListScreen(
-    problems: List<Problem>,
-    onItemClick: (Problem) -> Unit,
-    onNavigate: (String) -> Unit
+    problems: List<Problem>, // 문제 리스트
+    onProblemClick: (Problem) -> Unit, // 클릭이벤트
+    onNavigate: (String) -> Unit //
 ) {
     Scaffold(
         topBar = {
@@ -56,7 +56,7 @@ fun ProblemListScreen(
                 items(problems) { problem ->
                     ProblemCard(
                         problem = problem,
-                        onClick = { onItemClick(problem) }
+                        onClick = { onProblemClick(problem) }
                     )
                 }
             }
@@ -78,7 +78,7 @@ fun ProblemListScreenPreview() {
     
     ProblemListScreen(
         problems = sampleProblems,
-        onItemClick = {},
+        onProblemClick = {},
         onNavigate = {}
     )
 }

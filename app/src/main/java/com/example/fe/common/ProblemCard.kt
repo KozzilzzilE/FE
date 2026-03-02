@@ -139,5 +139,9 @@ fun ProblemCardPreview() {
             problem = Problem(2, "스택 구현하기", Difficulty.MEDIUM, true),
             onClick = {}
         )
+        ProblemCard(
+            problem = Problem(3, "스택의 특징", Difficulty.HARD, true),
+            onClick = {}
+        )
     }
 }

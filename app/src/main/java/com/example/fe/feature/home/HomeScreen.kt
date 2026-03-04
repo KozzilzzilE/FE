@@ -99,10 +99,7 @@ fun HomeScreen(
                         CircularProgressIndicator(color = Color(0xFF4A90E2))
                     }
                     is HomeUiState.Error -> {
-                        Text(
-                            text = (uiState as HomeUiState.Error).message,
-                            color = Color.Red
-                        )
+                        // 사용자 요청에 따라 UI에는 아무런 에러 메시지도 표시하지 않습니다.
                     }
                     is HomeUiState.Success -> {
                         val name = (uiState as HomeUiState.Success).name

@@ -43,19 +43,19 @@ class HomeViewModel : ViewModel() {
                             )
                         } else {
                             Log.e("HomeViewModel", "홈 화면 파싱 오류: result가 null")
-                            _uiState.value = HomeUiState.Error("데이터를 불러오지 못했습니다.")
+                            _uiState.value = HomeUiState.Error("")
                         }
                     } else {
                         Log.e("HomeViewModel", "서버 응답 오류 (isSuccess=false): ${body?.message}")
-                        _uiState.value = HomeUiState.Error("데이터를 불러오지 못했습니다.")
+                        _uiState.value = HomeUiState.Error("")
                     }
                 } else {
                     Log.e("HomeViewModel", "HTTP 연결 실패: 코드 ${response.code()}")
-                    _uiState.value = HomeUiState.Error("데이터를 불러오지 못했습니다.")
+                    _uiState.value = HomeUiState.Error("")
                 }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "API Exception", e)
-                _uiState.value = HomeUiState.Error("인터넷 연결을 확인해주세요.")
+                _uiState.value = HomeUiState.Error("")
             }
         }
     }

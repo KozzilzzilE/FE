@@ -3,7 +3,7 @@ package com.example.fe.feature.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.app.Activity
-import com.example.fe.data.dto.UserRequest
+import com.example.fe.data.dto.SignUpRequest
 import com.example.fe.data.dto.LoginRequest
 import com.example.fe.api.RetrofitClient
 import com.example.fe.feature.auth.model.AuthState
@@ -13,6 +13,7 @@ import com.google.firebase.auth.OAuthProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.example.fe.common.TokenManager
 
 class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
     private val auth: FirebaseAuth = FirebaseAuth.getInstance() // Firebase 인증 인스턴스
@@ -69,14 +70,26 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
         auth.createUserWithEmailAndPassword(email, pass)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Firebase 가입 성공 시, 서버에 추가 정보 등록
-                    registerUserToServer(name, email, language) { isSuccess, message ->
-                        if (isSuccess) {
-                            auth.signOut()
-                            _authState.value = AuthState.SignedUp(message)
-                        } else {
-                            _authState.value = AuthState.Error(message)
+                    val user = task.result?.user
+                    if (user != null) {
+                        user.getIdToken(true).addOnCompleteListener { tokenTask ->
+                            if (tokenTask.isSuccessful) {
+                                val firebaseToken = tokenTask.result?.token ?: ""
+                                // Firebase 가입 성공 시, 서버에 추가 정보와 토큰을 함께 전송
+                                registerUserToServer(firebaseToken, name, email, language) { isSuccess, message ->
+                                    if (isSuccess) {
+                                        auth.signOut()
+                                        _authState.value = AuthState.SignedUp(message)
+                                    } else {
+                                        _authState.value = AuthState.Error(message)
+                                    }
+                                }
+                            } else {
+                                _authState.value = AuthState.Error("토큰 발급 실패")
+                            }
                         }
+                    } else {
+                        _authState.value = AuthState.Error("유저 정보를 찾을 수 없습니다.")
                     }
                 } else {
                     _authState.value = AuthState.Error(task.exception?.message ?: "Sign up failed")
@@ -186,24 +199,37 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
     // 소셜 로그인 회원의 추가 정보 취합 후 최종 백엔드 저장
     fun completeSocialSignUp(name: String, email: String, language: String) {
         _authState.value = AuthState.Loading
-        registerUserToServer(name, email, language) { isSuccess, message ->
-            if (isSuccess) {
-                // 저장 성공 시 회원가입 완료 알림을 띄우기 위해 SignedUp 상태 발행
-                _authState.value = AuthState.SignedUp(message)
-            } else {
-                _authState.value = AuthState.Error("서버 등록 실패: $message")
+        val user = auth.currentUser
+        if (user != null) {
+            user.getIdToken(true).addOnCompleteListener { tokenTask ->
+                if (tokenTask.isSuccessful) {
+                    val firebaseToken = tokenTask.result?.token ?: ""
+                    registerUserToServer(firebaseToken, name, email, language) { isSuccess, message ->
+                        if (isSuccess) {
+                            // 저장 성공 시 회원가입 완료 알림을 띄우기 위해 SignedUp 상태 발행
+                            _authState.value = AuthState.SignedUp(message)
+                        } else {
+                            _authState.value = AuthState.Error("서버 등록 실패: $message")
+                        }
+                    }
+                } else {
+                    _authState.value = AuthState.Error("Firebase 토큰 획득 실패")
+                }
             }
+        } else {
+            _authState.value = AuthState.Error("로그인된 사용자 정보가 없습니다.")
         }
     }
 
     /**
      * 우리 서버 DB에 유저 정보를 등록하는 공통 로직 (로컬/소셜 로그인에서 공동 사용)
      */
-    private fun registerUserToServer(name: String, email: String, language: String, onComplete: (Boolean, String) -> Unit) {
+    private fun registerUserToServer(firebaseToken: String, name: String, email: String, language: String, onComplete: (Boolean, String) -> Unit) {
         viewModelScope.launch {
             try {
                 val response = RetrofitClient.instance.signUp(
-                    UserRequest(
+                    SignUpRequest(
+                        firebaseToken = firebaseToken,
                         email = email,
                         nickname = name,
                         language = language
@@ -230,8 +256,18 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
                     LoginRequest(firebaseToken = firebaseToken)
                 )
                 if (response.isSuccessful && response.body()?.isSuccess == true) {
-                    // 서버 인증 성공 시 최종 클라이언트 로그인 승인
-                    _authState.value = AuthState.Success
+                    val loginResult = response.body()?.result
+                    if (loginResult != null && loginResult.accessToken.isNotEmpty()) {
+                        // 서버 토큰을 앱 로컬 금고(SharedPreferences)에 영구 저장합니다.
+                        TokenManager.saveAccessToken(loginResult.accessToken)
+                        
+                        // 서버 인증 성공 시 최종 클라이언트 로그인 승인
+                        _authState.value = AuthState.Success
+                    } else {
+                        // 결과 객체가 없거나 토큰이 비어있으면 에러
+                        auth.signOut()
+                        _authState.value = AuthState.Error("서버 토큰 발급 실패")
+                    }
                 } else {
                     // 서버에서 인증 실패 (미가입 상태 등) 처리
                     auth.signOut()
@@ -247,6 +283,7 @@ class AuthViewModel : ViewModel() { // 인증 관련 로직을 담당
     // 로그아웃 (필요시 호출)
     fun logout() {
         auth.signOut()
+        TokenManager.clearAccessToken() // 서버 토큰도 함께 날립니다
         _authState.value = AuthState.Idle
     }
 }

@@ -3,15 +3,13 @@ package com.example.fe.data.dto
 import com.google.gson.annotations.SerializedName
 
 /**
- * 로그인 요청 바디
+ * [로그인 API]
+ * POST /api/v1/auths/login
  */
 data class LoginRequest(
     @SerializedName("firebaseToken") val firebaseToken: String
 )
 
-/**
- * 로그인 응답 바디
- */
 data class LoginResponse(
     @SerializedName("isSuccess") val isSuccess: Boolean,
     @SerializedName("code") val code: String,

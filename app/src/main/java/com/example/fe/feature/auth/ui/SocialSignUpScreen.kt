@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.auth.component.InputSection
+import com.example.fe.feature.auth.component.SignUpLanguageDropdown
 
 @Composable
 fun SocialSignUpScreen(
@@ -29,9 +30,6 @@ fun SocialSignUpScreen(
     var name by remember { mutableStateOf(initialName) }
     var email by remember { mutableStateOf(initialEmail) }
     var language by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-    
-    val languages = listOf("Java", "Python", "JavaScript", "C++")
 
     Scaffold(
         containerColor = Color.White,
@@ -85,55 +83,11 @@ fun SocialSignUpScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // 사용 언어 (드롭다운)
-            Text(text = "주 사용 언어", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-            Box {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .background(Color.White, RoundedCornerShape(8.dp))
-                        .run { 
-                            shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)) 
-                                .background(Color.White, RoundedCornerShape(8.dp))
-                        }
-                        .background(Color.White)
-                        .clickable { expanded = true }
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                     Row(
-                         modifier = Modifier.fillMaxWidth(),
-                         horizontalArrangement = Arrangement.SpaceBetween,
-                         verticalAlignment = Alignment.CenterVertically
-                     ) {
-                         Text(
-                             text = if (language.isEmpty()) "언어를 선택해주세요" else language, 
-                             fontSize = 16.sp, 
-                             color = if(language.isEmpty()) Color.Gray else Color.Black
-                         )
-                         Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Gray)
-                     }
-                }
-                
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier
-                        .fillMaxWidth(0.85f)
-                        .background(Color.White)
-                ) {
-                    languages.forEach { selectedLanguage ->
-                        DropdownMenuItem(
-                            text = { Text(selectedLanguage) },
-                            onClick = { 
-                                language = selectedLanguage
-                                expanded = false 
-                            }
-                        )
-                    }
-                }
-            }
+            SignUpLanguageDropdown(
+                selectedLanguage = language,
+                onLanguageSelected = { language = it },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 

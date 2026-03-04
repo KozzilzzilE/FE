@@ -19,6 +19,7 @@ import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.list.ProblemListScreen
+import com.example.fe.feature.home.HomeScreen
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.ui.EditorFullScreen
 import com.example.fe.feature.solver.ui.EditorScreen
@@ -36,7 +37,7 @@ fun AppNavGraph() {
     LaunchedEffect(authState) {
         when (val state = authState) {
             is AuthState.Success -> {
-                navController.navigate(Routes.STUDY) { // 임시 목적지
+                navController.navigate(Routes.HOME) { // 로그인 성공 시 HOME으로 이동
                     popUpTo(Routes.LOGIN) { inclusive = true }
                 }
             }
@@ -74,6 +75,12 @@ fun AppNavGraph() {
                 },
                 onGithubLoginClick = { activity ->
                     authViewModel.signInWithGithubLogin(activity)
+                },
+                onSkipLoginClick = {
+                    // 개발용: 로그인 절차 없이 바로 홈 화면으로 직행
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
                 }
             )
         }
@@ -110,7 +117,20 @@ fun AppNavGraph() {
             )
         }
 
-        // 4. 메인 문제 목록 화면 (로그인 성공 시 이동할 곳)
+        // 4. 메인 홈 화면
+        composable(Routes.HOME) {
+            HomeScreen(
+                onNavigate = { route -> 
+                    navController.navigate(route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
+        // 5. 메인 문제 목록 화면 (학습 탭 누를 시)
         composable(route = Routes.STUDY) {
             val sampleProblems = listOf(
                 Problem(1, "두 수의 합", Difficulty.EASY, false),

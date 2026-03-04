@@ -1,4 +1,4 @@
-package com.example.fe.common
+package com.example.fe.feature.home.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +29,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import com.example.fe.common.AppConstants
+
 @Composable
 fun LanguageDropdown(
     selectedLanguage: String,
@@ -36,7 +38,6 @@ fun LanguageDropdown(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val languages = listOf("Java", "Python", "C++", "JavaScript")
 
     Box(
         modifier = modifier
@@ -79,7 +80,7 @@ fun LanguageDropdown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth(0.9f)
         ) {
-            languages.forEach { lang ->
+            AppConstants.SUPPORTED_LANGUAGES.forEach { lang ->
                 DropdownMenuItem(
                     text = { Text(lang) },
                     onClick = {

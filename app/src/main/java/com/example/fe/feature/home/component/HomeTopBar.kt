@@ -1,4 +1,4 @@
-package com.example.fe.common
+package com.example.fe.feature.home.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

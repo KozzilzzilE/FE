@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.VisualTransformation
 import com.example.fe.feature.auth.component.InputSection
+import com.example.fe.feature.auth.component.SignUpLanguageDropdown
 import com.example.fe.feature.auth.component.SocialLoginButton
 
 import android.app.Activity
@@ -74,9 +75,6 @@ fun SignUpScreen(
     var password by remember { mutableStateOf("") }
     var language by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") } // 비밀번호 확인
-    
-    var expanded by remember { mutableStateOf(false) }
-    val languages = listOf("Java", "Python", "JavaScript", "C++")
     
     val context = LocalContext.current
     
@@ -190,51 +188,11 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // 4. 사용 언어 (드롭다운)
-            Text(text = "사용 언어", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-            Box {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .background(Color.White, RoundedCornerShape(8.dp))
-                        .run { 
-                            shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)) 
-                                .background(Color.White, RoundedCornerShape(8.dp)) // 그림자 위 배경
-                        }
-                        .background(Color.White) // 배경 확실히
-                        .clickable { expanded = true }
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                     Row(
-                         modifier = Modifier.fillMaxWidth(),
-                         horizontalArrangement = Arrangement.SpaceBetween,
-                         verticalAlignment = Alignment.CenterVertically
-                     ) {
-                         Text(if (language.isEmpty()) "Java" else language, fontSize = 16.sp)
-                         Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Gray)
-                     }
-                }
-                
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier
-                        .fillMaxWidth(0.85f)
-                        .background(Color.White)
-                ) {
-                    languages.forEach { selectedLanguage ->
-                        DropdownMenuItem(
-                            text = { Text(selectedLanguage) },
-                            onClick = { 
-                                language = selectedLanguage
-                                expanded = false 
-                            }
-                        )
-                    }
-                }
-            }
+            SignUpLanguageDropdown(
+                selectedLanguage = language,
+                onLanguageSelected = { language = it },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
 

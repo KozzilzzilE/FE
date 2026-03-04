@@ -4,6 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.example.fe.common.TokenManager
 
 object RetrofitClient { // 싱글톤 객체로 생성
     private const val BASE_URL = "http://10.0.2.2:8080/" 
@@ -12,24 +13,16 @@ object RetrofitClient { // 싱글톤 객체로 생성
         level = HttpLoggingInterceptor.Level.BODY // HTTP 요청/응답 로그 기록
     }
 
-    // Firebase 인증 토큰을 헤더에 추가하는 인터셉터
+    // 서버에서 발급한 전용 토큰(AccessToken)을 헤더에 추가하는 인터셉터
     private val authInterceptor = okhttp3.Interceptor { chain ->
-        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
         val requestBuilder = chain.request().newBuilder()
         
-        if (user != null) {
-            try {
-                // 토큰을 동기적으로 가져옴
-                val task = user.getIdToken(false)
-                val tokenResult = com.google.android.gms.tasks.Tasks.await(task)
-                val token = tokenResult.token
-                
-                if (token != null) { // 토큰이 있으면 헤더에 추가
-                    requestBuilder.addHeader("Authorization", "Bearer $token")
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        // 로컬 금고에서 서버 토큰을 꺼냅니다.
+        val serverToken = TokenManager.getAccessToken()
+        
+        // 토큰이 존재할 경우에만(로그인 된 상태) 요청 헤더에 삽입
+        if (!serverToken.isNullOrEmpty()) {
+            requestBuilder.addHeader("Authorization", "Bearer $serverToken")
         }
         
         chain.proceed(requestBuilder.build())

@@ -120,7 +120,6 @@ fun AppNavGraph() {
         // 4. 메인 홈 화면
         composable(Routes.HOME) {
             HomeScreen(
-                userName = "테스터", // 임시로 표시될 유저명
                 onNavigate = { route -> 
                     navController.navigate(route) {
                         popUpTo(navController.graph.startDestinationId) { saveState = true }

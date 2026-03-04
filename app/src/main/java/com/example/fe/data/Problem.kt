@@ -1,4 +1,5 @@
 package com.example.fe.data
+// 테스트용
 
 enum class Difficulty(val label: String) {
     EASY("쉬움"),

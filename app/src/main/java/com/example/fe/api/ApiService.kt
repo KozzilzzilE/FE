@@ -6,6 +6,7 @@ import com.example.fe.data.dto.SignUpResponse
 import com.example.fe.data.dto.LoginRequest
 import com.example.fe.data.dto.LoginResponse
 import com.example.fe.data.dto.HomeResponse
+import com.example.fe.data.dto.TopicResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -27,4 +28,8 @@ interface ApiService {
     // 메인화면 : 홈 화면 데이터 가져오기
     @GET("api/v1/users/main")
     suspend fun getHomeData(): Response<HomeResponse>
+
+    // 알고리즘 주제 목록 조회
+    @GET("api/v1/topics")
+    suspend fun getTopics(): Response<TopicResponse>
 }

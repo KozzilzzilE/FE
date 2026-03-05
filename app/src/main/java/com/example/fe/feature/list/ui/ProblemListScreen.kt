@@ -1,4 +1,4 @@
-package com.example.fe.feature.list
+package com.example.fe.feature.list.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.fe.common.BottomNavigationBar
-import com.example.fe.common.CommonTopAppBar
+import com.example.fe.common.TopBar
 import com.example.fe.common.ProblemCard
 import com.example.fe.common.bottomNavItems
 import com.example.fe.data.Difficulty
@@ -30,9 +30,10 @@ fun ProblemListScreen(
 ) {
     Scaffold(
         topBar = {
-            CommonTopAppBar(
+            TopBar(
                 title = "알고리즘 학습",
-                canNavigateBack = false,
+                onBackClick = { /* TODO */ },
+                onHomeClick = { onNavigate("home") }
             )
         },
         bottomBar = {

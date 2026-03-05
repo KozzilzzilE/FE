@@ -18,7 +18,8 @@ import com.example.fe.feature.auth.AuthViewModel
 import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
-import com.example.fe.feature.list.ProblemListScreen
+import com.example.fe.feature.list.ui.ProblemListScreen
+import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.HomeScreen
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.ui.EditorFullScreen
@@ -130,24 +131,12 @@ fun AppNavGraph() {
             )
         }
 
-        // 5. 메인 문제 목록 화면 (학습 탭 누를 시)
-        composable(route = Routes.STUDY) {
-            val sampleProblems = listOf(
-                Problem(1, "두 수의 합", Difficulty.EASY, false),
-                Problem(2, "스택 구현하기", Difficulty.MEDIUM, true),
-                Problem(3, "큐 활용하기", Difficulty.MEDIUM, false),
-                Problem(4, "힙 정렬", Difficulty.HARD, false),
-                Problem(5, "DFS 탐색", Difficulty.HARD, true),
-            )
-            // 문제 리스트 화면으로 넘어갈 때 (main 브랜치 구조)
-            ProblemListScreen(
-                problems = sampleProblems,
-                onProblemClick = { p ->
-                    navController.navigate(Routes.solve(p.id.toLong()))
-                },
+        // 5. 메인 알고리즘 주제 목록 화면 (학습 탭 누를 시)
+        composable(route = Routes.TOPIC) {
+            TopicListScreen(
                 onNavigate = { route ->
                     when (route) {
-                        Routes.HOME, Routes.STUDY, Routes.PROBLEM, Routes.MY -> {
+                        Routes.HOME, Routes.TOPIC, Routes.PROBLEM, Routes.MY -> {
                             navController.navigate(route) {
                                 launchSingleTop = true
                                 restoreState = true
@@ -172,11 +161,11 @@ fun AppNavGraph() {
                 viewModel = solverViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = {
-                    navController.navigate(Routes.STUDY) {
-                        popUpTo(Routes.STUDY) { inclusive = false }
-                        launchSingleTop = true
-                    }
-                },
+            navController.navigate(Routes.TOPIC) {
+                popUpTo(Routes.TOPIC) { inclusive = false }
+                launchSingleTop = true
+            }
+        },
                 onOpenEditorFull = { id ->
                     navController.navigate(Routes.editorFull(id))
                 }
@@ -197,8 +186,8 @@ fun AppNavGraph() {
                 viewModel = solverViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = {
-                    navController.navigate(Routes.STUDY) {
-                        popUpTo(Routes.STUDY) { inclusive = false }
+                    navController.navigate(Routes.TOPIC) {
+                        popUpTo(Routes.TOPIC) { inclusive = false }
                         launchSingleTop = true
                     }
                 },

@@ -3,6 +3,8 @@ package com.example.fe.feature.list.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,37 +57,36 @@ fun TopicListScreen(
             )
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            when (val state = uiState) {
-                is TopicUiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = Color(0xFF4A90E2)
-                    )
+        when (val state = uiState) {
+            is TopicUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF4A90E2))
                 }
-                is TopicUiState.Error -> {
-                    // 에러 발생 시 UI 표출 안함(요구사항)
-                }
-                is TopicUiState.Success -> {
-                    val topics = state.topics
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp), // 상하단 스크롤 여백용
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(topics) { topic ->
-                            TopicCard(
-                                title = topic.displayName,
-                                onClick = {
-                                    // 추후 알고리즘 상세 문제 목록 등으로 넘어갈 임시 동작
-                                }
-                            )
-                        }
+            }
+            is TopicUiState.Error -> {
+                // 에러 발생 시 UI 표출 안함(요구사항)
+            }
+            is TopicUiState.Success -> {
+                val topics = state.topics
+                val scrollState = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .verticalScroll(scrollState)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    topics.forEach { topic ->
+                        TopicCard(
+                            title = topic.displayName,
+                            onClick = {
+                                onNavigate(Routes.PROBLEM)
+                            }
+                        )
                     }
                 }
             }

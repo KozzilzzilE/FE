@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,6 +36,7 @@ fun ProblemListScreen(
         topBar = {
             TopBar(
                 title = "알고리즘 학습",
+                showBackIcon = false,
                 onBackClick = onBackClick,
                 onHomeClick = { onNavigate("home") }
             )
@@ -45,25 +49,23 @@ fun ProblemListScreen(
             )
         }
     ) { innerPadding ->
-        Box(
+        val scrollState = rememberScrollState()
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(Color(0xFFF7F9FB)) // Light background
+                .verticalScroll(scrollState)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    contentPadding = PaddingValues(vertical = 8.dp)
-                ) {
-                items(problems) { problem ->
-                    ProblemCard(
-                        problem = problem,
-                        onClick = { onProblemClick(problem) }
-                    )
-                }
+            problems.forEach { problem ->
+                ProblemCard(
+                    problem = problem,
+                    onClick = { onProblemClick(problem) }
+                )
             }
         }
-    }
     }
 }
 

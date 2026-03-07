@@ -26,13 +26,14 @@ import com.example.fe.data.Problem
 fun ProblemListScreen(
     problems: List<Problem>, // 문제 리스트
     onProblemClick: (Problem) -> Unit, // 클릭이벤트
-    onNavigate: (String) -> Unit //
+    onNavigate: (String) -> Unit, // 네비게이션
+    onBackClick: () -> Unit // 뒤로 가기
 ) {
     Scaffold(
         topBar = {
             TopBar(
                 title = "알고리즘 학습",
-                onBackClick = { /* TODO */ },
+                onBackClick = onBackClick,
                 onHomeClick = { onNavigate("home") }
             )
         },
@@ -80,6 +81,7 @@ fun ProblemListScreenPreview() {
     ProblemListScreen(
         problems = sampleProblems,
         onProblemClick = {},
-        onNavigate = {}
+        onNavigate = {},
+        onBackClick = {}
     )
 }

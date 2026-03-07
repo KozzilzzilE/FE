@@ -26,6 +26,7 @@ fun TopBar(
     title: String,
     subtitle: String? = null,
     leftContent: @Composable (() -> Unit)? = null, // 화살표 옆 커스텀 아이콘 등을 위한 슬롯
+    showBackIcon: Boolean = true, // 뒤로 가기 화살표 렌더링 여부 속성
     showHomeIcon: Boolean = true, // 홈 아이콘 렌더링 여부 속성
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit = {},
@@ -54,12 +55,14 @@ fun TopBar(
         },
         navigationIcon = {
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBackIosNew,
-                        contentDescription = "뒤로 가기",
-                        tint = Color(0xFF1A1F27) // 화살표 짙은 색
-                    )
+                if (showBackIcon) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBackIosNew,
+                            contentDescription = "뒤로 가기",
+                            tint = Color(0xFF1A1F27) // 화살표 짙은 색
+                        )
+                    }
                 }
                 if (leftContent != null) {
                     leftContent()

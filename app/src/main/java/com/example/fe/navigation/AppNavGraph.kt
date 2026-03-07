@@ -147,6 +147,24 @@ fun AppNavGraph() {
             )
         }
 
+        // 6. 알고리즘 분류 내 세부 문제 목록 화면
+        composable(route = Routes.PROBLEM) {
+            // TODO: 추후 TopicListScreen에서 선택한 특정 주제 ID를 받아 해당 문제들만 필터링하는 로직 필요
+            ProblemListScreen(
+                problems = emptyList(), // 당장 API가 없으므로 임시 빈 리스트나 샘플 할당
+                onProblemClick = { problem ->
+                    navController.navigate(Routes.solve(problem.id.toLong()))
+                },
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
         // SolveScreen: solve/{problemId}
         composable(
             route = Routes.SOLVE_ROUTE,

@@ -41,6 +41,7 @@ fun TopicListScreen(
             TopBar(
                 title = "알고리즘 학습",
                 subtitle = null, // 대분류 화면에는 서브타이틀 없음
+                showBackIcon = false, // 탭 화면이므로 뒤로 가기 제거
                 showHomeIcon = false, // TopicList 화면에서는 우측 상단 홈버튼 제거
                 onBackClick = { /* TODO: 뒤로가기 로직 */ },
                 onHomeClick = { onNavigate(Routes.HOME) }

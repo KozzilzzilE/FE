@@ -84,7 +84,7 @@ fun TopicListScreen(
                         TopicCard(
                             title = topic.displayName,
                             onClick = {
-                                onNavigate(Routes.PROBLEM)
+                                onNavigate(Routes.step(topic.topicId, topic.displayName))
                             }
                         )
                     }

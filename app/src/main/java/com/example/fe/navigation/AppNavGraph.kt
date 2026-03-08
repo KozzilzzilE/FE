@@ -18,7 +18,10 @@ import com.example.fe.feature.auth.AuthViewModel
 import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
-import com.example.fe.feature.list.ui.ProblemListScreen
+import com.example.fe.feature.list.DetailListScreen
+import com.example.fe.data.sampleConcepts
+import com.example.fe.data.sampleApplications
+import com.example.fe.data.sampleProblems
 import com.example.fe.feature.list.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.HomeScreen
@@ -167,13 +170,37 @@ fun AppNavGraph() {
             )
         }
 
-        // 6. 알고리즘 분류 내 세부 문제 목록 화면
-        composable(route = Routes.PROBLEM) {
-            // TODO: 추후 TopicListScreen에서 선택한 특정 주제 ID를 받아 해당 문제들만 필터링하는 로직 필요
-            ProblemListScreen(
-                problems = emptyList(), // 당장 API가 없으므로 임시 빈 리스트나 샘플 할당
-                onProblemClick = { problem ->
-                    navController.navigate(Routes.solve(problem.id.toLong()))
+        // 6. 알고리즘 분류 내 세부 목록 화면 (개념/응용/문제)
+        composable(
+            route = Routes.DETAIL_LIST_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.TOPIC_NAME) { type = NavType.StringType },
+                navArgument(Routes.STEP_TYPE) { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 1L
+            val topicName = backStackEntry.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
+            val stepType = backStackEntry.arguments?.getString(Routes.STEP_TYPE) ?: "problem"
+
+            // stepType에 따라 화면 타이틀과 목업 데이터 분기
+            val (screenTitle, itemsList) = when (stepType) {
+                "concept" -> "개념학습" to sampleConcepts
+                "application" -> "응용학습" to sampleApplications
+                "problem" -> "문제학습" to sampleProblems
+                else -> "문제학습" to sampleProblems
+            }
+
+            DetailListScreen(
+                screenTitle = screenTitle,
+                items = itemsList,
+                onItemClick = { item ->
+                    // 현재는 문제학습(problem)일 때만 Solve 라우터로 넘어가도록 임시 처리
+                    if (stepType == "problem") {
+                        navController.navigate(Routes.solve(item.id))
+                    } else {
+                        Toast.makeText(context, "${item.title} 클릭됨 (미구현)", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 onNavigate = { route ->
                     navController.navigate(route) {

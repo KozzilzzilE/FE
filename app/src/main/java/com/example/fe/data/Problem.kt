@@ -8,8 +8,8 @@ enum class Difficulty(val label: String) {
 }
 
 data class Problem(
-    val id: Int,
-    val title: String,
-    val difficulty: Difficulty,
-    val isSolved: Boolean = false
-)
+    override val id: Long,
+    override val title: String,
+    override val difficulty: Difficulty,
+    override val isCompleted: Boolean = false
+) : DetailItem

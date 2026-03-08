@@ -66,7 +66,7 @@ fun StepSelectionScreen(
                 icon = Icons.Outlined.LibraryBooks,
                 iconTint = Color(0xFF4A90E2),
                 onClick = {
-                    // TODO: 개념 학습 라우터로 이동
+                    onNavigate(com.example.fe.navigation.Routes.detailList(topicId, topicName, "concept"))
                 }
             )
 
@@ -78,7 +78,7 @@ fun StepSelectionScreen(
                 icon = Icons.Outlined.Lightbulb,
                 iconTint = Color(0xFF26B685),
                 onClick = {
-                    // TODO: 응용 학습 라우터로 이동
+                    onNavigate(com.example.fe.navigation.Routes.detailList(topicId, topicName, "application"))
                 }
             )
 
@@ -90,7 +90,7 @@ fun StepSelectionScreen(
                 icon = Icons.Outlined.Code,
                 iconTint = Color(0xFFE25B50),
                 onClick = {
-                    // TODO: 문제 목록 라우터로 이동 (원래 ProblemListScreen 매핑 고려)
+                    onNavigate(com.example.fe.navigation.Routes.detailList(topicId, topicName, "problem"))
                 }
             )
 

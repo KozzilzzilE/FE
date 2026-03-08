@@ -19,6 +19,7 @@ import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.list.ui.ProblemListScreen
+import com.example.fe.feature.list.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.HomeScreen
 import com.example.fe.feature.solver.SolverViewModel
@@ -135,13 +136,32 @@ fun AppNavGraph() {
         composable(route = Routes.TOPIC) {
             TopicListScreen(
                 onNavigate = { route ->
-                    when (route) {
-                        Routes.HOME, Routes.TOPIC, Routes.PROBLEM, Routes.MY -> {
-                            navController.navigate(route) {
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
+        // 5-1. 학습 단계 선택 화면 (주제 선택 시 진입)
+        composable(
+            route = Routes.STEP_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.TOPIC_NAME) { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 1L
+            val topicName = backStackEntry.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
+
+            StepSelectionScreen(
+                topicId = topicId,
+                topicName = topicName,
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
                     }
                 }
             )

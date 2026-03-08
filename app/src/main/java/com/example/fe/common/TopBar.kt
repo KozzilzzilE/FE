@@ -1,7 +1,11 @@
 package com.example.fe.common
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -34,38 +38,41 @@ fun TopBar(
 ) {
     TopAppBar(
         title = {
+            // 부제목 유무와 상관없이 동일한 높이를 차지하도록 설정하여 타이틀의 y축 위치를 고정
             Column(
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    color = Color(0xFF1A1F27) // 진한 텍스트
+                    color = Color(0xFF1A1F27)
                 )
-                if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        fontSize = 14.sp,
-                        color = Color(0xFF7A828A), // 살짝 연한 회색
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
+                // subtitle이 null이어도 공간을 차지하게 만들어 타이틀을 밀어올리는 정도를 동일하게 유지
+                Text(
+                    text = subtitle ?: " ", 
+                    fontSize = 14.sp,
+                    color = if (subtitle != null) Color(0xFF7A828A) else Color.Transparent,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
             }
         },
         navigationIcon = {
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                if (showBackIcon) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBackIosNew,
-                            contentDescription = "뒤로 가기",
-                            tint = Color(0xFF1A1F27) // 화살표 짙은 색
-                        )
+            if (showBackIcon || leftContent != null) {
+                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    if (showBackIcon) {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBackIosNew,
+                                contentDescription = "뒤로 가기",
+                                tint = Color(0xFF1A1F27) // 화살표 짙은 색
+                            )
+                        }
                     }
-                }
-                if (leftContent != null) {
-                    leftContent()
+                    if (leftContent != null) {
+                        leftContent()
+                    }
                 }
             }
         },

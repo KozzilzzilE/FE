@@ -22,6 +22,9 @@ object Routes {
     const val EDITOR_ROUTE = "editor/{$PROBLEM_ID}"
     const val EDITOR_FULL_ROUTE = "editor_full/{$PROBLEM_ID}"
 
+    //임시 응용 학습 TEST
+    const val PRACTICE_TEST = "practice_test"
+
     // Builders
     fun solve(problemId: Long) = "solve/$problemId"
     fun editor(problemId: Long) = "editor/$problemId"

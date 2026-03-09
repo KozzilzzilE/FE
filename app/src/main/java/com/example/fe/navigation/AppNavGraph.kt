@@ -25,6 +25,13 @@ import com.example.fe.feature.solver.ui.EditorFullScreen
 import com.example.fe.feature.solver.ui.EditorScreen
 import com.example.fe.feature.solver.ui.SolveScreen
 
+//임시 응용학습 관련 추가
+import com.example.fe.feature.study.practice.PracticeViewModel
+import com.example.fe.feature.study.practice.ui.PracticeScreen
+import com.example.fe.feature.study.practice.PracticeUiState
+import com.example.fe.feature.study.practice.dto.BlankDto
+import com.example.fe.feature.study.practice.dto.QuizItemDto
+import com.example.fe.feature.study.practice.ui.PracticeContent
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
@@ -34,32 +41,41 @@ fun AppNavGraph() {
     val solverViewModel: SolverViewModel = viewModel()
 
     // 인증 상태 모니터링 및 화면 전환
-    LaunchedEffect(authState) {
-        when (val state = authState) {
-            is AuthState.Success -> {
-                navController.navigate(Routes.HOME) { // 로그인 성공 시 HOME으로 이동
-                    popUpTo(Routes.LOGIN) { inclusive = true }
-                }
-            }
-            is AuthState.SignedUp -> {
-                Toast.makeText(context, "회원가입이 완료되었습니다.", Toast.LENGTH_LONG).show()
-                navController.navigate(Routes.LOGIN) {
-                    popUpTo(Routes.LOGIN) { inclusive = true }
-                }
-            }
-            is AuthState.NeedsExtraInfo -> {
-                navController.navigate(Routes.SOCIAL_SIGNUP)
-            }
-            is AuthState.Error -> {
-                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
-            }
-            else -> {}
-        }
-    }
+
+    //임시 비활성화
+
+//    LaunchedEffect(authState) {
+//        when (val state = authState) {
+//            is AuthState.Success -> {
+//                navController.navigate(Routes.HOME) { // 로그인 성공 시 HOME으로 이동
+//                    popUpTo(Routes.LOGIN) { inclusive = true }
+//                }
+//            }
+//            is AuthState.SignedUp -> {
+//                Toast.makeText(context, "회원가입이 완료되었습니다.", Toast.LENGTH_LONG).show()
+//                navController.navigate(Routes.LOGIN) {
+//                    popUpTo(Routes.LOGIN) { inclusive = true }
+//                }
+//            }
+//            is AuthState.NeedsExtraInfo -> {
+//                navController.navigate(Routes.SOCIAL_SIGNUP)
+//            }
+//            is AuthState.Error -> {
+//                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+//            }
+//            else -> {}
+//        }
+//    }
 
     NavHost(
-        navController = navController, 
-        startDestination = Routes.LOGIN
+        navController = navController,
+
+        //기존 실제 시작 화면 LOGIN
+        //startDestination = Routes.LOGIN
+
+      //응용학습 ui 화면 테스트용
+        startDestination = "practice_test"
+
     ) {
         // 1. 로그인 화면
         composable(Routes.LOGIN) {
@@ -158,6 +174,29 @@ fun AppNavGraph() {
             )
         }
 
+        //응용 학습 test
+        composable(route = Routes.PRACTICE_TEST) {
+            PracticeContent(
+                state = practicePreviewState(),
+                onBack = { navController.popBackStack() },
+                onHome = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onNextStepClick = {
+                    // 추후 개념학습 / 문제학습 등 다음 단계 연결 시 사용
+                },
+                onCheckAnswer = { _, _ ->
+                    // 현재는 UI 테스트용이므로 임시 false 반환
+                    false
+                }
+            )
+        }
+
+
+
         // SolveScreen: solve/{problemId}
         composable(
             route = Routes.SOLVE_ROUTE,
@@ -236,4 +275,44 @@ fun AppNavGraph() {
             )
         }
     }
+}
+/*
+ * 응용학습 화면 미리보기용 더미 데이터
+ * 따로 분리
+ */
+private fun practicePreviewState(): PracticeUiState {
+    return PracticeUiState(
+        isLoading = false,
+        quizzes = listOf(
+            QuizItemDto(
+                exerciseId = 1L,
+                orderNo = 1,
+                title = "해시맵으로 문자 개수 세기",
+                description = "문자열에서 각 문자의 개수를 세는 코드의 빈칸을 채워보세요.",
+                codeTemplate = """
+function countChars(str) {
+  const map = new ____();
+
+  for (let char of str) {
+    if (map.____(____)) {
+      map.set(char, map.get(char) + 1);
+    } else {
+      map.____(char, ____);
+    }
+  }
+
+  return map;
+}
+                """.trimIndent(),
+                blanks = listOf(
+                    BlankDto(content = "Map", answer = 1),
+                    BlankDto(content = "has", answer = 2),
+                    BlankDto(content = "char", answer = 3),
+                    BlankDto(content = "set", answer = 4),
+                    BlankDto(content = "1", answer = 5)
+                )
+            )
+        ),
+        error = null
+    )
 }

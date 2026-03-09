@@ -18,8 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fe.feature.study.practice.PracticeUiState
 import com.example.fe.feature.study.practice.PracticeViewModel
+import com.example.fe.feature.study.practice.PracticeViewModelFactory
+import com.example.fe.feature.study.practice.api.PracticeApi
+import com.example.fe.feature.study.practice.data.PracticeRepository
 import com.example.fe.feature.study.practice.dto.QuizItemDto
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
+// 기본 색상 -> Color.kt 맞게 수정 예정
 private val PageBg = Color(0xFFF7F9FC)
 private val BodyText = Color(0xFF667085)
 private val ProgressBlue = Color(0xFF6E8FE6)
@@ -29,11 +35,41 @@ fun PracticeScreen(
     topicId: Long,
     onBack: () -> Unit = {},
     onHome: () -> Unit = {},
-    onNextStepClick: () -> Unit = {},
-    viewModel: PracticeViewModel = viewModel()
+    onNextStepClick: () -> Unit = {}
 ) {
+
+    // Retrofit 생성 (임시)
+    // 나중에 RetrofitInstance로 분리 ?
+    val retrofit = remember {
+        Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:8080") // 에뮬레이터에서 로컬 서버 접근 주소
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    // API 인터페이스 생성
+    val practiceApi = remember(retrofit) {
+        retrofit.create(PracticeApi::class.java)
+    }
+
+    // Repository 생성 (API 호출 담당)
+    val repository = remember(practiceApi) {
+        PracticeRepository(practiceApi)
+    }
+
+    // ViewModelFactory 생성
+    // ViewModel에 Repository를 전달하기 위해 필요
+    val factory = remember(repository) {
+        PracticeViewModelFactory(repository)
+    }
+
+    // ViewModel 생성
+    val viewModel: PracticeViewModel = viewModel(factory = factory)
+
+    // ViewModel 상태 구독
     val state = viewModel.uiState.collectAsState().value
 
+    // 화면 진입 시 문제 로드
     LaunchedEffect(topicId) {
         viewModel.loadQuizzes(topicId)
     }
@@ -60,37 +96,55 @@ fun PracticeContent(
     onNextStepClick: () -> Unit = {},
     onCheckAnswer: (Int, List<String>) -> Boolean = { _, _ -> false }
 ) {
+
+    // 현재 보고 있는 문제 index
     var currentIndex by remember(state.quizzes) { mutableIntStateOf(0) }
 
     when {
+
+        // 로딩 상태
         state.isLoading -> {
             PracticeLoadingScreen()
         }
 
+        // 오류 발생
         state.error != null -> {
             PracticeMessageScreen(message = state.error ?: "오류가 발생했습니다.")
         }
 
+        // 정상 데이터
         else -> {
+
             val totalCount = state.quizzes.size
             val quiz = state.quizzes.getOrNull(currentIndex)
 
+            // 문제 없을 경우
             if (quiz == null) {
                 PracticeMessageScreen(message = "문제가 없습니다.")
             } else {
+
+                // 빈칸 채우기 문제 화면
                 PracticeBlankContent(
                     quiz = quiz,
                     currentIndex = currentIndex,
                     totalCount = totalCount.coerceAtLeast(1),
+
                     onBack = onBack,
                     onHome = onHome,
+
+                    // 이전 문제
                     onPrevClick = {
                         if (currentIndex > 0) currentIndex--
                     },
+
+                    // 다음 문제
                     onNextClick = {
                         if (currentIndex < totalCount - 1) currentIndex++
                     },
+
                     onNextStepClick = onNextStepClick,
+
+                    // 정답 체크
                     onCheckAnswer = { answers ->
                         onCheckAnswer(currentIndex, answers)
                     }
@@ -112,21 +166,30 @@ private fun PracticeBlankContent(
     onNextStepClick: () -> Unit,
     onCheckAnswer: (List<String>) -> Boolean
 ) {
+
+    // blanks는 API에서 null 가능하므로 안전 처리
+    val blanks = quiz.blanks ?: emptyList()
+
+    // 각 빈칸에 입력된 사용자 답
     val filledAnswers = remember(quiz.exerciseId) {
         mutableStateListOf<String?>().apply {
-            repeat(quiz.blanks.size) { add(null) }
+            repeat(blanks.size) { add(null) }
         }
     }
 
+    // 현재 선택된 빈칸 index
     var selectedBlankIndex by remember(quiz.exerciseId) {
         mutableIntStateOf(0)
     }
 
+    // 정답 결과 (true / false / null)
     var checkResult by remember(quiz.exerciseId) {
         mutableStateOf<Boolean?>(null)
     }
 
-    val isAnswerComplete = filledAnswers.none { it.isNullOrBlank() }
+    // 모든 빈칸이 채워졌는지 여부
+    val isAnswerComplete =
+        blanks.isNotEmpty() && filledAnswers.none { it.isNullOrBlank() }
 
     BlankScreen(
         quiz = quiz,
@@ -137,14 +200,19 @@ private fun PracticeBlankContent(
         selectedBlankIndex = selectedBlankIndex,
         isAnswerComplete = isAnswerComplete,
         checkResult = checkResult,
+
         onBack = onBack,
         onHome = onHome,
         onPrevClick = onPrevClick,
         onNextClick = onNextClick,
         onNextStepClick = onNextStepClick,
+
+        // 빈칸 선택
         onBlankClick = { index ->
             selectedBlankIndex = index
         },
+
+        // 답 초기화
         onResetAnswers = {
             repeat(filledAnswers.size) { index ->
                 filledAnswers[index] = null
@@ -152,6 +220,8 @@ private fun PracticeBlankContent(
             selectedBlankIndex = 0
             checkResult = null
         },
+
+        // 답칸 클릭
         onAnswerSlotClick = { index ->
             if (selectedBlankIndex == index && filledAnswers[index] != null) {
                 filledAnswers[index] = null
@@ -160,17 +230,23 @@ private fun PracticeBlankContent(
                 selectedBlankIndex = index
             }
         },
+
+        // 선택지 클릭
         onOptionClick = { option ->
             if (selectedBlankIndex in filledAnswers.indices) {
+
                 filledAnswers[selectedBlankIndex] = option
                 checkResult = null
 
+                // 다음 빈칸 자동 이동
                 val nextEmpty = filledAnswers.indexOfFirst { it == null }
                 if (nextEmpty != -1) {
                     selectedBlankIndex = nextEmpty
                 }
             }
         },
+
+        // 정답 확인 버튼
         onCheckAnswerClick = {
             val answers = filledAnswers.map { it ?: "" }
             checkResult = onCheckAnswer(answers)
@@ -180,18 +256,24 @@ private fun PracticeBlankContent(
 
 @Composable
 private fun PracticeLoadingScreen() {
+
+    // 로딩 화면
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(PageBg),
         contentAlignment = Alignment.Center
     ) {
-        androidx.compose.material3.CircularProgressIndicator(color = ProgressBlue)
+        androidx.compose.material3.CircularProgressIndicator(
+            color = ProgressBlue
+        )
     }
 }
 
 @Composable
 private fun PracticeMessageScreen(message: String) {
+
+    // 오류 / 데이터 없음 메시지 화면
     Box(
         modifier = Modifier
             .fillMaxSize()

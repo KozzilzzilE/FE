@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.example.fe.ui.theme.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fe.feature.study.practice.PracticeUiState
@@ -23,6 +22,8 @@ import com.example.fe.feature.study.practice.PracticeViewModelFactory
 import com.example.fe.feature.study.practice.api.PracticeApi
 import com.example.fe.feature.study.practice.data.PracticeRepository
 import com.example.fe.feature.study.practice.dto.QuizItemDto
+import com.example.fe.feature.study.practice.ui.blank.BlankScreen
+import com.example.fe.feature.study.practice.ui.blank.buildChoiceOptions
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

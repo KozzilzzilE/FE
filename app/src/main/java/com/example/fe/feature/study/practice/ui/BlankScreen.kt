@@ -47,40 +47,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.*
 import com.example.fe.common.MoveButtonBar
 import com.example.fe.feature.study.practice.dto.BlankDto
 import com.example.fe.feature.study.practice.dto.QuizItemDto
-
-//기본 색상 -> Color.kt 맞게 수정 예정
-private val PageBg = Color(0xFFF7F9FC)
-private val CardBg = Color.White
-
-private val TopBarTitle = Color(0xFF1F2937)
-private val TopBarSub = Color(0xFF98A2B3)
-private val Mint = Color(0xFF8FD8CC)
-
-private val DividerColor = Color(0xFFE7EDF5)
-
-private val ProgressBlue = Color(0xFF6E8FE6)
-private val ProgressTrack = Color(0xFFE7EEF8)
-
-private val CodeBg = Color(0xFF0C1433)
-private val CodeText = Color(0xFFF4F7FF)
-
-private val BlankBox = Color(0xFF2D447D)
-private val BlankBoxSelected = Color(0xFF5E7FE3)
-
-private val GrayText = Color(0xFF8C97A8)
-private val BodyText = Color(0xFF667085)
-private val TitleText = Color(0xFF1F2937)
-
-private val ChoiceBorder = Color(0xFFD8E1EC)
-
-private val CheckBtnBg = Color(0xFFE9EEF4)
-private val CheckBtnText = Color(0xFF7A8699)
-
-private val CorrectText = Color(0xFF157F3B)
-private val WrongText = Color(0xFFC62828)
 
 @Composable
 fun BlankScreen(

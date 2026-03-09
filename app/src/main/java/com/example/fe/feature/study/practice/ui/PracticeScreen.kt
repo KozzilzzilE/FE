@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.example.fe.ui.theme.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fe.feature.study.practice.PracticeUiState
 import com.example.fe.feature.study.practice.PracticeViewModel
@@ -24,11 +25,6 @@ import com.example.fe.feature.study.practice.data.PracticeRepository
 import com.example.fe.feature.study.practice.dto.QuizItemDto
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
-// 기본 색상 -> Color.kt 맞게 수정 예정
-private val PageBg = Color(0xFFF7F9FC)
-private val BodyText = Color(0xFF667085)
-private val ProgressBlue = Color(0xFF6E8FE6)
 
 @Composable
 fun PracticeScreen(

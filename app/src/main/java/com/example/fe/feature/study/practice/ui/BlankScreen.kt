@@ -48,10 +48,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.common.MoveButtonBar
-import com.example.fe.feature.study.practice.PracticeUiState
 import com.example.fe.feature.study.practice.dto.BlankDto
 import com.example.fe.feature.study.practice.dto.QuizItemDto
 
+//기본 색상 -> Color.kt 맞게 수정 예정
 private val PageBg = Color(0xFFF7F9FC)
 private val CardBg = Color.White
 
@@ -103,6 +103,9 @@ fun BlankScreen(
     onOptionClick: (String) -> Unit,
     onCheckAnswerClick: () -> Unit
 ) {
+    // API에서 blanks가 null일 수 있어서 안전하게 빈칸 개수 처리
+    val blankCount = quiz.blanks?.size ?: 0
+
     Scaffold(
         containerColor = PageBg,
         topBar = {
@@ -150,9 +153,10 @@ fun BlankScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                // 코드 템플릿 + 빈칸 표시 영역
                 CodeBlankCard(
                     codeTemplate = quiz.codeTemplate,
-                    blankCount = quiz.blanks.size,
+                    blankCount = blankCount,
                     selectedBlankIndex = selectedBlankIndex,
                     filledAnswers = filledAnswers,
                     onBlankClick = onBlankClick
@@ -160,6 +164,7 @@ fun BlankScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // 현재 사용자가 선택한 답안 확인 영역
                 SelectedAnswersCard(
                     selectedAnswers = filledAnswers,
                     selectedIndex = selectedBlankIndex,
@@ -177,6 +182,7 @@ fun BlankScreen(
                     modifier = Modifier.padding(start = 2.dp, bottom = 10.dp)
                 )
 
+                // 선택지 버튼 목록
                 ChoiceGrid(
                     options = choiceOptions,
                     onOptionClick = onOptionClick
@@ -184,6 +190,7 @@ fun BlankScreen(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
+                // 정답 확인 버튼
                 Button(
                     onClick = onCheckAnswerClick,
                     enabled = isAnswerComplete,
@@ -204,6 +211,7 @@ fun BlankScreen(
                     )
                 }
 
+                // 정답/오답 결과 표시
                 if (checkResult != null) {
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -366,6 +374,7 @@ private fun CodeBlankCard(
     filledAnswers: List<String?>,
     onBlankClick: (Int) -> Unit
 ) {
+    // 코드 템플릿을 줄 단위로 분리
     val lines = remember(codeTemplate) {
         codeTemplate.lines()
     }
@@ -393,9 +402,10 @@ private fun CodeBlankCard(
                         lineHeight = 22.sp
                     )
 
+                    // ____ 위치에 빈칸 슬롯 삽입
                     if (index < parts.lastIndex && blankIndex < blankCount) {
                         BlankSlot(
-                            text = filledAnswers[blankIndex] ?: "",
+                            text = filledAnswers.getOrNull(blankIndex) ?: "",
                             isSelected = selectedBlankIndex == blankIndex,
                             onClick = { onBlankClick(blankIndex) }
                         )
@@ -630,18 +640,20 @@ private fun ChoiceButton(
     }
 }
 
+// 보기 목록 생성
+// blanks가 null이면 빈 리스트 반환
 fun buildChoiceOptions(quiz: QuizItemDto): List<String> {
-    val correctOptions = quiz.blanks.map { it.content }
+    val correctOptions = quiz.blanks?.map { it.content } ?: emptyList()
     val extras = listOf("get", "delete", "HashMap", "0")
     return (correctOptions + extras).distinct()
 }
+
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 780)
 @Composable
 private fun BlankScreenPreview() {
     val previewQuiz = QuizItemDto(
         exerciseId = 1L,
-        orderNo = 1,
         title = "해시맵으로 문자 개수 세기",
         description = "문자열에서 각 문자의 개수를 세는 코드의 빈칸을 채워보세요.",
         codeTemplate = """
@@ -659,6 +671,8 @@ function countChars(str) {
   return map;
 }
         """.trimIndent(),
+        appliedCompleted = false,
+        totalBlanks = 5,
         blanks = listOf(
             BlankDto(content = "Map", answer = 1),
             BlankDto(content = "has", answer = 2),

@@ -16,17 +16,20 @@ object Routes {
 
     // Args
     const val PROBLEM_ID = "problemId"
+    const val TOPIC_ID = "topicId"
 
     // Patterns
     const val SOLVE_ROUTE = "solve/{$PROBLEM_ID}"
     const val EDITOR_ROUTE = "editor/{$PROBLEM_ID}"
     const val EDITOR_FULL_ROUTE = "editor_full/{$PROBLEM_ID}"
 
-    //임시 응용 학습 TEST
-    const val PRACTICE_TEST = "practice_test"
+    // Practice Route
+    const val PRACTICE_ROUTE = "practice/{$TOPIC_ID}"
 
     // Builders
     fun solve(problemId: Long) = "solve/$problemId"
     fun editor(problemId: Long) = "editor/$problemId"
     fun editorFull(problemId: Long) = "editor_full/$problemId"
+
+    fun practice(topicId: Long) = "practice/$topicId"
 }

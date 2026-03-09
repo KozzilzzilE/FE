@@ -73,8 +73,8 @@ fun AppNavGraph() {
         //기존 실제 시작 화면 LOGIN
         //startDestination = Routes.LOGIN
 
-      //응용학습 ui 화면 테스트용
-        startDestination = "practice_test"
+      //응용학습 ui 수정
+        startDestination = Routes.practice(1L)
 
     ) {
         // 1. 로그인 화면
@@ -174,10 +174,17 @@ fun AppNavGraph() {
             )
         }
 
-        //응용 학습 test
-        composable(route = Routes.PRACTICE_TEST) {
-            PracticeContent(
-                state = practicePreviewState(),
+        // 응용학습 화면 2차 수정
+        composable(
+            route = Routes.PRACTICE_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
+
+            PracticeScreen(
+                topicId = topicId,
                 onBack = { navController.popBackStack() },
                 onHome = {
                     navController.navigate(Routes.HOME) {
@@ -186,11 +193,7 @@ fun AppNavGraph() {
                     }
                 },
                 onNextStepClick = {
-                    // 추후 개념학습 / 문제학습 등 다음 단계 연결 시 사용
-                },
-                onCheckAnswer = { _, _ ->
-                    // 현재는 UI 테스트용이므로 임시 false 반환
-                    false
+                    // 추후 개념학습 / 문제학습 연결 시 사용
                 }
             )
         }
@@ -275,44 +278,4 @@ fun AppNavGraph() {
             )
         }
     }
-}
-/*
- * 응용학습 화면 미리보기용 더미 데이터
- * 따로 분리
- */
-private fun practicePreviewState(): PracticeUiState {
-    return PracticeUiState(
-        isLoading = false,
-        quizzes = listOf(
-            QuizItemDto(
-                exerciseId = 1L,
-                orderNo = 1,
-                title = "해시맵으로 문자 개수 세기",
-                description = "문자열에서 각 문자의 개수를 세는 코드의 빈칸을 채워보세요.",
-                codeTemplate = """
-function countChars(str) {
-  const map = new ____();
-
-  for (let char of str) {
-    if (map.____(____)) {
-      map.set(char, map.get(char) + 1);
-    } else {
-      map.____(char, ____);
-    }
-  }
-
-  return map;
-}
-                """.trimIndent(),
-                blanks = listOf(
-                    BlankDto(content = "Map", answer = 1),
-                    BlankDto(content = "has", answer = 2),
-                    BlankDto(content = "char", answer = 3),
-                    BlankDto(content = "set", answer = 4),
-                    BlankDto(content = "1", answer = 5)
-                )
-            )
-        ),
-        error = null
-    )
 }

@@ -6,6 +6,8 @@ import com.example.fe.data.dto.SignUpResponse
 import com.example.fe.data.dto.LoginRequest
 import com.example.fe.data.dto.LoginResponse
 import com.example.fe.data.dto.HomeResponse
+import com.example.fe.data.dto.PracticeCompletionResponseDto
+import com.example.fe.data.dto.PracticeResponseDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -27,4 +29,18 @@ interface ApiService {
     // 메인화면 : 홈 화면 데이터 가져오기
     @GET("api/v1/users/main")
     suspend fun getHomeData(): Response<HomeResponse>
+
+    // --- [응용학습 Practice] ---
+    // 응용학습 문제 조회
+    @GET("/api/v1/learnings/{topicId}/applications")
+    suspend fun getPracticeQuizzes(
+        @retrofit2.http.Path("topicId") topicId: Long,
+        @retrofit2.http.Query("language") language: String
+    ): PracticeResponseDto
+
+    // 응용학습 문제 완료 처리
+    @POST("/api/v1/learnings/applications/completions/{exerciseId}")
+    suspend fun completePractice(
+        @retrofit2.http.Path("exerciseId") exerciseId: Long
+    ): PracticeCompletionResponseDto
 }

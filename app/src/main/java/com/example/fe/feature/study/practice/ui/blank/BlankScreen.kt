@@ -22,8 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.common.MoveButtonBar
-import com.example.fe.feature.study.practice.dto.BlankDto
-import com.example.fe.feature.study.practice.dto.QuizItemDto
+import com.example.fe.data.dto.BlankDto
+import com.example.fe.data.dto.QuizItemDto
 import com.example.fe.ui.theme.CardBg
 import com.example.fe.ui.theme.CheckBtnBg
 import com.example.fe.ui.theme.CheckBtnText

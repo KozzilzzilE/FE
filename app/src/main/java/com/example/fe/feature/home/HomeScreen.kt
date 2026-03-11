@@ -23,7 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.fe.api.RetrofitClient
 import com.example.fe.common.AppConstants
+import com.example.fe.feature.home.data.HomeRepository
 import com.example.fe.common.BottomNavigationBar
 import com.example.fe.feature.home.component.HomeTopBar
 import com.example.fe.feature.home.component.LanguageDropdown
@@ -31,8 +33,10 @@ import com.example.fe.common.bottomNavItems
 
 @Composable
 fun HomeScreen(
-    // userName 파라미터는 뷰 모델을 통해 가져오므로 제거하거나 기본값 대체 가능 (여기서는 뷰 모델을 사용함)
-    viewModel: HomeViewModel = viewModel(),
+    // 팩토리를 통해 Repository 주입
+    viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(HomeRepository(RetrofitClient.instance))
+    ),
     onNavigate: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()

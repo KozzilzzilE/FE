@@ -1,10 +1,10 @@
 package com.example.fe.feature.study.practice.data
 
-import com.example.fe.feature.study.practice.api.PracticeApi
-import com.example.fe.feature.study.practice.dto.QuizItemDto
+import com.example.fe.api.ApiService
+import com.example.fe.data.dto.QuizItemDto
 
 class PracticeRepository(
-    private val practiceApi: PracticeApi
+    private val apiService: ApiService
 ) {
 
     // 응용학습 문제 조회
@@ -14,7 +14,7 @@ class PracticeRepository(
     ): List<QuizItemDto> {
 
         // API 호출
-        val response = practiceApi.getPracticeQuizzes(topicId, language)
+        val response = apiService.getPracticeQuizzes(topicId, language)
 
         // API 성공 여부 확인
         if (response.isSuccess) {
@@ -37,7 +37,7 @@ class PracticeRepository(
         exerciseId: Long
     ) {
 
-        val response = practiceApi.completePractice(exerciseId)
+        val response = apiService.completePractice(exerciseId)
 
         // 실패 시 예외 발생
         if (!response.isSuccess) {

@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fe.feature.study.practice.dto.QuizItemDto
+import com.example.fe.data.dto.QuizItemDto
 import com.example.fe.ui.theme.BlankBorder
 import com.example.fe.ui.theme.BlankBorderSelected
 import com.example.fe.ui.theme.BlankBox

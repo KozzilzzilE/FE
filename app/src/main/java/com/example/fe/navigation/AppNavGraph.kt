@@ -14,30 +14,42 @@ import androidx.navigation.navArgument
 import com.example.fe.data.Difficulty
 import com.example.fe.data.Problem
 import com.example.fe.feature.auth.AuthViewModel
+import com.example.fe.feature.auth.AuthViewModelFactory
+import com.example.fe.feature.auth.data.AuthRepository
 import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.home.HomeScreen
 import com.example.fe.feature.list.ProblemListScreen
 import com.example.fe.feature.solver.SolverViewModel
+import com.example.fe.feature.solver.SolverViewModelFactory
+import com.example.fe.feature.solver.data.SolverRepository
+import com.example.fe.api.RetrofitClient
 import com.example.fe.feature.solver.ui.EditorFullScreen
 import com.example.fe.feature.solver.ui.EditorScreen
 import com.example.fe.feature.solver.ui.SolveScreen
 
 // 응용학습 임시 UI 확인용 import
 import com.example.fe.feature.study.practice.PracticeUiState
-import com.example.fe.feature.study.practice.dto.BlankDto
-import com.example.fe.feature.study.practice.dto.QuizItemDto
+import com.example.fe.data.dto.BlankDto
+import com.example.fe.data.dto.QuizItemDto
 import com.example.fe.feature.study.practice.ui.PracticeContent
 import com.example.fe.feature.study.practice.ui.PracticeScreen
 
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
-    val authViewModel: AuthViewModel = viewModel()
+    
+    val authRepository = androidx.compose.runtime.remember { AuthRepository(RetrofitClient.instance) }
+    val authViewModelFactory = androidx.compose.runtime.remember(authRepository) { AuthViewModelFactory(authRepository) }
+    val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
+    
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
-    val solverViewModel: SolverViewModel = viewModel()
+    
+    val solverRepository = androidx.compose.runtime.remember { SolverRepository(RetrofitClient.instance) }
+    val solverViewModelFactory = androidx.compose.runtime.remember(solverRepository) { SolverViewModelFactory(solverRepository) }
+    val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
 
     // 인증 상태 모니터링 및 화면 전환
     // 지금은 응용학습 UI 확인 중이라 잠시 비활성화

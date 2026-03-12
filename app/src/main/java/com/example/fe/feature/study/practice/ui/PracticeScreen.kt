@@ -19,13 +19,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fe.feature.study.practice.PracticeUiState
 import com.example.fe.feature.study.practice.PracticeViewModel
 import com.example.fe.feature.study.practice.PracticeViewModelFactory
-import com.example.fe.feature.study.practice.api.PracticeApi
 import com.example.fe.feature.study.practice.data.PracticeRepository
-import com.example.fe.feature.study.practice.dto.QuizItemDto
+import com.example.fe.data.dto.QuizItemDto
 import com.example.fe.feature.study.practice.ui.blank.BlankScreen
 import com.example.fe.feature.study.practice.ui.blank.buildChoiceOptions
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.example.fe.api.RetrofitClient
 
 @Composable
 fun PracticeScreen(
@@ -35,23 +33,14 @@ fun PracticeScreen(
     onNextStepClick: () -> Unit = {}
 ) {
 
-    // Retrofit 생성 (임시)
-    // 나중에 RetrofitInstance로 분리 ?
-    val retrofit = remember {
-        Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080") // 에뮬레이터에서 로컬 서버 접근 주소
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    // API 인터페이스 생성
-    val practiceApi = remember(retrofit) {
-        retrofit.create(PracticeApi::class.java)
+    // API 인터페이스 가져오기 (공통 Network Client 사용)
+    val apiService = remember {
+        RetrofitClient.instance
     }
 
     // Repository 생성 (API 호출 담당)
-    val repository = remember(practiceApi) {
-        PracticeRepository(practiceApi)
+    val repository = remember(apiService) {
+        PracticeRepository(apiService)
     }
 
     // ViewModelFactory 생성

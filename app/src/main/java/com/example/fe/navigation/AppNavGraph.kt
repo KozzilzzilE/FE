@@ -29,6 +29,9 @@ import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.ui.EditorFullScreen
 import com.example.fe.feature.solver.ui.EditorScreen
 import com.example.fe.feature.solver.ui.SolveScreen
+import com.example.fe.feature.study.concept.ConceptViewModel
+import com.example.fe.feature.study.concept.ConceptViewModelFactory
+import com.example.fe.feature.study.concept.ui.ConceptDetailScreen
 
 @Composable
 fun AppNavGraph() {
@@ -195,11 +198,16 @@ fun AppNavGraph() {
                 screenTitle = screenTitle,
                 items = itemsList,
                 onItemClick = { item ->
-                    // 현재는 문제학습(problem)일 때만 Solve 라우터로 넘어가도록 임시 처리
-                    if (stepType == "problem") {
-                        navController.navigate(Routes.solve(item.id))
-                    } else {
-                        Toast.makeText(context, "${item.title} 클릭됨 (미구현)", Toast.LENGTH_SHORT).show()
+                    when (stepType) {
+                        "problem" -> {
+                            navController.navigate(Routes.solve(item.id))
+                        }
+                        "concept" -> {
+                            navController.navigate(Routes.concept(item.id))
+                        }
+                        else -> {
+                            Toast.makeText(context, "${item.title} 클릭됨 (미구현)", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 },
                 onNavigate = { route ->
@@ -209,6 +217,34 @@ fun AppNavGraph() {
                     }
                 },
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // ConceptDetailScreen: concept/{topicId}
+        composable(
+            route = Routes.CONCEPT_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
+            val conceptViewModelFactory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
+            val conceptViewModel: ConceptViewModel = viewModel(factory = conceptViewModelFactory)
+
+            ConceptDetailScreen(
+                topicId = topicId,
+                viewModel = conceptViewModel,
+                onBack = { navController.popBackStack() },
+                onHome = { 
+                    navController.navigate(Routes.TOPIC) {
+                        popUpTo(Routes.TOPIC) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onNextStepClick = {
+                    Toast.makeText(context, "다음 단계 학습으로 이동 (미구현)", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack() // 임시 처리: 목록으로 돌아가기
+                }
             )
         }
 

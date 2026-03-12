@@ -27,6 +27,7 @@ object Routes {
     const val SOLVE_ROUTE = "solve/{$PROBLEM_ID}"
     const val EDITOR_ROUTE = "editor/{$PROBLEM_ID}"
     const val EDITOR_FULL_ROUTE = "editor_full/{$PROBLEM_ID}"
+    const val CONCEPT_ROUTE = "concept/{$TOPIC_ID}"
 
     // Builders
     fun step(topicId: Long, topicName: String) = "step/$topicId/$topicName"
@@ -34,4 +35,5 @@ object Routes {
     fun solve(problemId: Long) = "solve/$problemId"
     fun editor(problemId: Long) = "editor/$problemId"
     fun editorFull(problemId: Long) = "editor_full/$problemId"
+    fun concept(topicId: Long) = "concept/$topicId"
 }

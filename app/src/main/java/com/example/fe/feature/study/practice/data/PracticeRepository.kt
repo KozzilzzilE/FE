@@ -1,47 +1,108 @@
 package com.example.fe.feature.study.practice.data
 
+import android.util.Log
 import com.example.fe.api.ApiService
+import com.example.fe.data.dto.BlankDto
 import com.example.fe.data.dto.QuizItemDto
 
 class PracticeRepository(
     private val apiService: ApiService
 ) {
 
+    companion object {
+        // ============================================================
+        // ★ Mock 데이터 전환 플래그 ★
+        // true  → 더미 데이터 사용 (서버 없이 UI 테스트)
+        // false → 실제 API 호출 (서버 연결 시 변경)
+        // ============================================================
+        const val USE_MOCK = true
+    }
+
     // 응용학습 문제 조회
     suspend fun getQuizzes(
         topicId: Long,
-        language: String
+        language: String = "JAVA"
     ): List<QuizItemDto> {
+        if (USE_MOCK) return getMockQuizzes()
 
-        // API 호출
         val response = apiService.getPracticeQuizzes(topicId, language)
 
-        // API 성공 여부 확인
         if (response.isSuccessful && response.body()?.isSuccess == true) {
-
-            // result가 null일 수도 있으므로 안전 처리
             val result = response.body()?.result ?: return emptyList()
-
-            // 실제 문제 리스트 반환
             return result.appliedExercises
         } else {
-
-            // API 실패 시 message 전달
             throw java.lang.Exception(response.body()?.message ?: "응용 학습 조회 실패")
         }
     }
 
-
     // 응용 문제 완료 처리
-    suspend fun completeQuiz(
-        exerciseId: Long
-    ) {
+    suspend fun completeQuiz(exerciseId: Long) {
+        if (USE_MOCK) {
+            Log.d("PracticeRepository", "[MOCK] 응용 학습 완료 처리: exerciseId=$exerciseId")
+            return
+        }
 
         val response = apiService.completePractice(exerciseId)
 
-        // 실패 시 예외 발생
         if (!response.isSuccessful || response.body()?.isSuccess != true) {
             throw java.lang.Exception(response.body()?.message ?: "응용 학습 완료 처리 실패")
         }
+    }
+
+    // ================================================================
+    // Mock 데이터 (API 명세 기준)
+    // API 연동 완료 후 삭제하거나 그대로 유지해도 무방
+    // ================================================================
+    private fun getMockQuizzes(): List<QuizItemDto> {
+        return listOf(
+            QuizItemDto(
+                exerciseId = 1L,
+                title = "HashMap으로 문자 개수 세기",
+                description = "문자열에서 각 문자의 개수를 세는 코드의 빈칸을 채워보세요.",
+                codeTemplate = "Map<Character, Integer> map = new ____<>();\nfor (char c : str.toCharArray()) {\n    map.____(c, map.getOrDefault(c, 0) + 1);\n}\nreturn map;",
+                appliedCompleted = false,
+                totalBlanks = 2,
+                blanks = listOf(
+                    BlankDto(content = "HashMap", answer = 1),
+                    BlankDto(content = "put", answer = 2)
+                )
+            ),
+            QuizItemDto(
+                exerciseId = 2L,
+                title = "두 배열의 교집합 찾기",
+                description = "두 배열에서 공통으로 존재하는 원소를 찾는 코드의 빈칸을 채워보세요.",
+                codeTemplate = "Set<Integer> set = new HashSet<>();\nfor (int n : nums1) set.____(n);\nList<Integer> result = new ArrayList<>();\nfor (int n : nums2) {\n    if (set.____(n)) result.add(n);\n}\nreturn result;",
+                appliedCompleted = true,
+                totalBlanks = 2,
+                blanks = listOf(
+                    BlankDto(content = "add", answer = 1),
+                    BlankDto(content = "contains", answer = 2)
+                )
+            ),
+            QuizItemDto(
+                exerciseId = 3L,
+                title = "HashMap으로 문자 개수 세기 2",
+                description = "문자열에서 각 문자의 개수를 세는 코드의 빈칸을 채워보세요.",
+                codeTemplate = "Map<Character, Integer> map = new ____<>();\nfor (char c : str.toCharArray()) {\n    map.____(c, map.getOrDefault(c, 0) + 1);\n}\nreturn map;",
+                appliedCompleted = false,
+                totalBlanks = 2,
+                blanks = listOf(
+                    BlankDto(content = "HashMap", answer = 1),
+                    BlankDto(content = "put", answer = 2)
+                )
+            ),
+            QuizItemDto(
+                exerciseId = 3L,
+                title = "HashMap으로 문자 개수 세기 3",
+                description = "문자열에서 각 문자의 개수를 세는 코드의 빈칸을 채워보세요.",
+                codeTemplate = "Map<Character, Integer> map = new ____<>();\nfor (char c : str.toCharArray()) {\n    map.____(c, map.getOrDefault(c, 0) + 1);\n}\nreturn map;",
+                appliedCompleted = false,
+                totalBlanks = 2,
+                blanks = listOf(
+                    BlankDto(content = "HashMap", answer = 1),
+                    BlankDto(content = "put", answer = 2)
+                )
+            )
+        )
     }
 }

@@ -16,11 +16,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.fe.common.BottomNavigationBar
-import com.example.fe.common.CommonTopAppBar
-import com.example.fe.common.ProblemCard
+import com.example.fe.common.TopBar
+import com.example.fe.common.DetailCard
 import com.example.fe.common.bottomNavItems
 import com.example.fe.data.Difficulty
 import com.example.fe.data.Problem
+import com.example.fe.data.DetailItem
 
 @Composable
 fun ProblemListScreen(
@@ -30,9 +31,12 @@ fun ProblemListScreen(
 ) {
     Scaffold(
         topBar = {
-            CommonTopAppBar(
+            TopBar(
                 title = "알고리즘 학습",
-                canNavigateBack = false,
+                showBackIcon = false,
+                showHomeIcon = false,
+                onBackClick = {},
+                onHomeClick = {}
             )
         },
         bottomBar = {
@@ -54,8 +58,8 @@ fun ProblemListScreen(
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                 items(problems) { problem ->
-                    ProblemCard(
-                        problem = problem,
+                    DetailCard(
+                        item = problem,
                         onClick = { onProblemClick(problem) }
                     )
                 }

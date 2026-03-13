@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -14,24 +15,30 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.fe.data.Difficulty
 import com.example.fe.data.Problem
+import com.example.fe.data.Concept
+import com.example.fe.data.Application
 import com.example.fe.feature.auth.AuthViewModel
 import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.list.DetailListScreen
-import com.example.fe.data.sampleConcepts
-import com.example.fe.data.sampleApplications
 import com.example.fe.data.sampleProblems
 import com.example.fe.feature.list.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.HomeScreen
 import com.example.fe.feature.solver.SolverViewModel
+import com.example.fe.feature.solver.data.SolverRepository
+import androidx.lifecycle.ViewModelProvider
 import com.example.fe.feature.solver.ui.EditorFullScreen
 import com.example.fe.feature.solver.ui.EditorScreen
 import com.example.fe.feature.solver.ui.SolveScreen
 import com.example.fe.feature.study.concept.ConceptViewModel
 import com.example.fe.feature.study.concept.ConceptViewModelFactory
 import com.example.fe.feature.study.concept.ui.ConceptDetailScreen
+import com.example.fe.feature.study.practice.PracticeViewModel
+import com.example.fe.feature.study.practice.PracticeViewModelFactory
+import com.example.fe.feature.study.practice.data.PracticeRepository
+import com.example.fe.api.RetrofitClient
 
 @Composable
 fun AppNavGraph() {
@@ -39,7 +46,14 @@ fun AppNavGraph() {
     val authViewModel: AuthViewModel = viewModel()
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
-    val solverViewModel: SolverViewModel = viewModel()
+    val solverViewModel: SolverViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return SolverViewModel(SolverRepository(RetrofitClient.instance)) as T
+            }
+        }
+    )
 
     // 인증 상태 모니터링 및 화면 전환
     LaunchedEffect(authState) {
@@ -186,38 +200,113 @@ fun AppNavGraph() {
             val topicName = backStackEntry.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
             val stepType = backStackEntry.arguments?.getString(Routes.STEP_TYPE) ?: "problem"
 
-            // stepType에 따라 화면 타이틀과 목업 데이터 분기
-            val (screenTitle, itemsList) = when (stepType) {
-                "concept" -> "개념학습" to sampleConcepts
-                "application" -> "응용학습" to sampleApplications
-                "problem" -> "문제학습" to sampleProblems
-                else -> "문제학습" to sampleProblems
-            }
+            when (stepType) {
+                "concept" -> {
+                    val factory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
+                    val conceptViewModel: ConceptViewModel = viewModel(factory = factory)
+                    val uiState by conceptViewModel.uiState.collectAsState()
 
-            DetailListScreen(
-                screenTitle = screenTitle,
-                items = itemsList,
-                onItemClick = { item ->
-                    when (stepType) {
-                        "problem" -> {
+                    // 화면 진입 시 API 호출
+                    androidx.compose.runtime.LaunchedEffect(topicId) {
+                        conceptViewModel.loadConcepts(topicId)
+                    }
+
+                    // NotionDto -> Concept(DetailItem) 변환
+                    val conceptItems = uiState.concepts.map { notion ->
+                        Concept(
+                            id = notion.notionId,
+                            title = notion.title,
+                            difficulty = Difficulty.EASY, // 개념 학습은 난이도 없음
+                            isCompleted = notion.notionCompleted
+                        )
+                    }
+
+                    if (uiState.isLoading) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                        )
+                    } else {
+                        DetailListScreen(
+                            screenTitle = "개념학습",
+                            items = conceptItems,
+                            onItemClick = { item ->
+                                navController.navigate(Routes.concept(topicId))
+                            },
+                            onNavigate = { route ->
+                                navController.navigate(route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
+                }
+
+                "application" -> {
+                    val factory = androidx.compose.runtime.remember {
+                        PracticeViewModelFactory(PracticeRepository(RetrofitClient.instance))
+                    }
+                    val practiceViewModel: PracticeViewModel = viewModel(factory = factory)
+                    val uiState by practiceViewModel.uiState.collectAsState()
+
+                    // 화면 진입 시 API 호출
+                    androidx.compose.runtime.LaunchedEffect(topicId) {
+                        practiceViewModel.loadQuizzes(topicId)
+                    }
+
+                    // QuizItemDto -> Application(DetailItem) 변환
+                    val applicationItems = uiState.quizzes.map { quiz ->
+                        Application(
+                            id = quiz.exerciseId,
+                            title = quiz.title,
+                            difficulty = Difficulty.EASY,
+                            isCompleted = quiz.appliedCompleted
+                        )
+                    }
+
+                    if (uiState.isLoading) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                        )
+                    } else {
+                        DetailListScreen(
+                            screenTitle = "응용학습",
+                            items = applicationItems,
+                            onItemClick = { item ->
+                                // TODO: 응용 학습 상세 화면 연결
+                                Toast.makeText(context, "${item.title} (미구현)", Toast.LENGTH_SHORT).show()
+                            },
+                            onNavigate = { route ->
+                                navController.navigate(route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
+                }
+
+                else -> {
+                    // 문제 풀이 (기존 더미 데이터 유지)
+                    val itemsList = sampleProblems
+                    DetailListScreen(
+                        screenTitle = "문제학습",
+                        items = itemsList,
+                        onItemClick = { item ->
                             navController.navigate(Routes.solve(item.id))
-                        }
-                        "concept" -> {
-                            navController.navigate(Routes.concept(item.id))
-                        }
-                        else -> {
-                            Toast.makeText(context, "${item.title} 클릭됨 (미구현)", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                },
-                onNavigate = { route ->
-                    navController.navigate(route) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onBackClick = { navController.popBackStack() }
-            )
+                        },
+                        onNavigate = { route ->
+                            navController.navigate(route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+            }
         }
 
         // ConceptDetailScreen: concept/{topicId}

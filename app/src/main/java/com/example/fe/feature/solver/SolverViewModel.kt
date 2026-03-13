@@ -2,8 +2,8 @@ package com.example.fe.feature.solver
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fe.feature.solver.data.SolverRepository
 import com.example.fe.feature.solver.model.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,15 +13,19 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SolverViewModel : ViewModel() {
+class SolverViewModel(
+    private val repository: SolverRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         SolverUiState(
             code = DEFAULT_JAVA_TEMPLATE,
+            // 초기 더미 테스트케이스 (화면 첫 진입 시 보여줄 기본값)
             testCases = listOf(
                 TestCase(id = 1L, input = "nums = [2,7,11,15], target = 9", expectedOutput = "[0,1]"),
                 TestCase(id = 2L, input = "nums = [3,2,4], target = 6", expectedOutput = "[1,2]")
             ),
+            // 초기 더미 제출 기록
             submissions = listOf(
                 SubmissionRecord("2026.01.21 14:29:00", "Java", "정답", true),
                 SubmissionRecord("2026.01.21 14:28:00", "Java", "오답", false)
@@ -30,7 +34,6 @@ class SolverViewModel : ViewModel() {
     )
     val uiState: StateFlow<SolverUiState> = _uiState.asStateFlow()
 
-    // 파생 Flow (기존 UI 호환용)
     private val started = SharingStarted.WhileSubscribed(5_000)
 
     val code: StateFlow<String> =
@@ -49,76 +52,28 @@ class SolverViewModel : ViewModel() {
     val submissions: StateFlow<List<SubmissionRecord>> =
         uiState.map { it.submissions }.stateIn(viewModelScope, started, _uiState.value.submissions)
 
-    /** P-07 문제 상세 조회: /api/v1/problems/{problemId}?language=JAVA */
+    /** 문제 상세 조회 */
     fun loadProblemDetail(problemId: Long, language: String = _uiState.value.language) {
         viewModelScope.launch {
             _uiState.update { it.copy(problemId = problemId, language = language, isLoadingProblem = true) }
 
-            delay(200)
-
-            val detail = when (problemId) {
-                1L -> ProblemDetail(
-                    problemId = 1L,
-                    title = "두 수의 합",
-                    difficultyLabel = "쉬움",
-                    description = "정수 배열 nums와 정수 target이 주어졌을 때, 합이 target이 되는 두 수의 인덱스를 반환하세요.",
-                    exampleInput = "nums = [2, 7, 11, 15], target = 9",
-                    exampleOutput = "[0, 1]",
-                    constraints = listOf("2 ≤ nums.length ≤ 10⁴"),
-                    initialCode = DEFAULT_JAVA_TEMPLATE
-                )
-
-                2L -> ProblemDetail(
-                    problemId = 2L,
-                    title = "스택 구현하기",
-                    difficultyLabel = "보통",
-                    description = "정수 스택을 구현하고 push/pop/top/isEmpty를 지원하세요.",
-                    exampleInput = "push 1, push 2, top, pop, isEmpty",
-                    exampleOutput = "top=2, pop=2, isEmpty=false",
-                    constraints = listOf("연산 수 ≤ 100,000"),
-                    initialCode = DEFAULT_JAVA_TEMPLATE
-                )
-
-                3L -> ProblemDetail(
-                    problemId = 3L,
-                    title = "큐 활용하기",
-                    difficultyLabel = "보통",
-                    description = "정수 큐를 구현하고 enqueue/dequeue/front/isEmpty를 지원하세요.",
-                    exampleInput = "enqueue 3, enqueue 4, front, dequeue",
-                    exampleOutput = "front=3, dequeue=3",
-                    constraints = listOf("연산 수 ≤ 100,000"),
-                    initialCode = DEFAULT_JAVA_TEMPLATE
-                )
-
-                else -> ProblemDetail(
-                    problemId = problemId,
-                    title = "임시 문제($problemId)",
-                    difficultyLabel = "미정",
-                    description = "아직 mock 데이터가 준비되지 않았습니다.",
-                    exampleInput = "-",
-                    exampleOutput = "-",
-                    constraints = emptyList(),
-                    initialCode = DEFAULT_JAVA_TEMPLATE
-                )
-            }
+            val detail = repository.loadProblemDetail(problemId, language)
 
             _uiState.update { state ->
                 state.copy(
                     isLoadingProblem = false,
                     problemDetail = detail,
-                    // 초기 코드 주입: 빈 상태거나 기본 템플릿일 때만 덮어쓰기
                     code = if (state.code.isBlank() || state.code == DEFAULT_JAVA_TEMPLATE) detail.initialCode else state.code
                 )
             }
         }
     }
 
-
     fun updateCode(newCode: String) {
         _uiState.update { it.copy(code = newCode) }
     }
 
-    /** P-07 실행: /api/v1/problems/{problemId}/run */
+    /** 코드 실행 */
     fun runCode() {
         val state = _uiState.value
         if (state.problemId == 0L) {
@@ -129,27 +84,9 @@ class SolverViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isRunning = true, runResult = null) }
 
-            // TODO: repository.run(problemId, code, language, 성공조건)
-            delay(800)
+            val runResult = repository.runCode(state.problemId, state.code, state.language)
 
-            val lines = listOf(
-                "$ Running test cases...",
-                "Test 1: Passed ✓",
-                "Test 2: Passed ✓",
-                "All tests passed!"
-            )
-
-            _uiState.update {
-                it.copy(
-                    isRunning = false,
-                    runResult = RunResult(
-                        passed = true,
-                        runtimeMs = 123,
-                        errorMessage = null,
-                        terminalLines = lines
-                    )
-                )
-            }
+            _uiState.update { it.copy(isRunning = false, runResult = runResult) }
         }
     }
 
@@ -157,7 +94,7 @@ class SolverViewModel : ViewModel() {
         _uiState.update { it.copy(runResult = null) }
     }
 
-    /** P-07-1 제출/채점: /api/v1/problems/{problemId}/submissions */
+    /** 코드 제출/채점 */
     fun submitCode() {
         val state = _uiState.value
         if (state.problemId == 0L) {
@@ -168,16 +105,7 @@ class SolverViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, submitResult = null) }
 
-            // TODO: repository.submit(problemId, code, language, 성공조건)
-            delay(700)
-
-            val result = SubmitResult(isCorrect = true, runtimeMs = 210, errorMessage = null)
-            val newRecord = SubmissionRecord(
-                date = "2026.02.09 13:40:00",
-                language = "Java",
-                result = if (result.isCorrect) "정답" else "오답",
-                isCorrect = result.isCorrect
-            )
+            val (result, newRecord) = repository.submitCode(state.problemId, state.code, state.language)
 
             _uiState.update {
                 it.copy(
@@ -191,42 +119,18 @@ class SolverViewModel : ViewModel() {
 
     fun loadSubmissionHistory(problemId: Long = _uiState.value.problemId) {
         viewModelScope.launch {
-            // TODO: repository.getSubmissionHistory(problemId)
-            delay(200)
+            repository.loadSubmissionHistory(problemId)
         }
     }
 
-    /** P-08 모범 답안 조회: /api/v1/problems/{problemId}/solution?language=JAVA */
+    /** 모범 답안 조회 */
     fun loadSolution(problemId: Long = _uiState.value.problemId, language: String = _uiState.value.language) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingSolution = true, solution = null) }
 
-            // TODO: repository.getSolution(problemId, language)
-            delay(350)
+            val solution = repository.loadSolution(problemId, language)
 
-            _uiState.update {
-                it.copy(
-                    isLoadingSolution = false,
-                    solution = SolutionDetail(
-                        code = """
-import java.util.*;
-
-class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        Map<Integer,Integer> map = new HashMap<>();
-        for (int i = 0; i < nums.length; i++) {
-            int complement = target - nums[i];
-            if (map.containsKey(complement)) return new int[]{ map.get(complement), i };
-            map.put(nums[i], i);
-        }
-        return new int[]{};
-    }
-}
-                        """.trimIndent(),
-                        explanation = "해시맵을 사용하면 O(n)으로 해결할 수 있습니다."
-                    )
-                )
-            }
+            _uiState.update { it.copy(isLoadingSolution = false, solution = solution) }
         }
     }
 
@@ -258,7 +162,7 @@ class Solution {
     }
 
     companion object {
-        private val DEFAULT_JAVA_TEMPLATE = """
+        val DEFAULT_JAVA_TEMPLATE = """
 import java.util.*;
 
 public class Solution {
@@ -270,3 +174,5 @@ public class Solution {
         """.trimIndent()
     }
 }
+
+

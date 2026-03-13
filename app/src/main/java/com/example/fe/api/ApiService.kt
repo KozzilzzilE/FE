@@ -7,7 +7,6 @@ import com.example.fe.data.dto.LoginRequest
 import com.example.fe.data.dto.LoginResponse
 import com.example.fe.data.dto.HomeResponse
 import com.example.fe.data.dto.TopicResponse
-import com.example.fe.data.dto.TopicResponse
 import com.example.fe.data.dto.ConceptResponse
 import com.example.fe.data.dto.PracticeResponseDto
 import com.example.fe.data.dto.PracticeCompletionResponseDto

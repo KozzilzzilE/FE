@@ -30,7 +30,7 @@ data class QuizItemDto(
 // 빈칸 데이터
 data class BlankDto(
     @SerializedName("content") val content: String,
-    @SerializedName("answer") val answer: Int
+    @SerializedName("answer") val answer: Int?
 )
 
 // 응용 문제 완료 API 응답

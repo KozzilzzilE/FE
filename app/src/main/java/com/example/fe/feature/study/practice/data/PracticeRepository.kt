@@ -13,35 +13,36 @@ class PracticeRepository(
         language: String
     ): List<QuizItemDto> {
 
-        // API 호출
         val response = apiService.getPracticeQuizzes(topicId, language)
 
-        // API 성공 여부 확인
-        if (response.isSuccess) {
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 본문이 비어 있습니다.")
 
-            // result가 null일 수도 있으므로 안전 처리
-            val result = response.result ?: return emptyList()
-
-            // 실제 문제 리스트 반환
-            return result.appliedExercises
+            if (body.isSuccess) {
+                val result = body.result ?: return emptyList()
+                return result.appliedExercises
+            } else {
+                throw Exception(body.message)
+            }
         } else {
-
-            // API 실패 시 message 전달
-            throw Exception(response.message)
+            throw Exception("응용학습 조회 실패: ${response.code()}")
         }
     }
-
 
     // 응용 문제 완료 처리
     suspend fun completeQuiz(
         exerciseId: Long
     ) {
-
         val response = apiService.completePractice(exerciseId)
 
-        // 실패 시 예외 발생
-        if (!response.isSuccess) {
-            throw Exception(response.message)
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 본문이 비어 있습니다.")
+
+            if (!body.isSuccess) {
+                throw Exception(body.message)
+            }
+        } else {
+            throw Exception("응용학습 완료 처리 실패: ${response.code()}")
         }
     }
 }

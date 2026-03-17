@@ -12,6 +12,8 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     // 회원가입 : 회원 정보 서버에 등록 (소셜 연동 포함)
@@ -31,16 +33,17 @@ interface ApiService {
     suspend fun getHomeData(): Response<HomeResponse>
 
     // --- [응용학습 Practice] ---
+
     // 응용학습 문제 조회
     @GET("/api/v1/learnings/{topicId}/applications")
     suspend fun getPracticeQuizzes(
-        @retrofit2.http.Path("topicId") topicId: Long,
-        @retrofit2.http.Query("language") language: String
-    ): PracticeResponseDto
+        @Path("topicId") topicId: Long,
+        @Query("language") language: String
+    ): Response<PracticeResponseDto>
 
     // 응용학습 문제 완료 처리
     @POST("/api/v1/learnings/applications/completions/{exerciseId}")
     suspend fun completePractice(
-        @retrofit2.http.Path("exerciseId") exerciseId: Long
-    ): PracticeCompletionResponseDto
+        @Path("exerciseId") exerciseId: Long
+    ): Response<PracticeCompletionResponseDto>
 }

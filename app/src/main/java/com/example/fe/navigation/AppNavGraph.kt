@@ -23,7 +23,7 @@ import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.list.DetailListScreen
 import com.example.fe.data.sampleProblems
-import com.example.fe.feature.list.ui.StepSelectionScreen
+import com.example.fe.feature.step.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.HomeScreen
 import com.example.fe.feature.solver.SolverViewModel
@@ -230,7 +230,8 @@ fun AppNavGraph() {
                             screenTitle = "개념학습",
                             items = conceptItems,
                             onItemClick = { item ->
-                                navController.navigate(Routes.concept(topicId))
+                                val index = conceptItems.indexOf(item).coerceAtLeast(0)
+                                navController.navigate(Routes.concept(topicId, index))
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
@@ -313,15 +314,18 @@ fun AppNavGraph() {
         composable(
             route = Routes.CONCEPT_ROUTE,
             arguments = listOf(
-                navArgument(Routes.TOPIC_ID) { type = NavType.LongType }
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.INITIAL_INDEX) { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
+            val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0L
             val conceptViewModelFactory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
             val conceptViewModel: ConceptViewModel = viewModel(factory = conceptViewModelFactory)
 
             ConceptDetailScreen(
                 topicId = topicId,
+                initialIndex = initialIndex.toInt(),
                 viewModel = conceptViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = { 

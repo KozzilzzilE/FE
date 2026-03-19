@@ -20,6 +20,7 @@ object Routes {
     const val TOPIC_ID = "topicId"
     const val TOPIC_NAME = "topicName"
     const val STEP_TYPE = "stepType" // 개념, 응용, 문제 구분용 파라미터
+    const val INITIAL_INDEX = "initialIndex"
 
     // Patterns
     const val STEP_ROUTE = "step/{$TOPIC_ID}/{$TOPIC_NAME}"
@@ -27,7 +28,7 @@ object Routes {
     const val SOLVE_ROUTE = "solve/{$PROBLEM_ID}"
     const val EDITOR_ROUTE = "editor/{$PROBLEM_ID}"
     const val EDITOR_FULL_ROUTE = "editor_full/{$PROBLEM_ID}"
-    const val CONCEPT_ROUTE = "concept/{$TOPIC_ID}"
+    const val CONCEPT_ROUTE = "concept/{$TOPIC_ID}/{$INITIAL_INDEX}"
 
     // Builders
     fun step(topicId: Long, topicName: String) = "step/$topicId/$topicName"
@@ -35,5 +36,6 @@ object Routes {
     fun solve(problemId: Long) = "solve/$problemId"
     fun editor(problemId: Long) = "editor/$problemId"
     fun editorFull(problemId: Long) = "editor_full/$problemId"
-    fun concept(topicId: Long) = "concept/$topicId"
+    fun concept(topicId: Long, initialIndex: Int) = "concept/$topicId/$initialIndex"
 }
+

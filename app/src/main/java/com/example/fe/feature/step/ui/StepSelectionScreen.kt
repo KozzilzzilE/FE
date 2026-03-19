@@ -1,4 +1,4 @@
-package com.example.fe.feature.list.ui
+package com.example.fe.feature.step.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -37,6 +37,7 @@ import com.example.fe.feature.study.concept.ConceptViewModel
 @Composable
 fun ConceptDetailScreen(
     topicId: Long,
+    initialIndex: Int = 0,
     viewModel: ConceptViewModel,
     onBack: () -> Unit,
     onHome: () -> Unit,
@@ -44,9 +45,9 @@ fun ConceptDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // 뷰 진입 시 해당 주제의 개념 데이터 로드
+    // 뷰 진입 시 해당 주제의 개념 데이터 로드 (시작 인덱스 전달)
     LaunchedEffect(topicId) {
-        viewModel.loadConcepts(topicId)
+        viewModel.loadConcepts(topicId = topicId, initialIndex = initialIndex)
     }
 
     Scaffold(

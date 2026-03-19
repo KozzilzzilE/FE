@@ -21,7 +21,7 @@ class ConceptViewModel(private val repository: ConceptRepository) : ViewModel() 
     private val _uiState = MutableStateFlow(ConceptUiState())
     val uiState: StateFlow<ConceptUiState> = _uiState.asStateFlow()
 
-    fun loadConcepts(topicId: Long, language: String = "JAVA") {
+    fun loadConcepts(topicId: Long, language: String = "JAVA", initialIndex: Int = 0) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
@@ -37,10 +37,11 @@ class ConceptViewModel(private val repository: ConceptRepository) : ViewModel() 
                         // API에 주제 이름이 없다면 임시 대체(필요 시 이전 화면에서 파라미터로 받도록 개선)
                         topicTitle = "알고리즘 개념", 
                         concepts = sortedNotions,
-                        currentIndex = 0
+                        currentIndex = initialIndex
                     )
                 }
             } else {
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,

@@ -51,15 +51,17 @@ interface ApiService {
         @Path("notionId") notionId: Long
     ): Response<com.example.fe.data.dto.ConceptCompletionResponse>
 
-    // 응용 학습(practices) 조회
-    @GET("api/v1/learnings/{topicId}/practices")
+    // --- [응용학습 Practice] ---
+
+    // 응용학습 문제 조회
+    @GET("/api/v1/learnings/{topicId}/applications")
     suspend fun getPracticeQuizzes(
         @Path("topicId") topicId: Long,
         @Query("language") language: String
     ): Response<PracticeResponseDto>
 
-    // 응용 학습 완료 처리
-    @POST("api/v1/learnings/practices/completions/{exerciseId}")
+    // 응용학습 문제 완료 처리
+    @POST("/api/v1/learnings/applications/completions/{exerciseId}")
     suspend fun completePractice(
         @Path("exerciseId") exerciseId: Long
     ): Response<PracticeCompletionResponseDto>

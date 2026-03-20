@@ -13,14 +13,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.example.fe.feature.solver.data.SolverRepository
+
 class SolverViewModel(
     private val repository: SolverRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         SolverUiState(
-            code = DEFAULT_JAVA_TEMPLATE,
-            // 초기 더미 테스트케이스 (화면 첫 진입 시 보여줄 기본값)
+            code = "",
             testCases = listOf(
                 TestCase(id = 1L, input = "nums = [2,7,11,15], target = 9", expectedOutput = "[0,1]"),
                 TestCase(id = 2L, input = "nums = [3,2,4], target = 6", expectedOutput = "[1,2]")
@@ -63,7 +64,8 @@ class SolverViewModel(
                 state.copy(
                     isLoadingProblem = false,
                     problemDetail = detail,
-                    code = if (state.code.isBlank() || state.code == DEFAULT_JAVA_TEMPLATE) detail.initialCode else state.code
+                    // 초기 코드 주입: 빈 상태거나 기본 템플릿일 때만 덮어쓰기
+                    code = if (state.code.isBlank() || state.code == detail.initialCode) detail.initialCode else state.code
                 )
             }
         }
@@ -84,9 +86,14 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isRunning = true, runResult = null) }
 
-            val runResult = repository.runCode(state.problemId, state.code, state.language)
+            val runResultResponse = repository.runCode(state.problemId, state.code, state.language)
 
-            _uiState.update { it.copy(isRunning = false, runResult = runResult) }
+            _uiState.update {
+                it.copy(
+                    isRunning = false,
+                    runResult = runResultResponse
+                )
+            }
         }
     }
 
@@ -105,12 +112,12 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, submitResult = null) }
 
-            val (result, newRecord) = repository.submitCode(state.problemId, state.code, state.language)
+            val (submitResult, newRecord) = repository.submitCode(state.problemId, state.code, state.language)
 
             _uiState.update {
                 it.copy(
                     isSubmitting = false,
-                    submitResult = result,
+                    submitResult = submitResult,
                     submissions = listOf(newRecord) + it.submissions
                 )
             }
@@ -128,9 +135,14 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingSolution = true, solution = null) }
 
-            val solution = repository.loadSolution(problemId, language)
+            val loadedSolution = repository.loadSolution(problemId, language)
 
-            _uiState.update { it.copy(isLoadingSolution = false, solution = solution) }
+            _uiState.update {
+                it.copy(
+                    isLoadingSolution = false,
+                    solution = loadedSolution
+                )
+            }
         }
     }
 
@@ -159,19 +171,6 @@ class SolverViewModel(
 
     fun clearErrorToast() {
         _uiState.update { it.copy(errorToast = null) }
-    }
-
-    companion object {
-        val DEFAULT_JAVA_TEMPLATE = """
-import java.util.*;
-
-public class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        // 여기에 코드를 작성하세요...
-        return new int[] {};
-    }
-}
-        """.trimIndent()
     }
 }
 

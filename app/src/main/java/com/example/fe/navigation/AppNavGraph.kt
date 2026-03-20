@@ -27,8 +27,8 @@ import com.example.fe.feature.step.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.HomeScreen
 import com.example.fe.feature.solver.SolverViewModel
+import com.example.fe.feature.solver.SolverViewModelFactory
 import com.example.fe.feature.solver.data.SolverRepository
-import androidx.lifecycle.ViewModelProvider
 import com.example.fe.feature.solver.ui.EditorFullScreen
 import com.example.fe.feature.solver.ui.EditorScreen
 import com.example.fe.feature.solver.ui.SolveScreen
@@ -46,14 +46,9 @@ fun AppNavGraph() {
     val authViewModel: AuthViewModel = viewModel()
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
-    val solverViewModel: SolverViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                @Suppress("UNCHECKED_CAST")
-                return SolverViewModel(SolverRepository(RetrofitClient.instance)) as T
-            }
-        }
-    )
+    val solverRepository = androidx.compose.runtime.remember { SolverRepository(RetrofitClient.instance) }
+    val solverViewModelFactory = androidx.compose.runtime.remember(solverRepository) { SolverViewModelFactory(solverRepository) }
+    val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
 
     // 인증 상태 모니터링 및 화면 전환
     LaunchedEffect(authState) {

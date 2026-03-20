@@ -30,6 +30,9 @@ object Routes {
     const val EDITOR_FULL_ROUTE = "editor_full/{$PROBLEM_ID}"
     const val CONCEPT_ROUTE = "concept/{$TOPIC_ID}/{$INITIAL_INDEX}"
 
+    // Practice Route
+    const val PRACTICE_ROUTE = "practice/{$TOPIC_ID}"
+
     // Builders
     fun step(topicId: Long, topicName: String) = "step/$topicId/$topicName"
     fun detailList(topicId: Long, topicName: String, stepType: String) = "detail/$topicId/$topicName/$stepType"
@@ -37,5 +40,7 @@ object Routes {
     fun editor(problemId: Long) = "editor/$problemId"
     fun editorFull(problemId: Long) = "editor_full/$problemId"
     fun concept(topicId: Long, initialIndex: Int) = "concept/$topicId/$initialIndex"
+
+    fun practice(topicId: Long) = "practice/$topicId"
 }
 

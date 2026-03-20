@@ -131,22 +131,22 @@ class Solution {
             )
             2L -> ProblemDetail(
                 problemId = 2L,
-                title = "완주하지 못한 선수",
-                difficultyLabel = "쉬움",
-                description = "마라톤에 참여한 선수들 중 완주하지 못한 선수의 이름을 반환하세요.",
-                exampleInput = "participant=[\"leo\",\"kiki\",\"eden\"], completion=[\"eden\",\"kiki\"]",
-                exampleOutput = "\"leo\"",
-                constraints = listOf("1 ≤ participant.length ≤ 100,000"),
+                title = "스택 구현하기",
+                difficultyLabel = "보통",
+                description = "정수 스택을 구현하고 push/pop/top/isEmpty를 지원하세요.",
+                exampleInput = "push 1, push 2, top, pop, isEmpty",
+                exampleOutput = "top=2, pop=2, isEmpty=false",
+                constraints = listOf("연산 수 ≤ 100,000"),
                 initialCode = DEFAULT_JAVA_TEMPLATE
             )
             3L -> ProblemDetail(
                 problemId = 3L,
-                title = "전화번호 목록",
+                title = "큐 활용하기",
                 difficultyLabel = "보통",
-                description = "전화번호부에 있는 어떤 번호가 다른 번호의 접두어인지 확인하세요.",
-                exampleInput = "phone_book=[\"119\",\"97674223\",\"1195524421\"]",
-                exampleOutput = "false",
-                constraints = listOf("1 ≤ phone_book.length ≤ 1,000,000"),
+                description = "정수 큐를 구현하고 enqueue/dequeue/front/isEmpty를 지원하세요.",
+                exampleInput = "enqueue 3, enqueue 4, front, dequeue",
+                exampleOutput = "front=3, dequeue=3",
+                constraints = listOf("연산 수 ≤ 100,000"),
                 initialCode = DEFAULT_JAVA_TEMPLATE
             )
             4L -> ProblemDetail(

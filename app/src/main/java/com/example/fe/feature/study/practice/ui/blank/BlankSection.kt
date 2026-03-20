@@ -39,7 +39,7 @@ import com.example.fe.ui.theme.CardBg
 import com.example.fe.ui.theme.CodeBg
 import com.example.fe.ui.theme.CodeText
 import com.example.fe.ui.theme.DividerColor
-import androidx.compose.ui.graphics.Color
+import com.example.fe.ui.theme.GrayText
 import com.example.fe.ui.theme.Mint
 import com.example.fe.ui.theme.ProgressBlue
 import com.example.fe.ui.theme.ProgressTrack
@@ -270,13 +270,13 @@ fun SelectedAnswersCard(
                     Icon(
                         imageVector = Icons.Outlined.Refresh,
                         contentDescription = "reset",
-                        tint = Color.Gray,
+                        tint = GrayText,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "초기화",
-                        color = Color.Gray,
+                        color = GrayText,
                         fontSize = 14.sp
                     )
                 }

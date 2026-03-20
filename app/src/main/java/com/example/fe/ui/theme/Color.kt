@@ -10,34 +10,50 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-// 임시 추가
-val GrayText = Color(0xFF8B95A1)
-val Mint = Color(0xFF00C781)
-val DividerColor = Color(0xFFE5E8EB)
-val CodeBg = Color(0xFFF2F4F6)
-val CardBg = Color(0xFFFFFFFF)
-val BodyText = Color(0xFF4E5968)
-val TitleText = Color(0xFF191F28)
-val ProgressBlue = Color(0xFF3182F6)
-val ProgressTrack = Color(0xFFE5E8EB)
-val CodeText = Color(0xFF333D4B)
-val TopBarTitle = Color(0xFF191F28)
-val TopBarSub = Color(0xFF8B95A1)
-val BlankBorder = Color(0xFFD1D6DB)
-val BlankBorderSelected = Color(0xFF3182F6)
-val WrongText = Color(0xFFF04438)
-val CorrectText = Color(0xFF00C781)
+// 공통 앱 색상 추가
 
-// 추가 누락 색상
-val CheckBtnBg = Color(0xFFE5E8EB)
-val CheckBtnText = Color(0xFF8B95A1)
-val PageBg = Color(0xFFF8FAFC)
-val PrimaryButtonBlue = Color(0xFF3182F6)
+// 배경
+val PageBg = Color(0xFFF7F9FC)
+val CardBg = Color.White
 
-// 추가 누락 색상 (2차)
-val BlankBox = Color(0xFFF2F4F6)
-val BlankBoxSelected = Color(0xFFE8F3FF)
-val BlankTextFilled = Color(0xFF191F28)
-val ChoiceBorder = Color(0xFFE5E8EB)
-val EmptyBorder = Color(0xFFD1D6DB)
-val SelectedAnswerBg = Color(0xFFF2F8FF)
+// 텍스트
+val TitleText = Color(0xFF1F2937)
+val BodyText = Color(0xFF667085)
+val GrayText = Color(0xFF8C97A8)
+
+// TopBar
+val TopBarTitle = Color(0xFF1F2937)
+val TopBarSub = Color(0xFF98A2B3)
+val Mint = Color(0xFF8FD8CC)
+
+// Divider
+val DividerColor = Color(0xFFE7EDF5)
+
+// Progress
+val ProgressBlue = Color(0xFF6E8FE6)
+val ProgressTrack = Color(0xFFE7EEF8)
+
+// Code 영역
+val CodeBg = Color(0xFF0C1433)
+val CodeText = Color(0xFFF4F7FF)
+
+// Blank 영역
+val BlankBox = Color(0xFF2D447D)
+val BlankBoxSelected = Color(0xFF5E7FE3)
+val BlankBorder = Color(0xFF5D6C99)
+val BlankBorderSelected = Color(0xFF9CB8FF)
+val BlankTextFilled = Color(0xFF7DA2F8)
+
+// 선택지 / 카드
+val ChoiceBorder = Color(0xFFD8E1EC)
+val SelectedAnswerBg = Color(0xFFEAF1FF)
+val EmptyBorder = Color(0xFFD9E3F0)
+
+// 버튼
+val CheckBtnBg = Color(0xFFE9EEF4)
+val CheckBtnText = Color(0xFF7A8699)
+val PrimaryButtonBlue = Color(0xFF4A90E2)
+
+// 결과 텍스트
+val CorrectText = Color(0xFF157F3B)
+val WrongText = Color(0xFFC62828)

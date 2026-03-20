@@ -6,10 +6,12 @@ import com.example.fe.data.dto.SignUpResponse
 import com.example.fe.data.dto.LoginRequest
 import com.example.fe.data.dto.LoginResponse
 import com.example.fe.data.dto.HomeResponse
+
 import com.example.fe.data.dto.TopicResponse
 import com.example.fe.data.dto.ConceptResponse
 import com.example.fe.data.dto.PracticeResponseDto
 import com.example.fe.data.dto.PracticeCompletionResponseDto
+
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -34,6 +36,7 @@ interface ApiService {
     @GET("api/v1/users/main")
     suspend fun getHomeData(): Response<HomeResponse>
 
+
     // 알고리즘 주제 목록 조회
     @GET("api/v1/topics")
     suspend fun getTopics(): Response<TopicResponse>
@@ -50,6 +53,7 @@ interface ApiService {
     suspend fun postNotionCompletion(
         @Path("notionId") notionId: Long
     ): Response<com.example.fe.data.dto.ConceptCompletionResponse>
+
 
     // --- [응용학습 Practice] ---
 

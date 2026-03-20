@@ -27,16 +27,24 @@ class PracticeRepository(
 
         val response = apiService.getPracticeQuizzes(topicId, language)
 
-        if (response.isSuccessful && response.body()?.isSuccess == true) {
-            val result = response.body()?.result ?: return emptyList()
-            return result.appliedExercises
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 본문이 비어 있습니다.")
+
+            if (body.isSuccess) {
+                val result = body.result ?: return emptyList()
+                return result.appliedExercises
+            } else {
+                throw Exception(body.message)
+            }
         } else {
-            throw java.lang.Exception(response.body()?.message ?: "응용 학습 조회 실패")
+            throw Exception("응용학습 조회 실패: ${response.code()}")
         }
     }
 
     // 응용 문제 완료 처리
-    suspend fun completeQuiz(exerciseId: Long) {
+    suspend fun completeQuiz(
+        exerciseId: Long
+    ) {
         if (USE_MOCK) {
             Log.d("PracticeRepository", "[MOCK] 응용 학습 완료 처리: exerciseId=$exerciseId")
             return
@@ -44,8 +52,14 @@ class PracticeRepository(
 
         val response = apiService.completePractice(exerciseId)
 
-        if (!response.isSuccessful || response.body()?.isSuccess != true) {
-            throw java.lang.Exception(response.body()?.message ?: "응용 학습 완료 처리 실패")
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 본문이 비어 있습니다.")
+
+            if (!body.isSuccess) {
+                throw Exception(body.message)
+            }
+        } else {
+            throw Exception("응용학습 완료 처리 실패: ${response.code()}")
         }
     }
 

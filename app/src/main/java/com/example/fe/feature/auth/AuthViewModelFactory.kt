@@ -1,16 +1,16 @@
-package com.example.fe.feature.home
+package com.example.fe.feature.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.fe.feature.home.data.HomeRepository
+import com.example.fe.feature.auth.data.AuthRepository
 
-class HomeViewModelFactory(
-    private val repository: HomeRepository
+class AuthViewModelFactory(
+    private val repository: AuthRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return HomeViewModel(repository) as T
+            return AuthViewModel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

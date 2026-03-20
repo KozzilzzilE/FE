@@ -23,9 +23,10 @@ fun PracticeTemplate(
 ) {
     Scaffold(
         topBar = {
-            CommonTopAppBar(
-                title = title, // 개념 or 응용 or 문제 학습
-                canNavigateBack = true
+            TopBar(
+                title = title,
+                onBackClick = { /* TODO */ },
+                onHomeClick = { onNavigate("home") }
             )
         },
         bottomBar = {

@@ -2,8 +2,8 @@ package com.example.fe.feature.solver
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fe.feature.solver.data.SolverRepository
 import com.example.fe.feature.solver.model.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +26,7 @@ class SolverViewModel(
                 TestCase(id = 1L, input = "nums = [2,7,11,15], target = 9", expectedOutput = "[0,1]"),
                 TestCase(id = 2L, input = "nums = [3,2,4], target = 6", expectedOutput = "[1,2]")
             ),
+            // 초기 더미 제출 기록
             submissions = listOf(
                 SubmissionRecord("2026.01.21 14:29:00", "Java", "정답", true),
                 SubmissionRecord("2026.01.21 14:28:00", "Java", "오답", false)
@@ -34,7 +35,6 @@ class SolverViewModel(
     )
     val uiState: StateFlow<SolverUiState> = _uiState.asStateFlow()
 
-    // 파생 Flow (기존 UI 호환용)
     private val started = SharingStarted.WhileSubscribed(5_000)
 
     val code: StateFlow<String> =
@@ -53,7 +53,7 @@ class SolverViewModel(
     val submissions: StateFlow<List<SubmissionRecord>> =
         uiState.map { it.submissions }.stateIn(viewModelScope, started, _uiState.value.submissions)
 
-    /** P-07 문제 상세 조회: /api/v1/problems/{problemId}?language=JAVA */
+    /** 문제 상세 조회 */
     fun loadProblemDetail(problemId: Long, language: String = _uiState.value.language) {
         viewModelScope.launch {
             _uiState.update { it.copy(problemId = problemId, language = language, isLoadingProblem = true) }
@@ -71,12 +71,11 @@ class SolverViewModel(
         }
     }
 
-
     fun updateCode(newCode: String) {
         _uiState.update { it.copy(code = newCode) }
     }
 
-    /** P-07 실행: /api/v1/problems/{problemId}/run */
+    /** 코드 실행 */
     fun runCode() {
         val state = _uiState.value
         if (state.problemId == 0L) {
@@ -102,7 +101,7 @@ class SolverViewModel(
         _uiState.update { it.copy(runResult = null) }
     }
 
-    /** P-07-1 제출/채점: /api/v1/problems/{problemId}/submissions */
+    /** 코드 제출/채점 */
     fun submitCode() {
         val state = _uiState.value
         if (state.problemId == 0L) {
@@ -131,7 +130,7 @@ class SolverViewModel(
         }
     }
 
-    /** P-08 모범 답안 조회: /api/v1/problems/{problemId}/solution?language=JAVA */
+    /** 모범 답안 조회 */
     fun loadSolution(problemId: Long = _uiState.value.problemId, language: String = _uiState.value.language) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingSolution = true, solution = null) }
@@ -174,3 +173,5 @@ class SolverViewModel(
         _uiState.update { it.copy(errorToast = null) }
     }
 }
+
+

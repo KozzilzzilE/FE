@@ -37,7 +37,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.example.fe.common.CommonTopAppBar
+import com.example.fe.common.TopBar
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
 
@@ -76,19 +76,11 @@ fun EditorScreen(
         Scaffold(
             contentWindowInsets = WindowInsets(0),
             topBar = {
-                CommonTopAppBar(
+                TopBar(
                     title = "문제 풀이",
-                    canNavigateBack = true,
-                    navigateUp = onBack,
-                    actions = {
-                        IconButton(onClick = onHome) {
-                            Icon(
-                                imageVector = Icons.Filled.Home,
-                                contentDescription = "Home",
-                                tint = Color(0xFF72C6B4)
-                            )
-                        }
-                    }
+                    showHomeIcon = true,
+                    onBackClick = onBack,
+                    onHomeClick = onHome
                 )
             },
             bottomBar = {

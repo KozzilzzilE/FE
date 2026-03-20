@@ -43,7 +43,7 @@ fun BottomNavigationBar(
 
 val bottomNavItems = listOf(
     BottomNavItem("홈", Icons.Default.Home, "home"),
-    BottomNavItem("학습", Icons.Default.Menu, "study"), // Placeholder icon
+    BottomNavItem("학습", Icons.Default.Menu, "topic"), // Placeholder icon
     BottomNavItem("문제", Icons.Default.Star, "problem"), // Placeholder icon
     BottomNavItem("MY", Icons.Default.Person, "my"),
 )

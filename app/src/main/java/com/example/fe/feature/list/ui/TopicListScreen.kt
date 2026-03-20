@@ -1,0 +1,128 @@
+package com.example.fe.feature.list.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.fe.common.BottomNavigationBar
+import com.example.fe.common.TopBar
+import com.example.fe.common.bottomNavItems
+import com.example.fe.navigation.Routes
+import com.example.fe.feature.list.TopicViewModel
+import com.example.fe.feature.list.TopicUiState
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopicListScreen(
+    viewModel: TopicViewModel = viewModel(),
+    onNavigate: (String) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Scaffold(
+        containerColor = Color(0xFFF1F5F9), // 약간 그레이톤/푸르스름한 배경
+        topBar = {
+            TopBar(
+                title = "알고리즘 학습",
+                subtitle = null, // 대분류 화면에는 서브타이틀 없음
+                showBackIcon = false, // 탭 화면이므로 뒤로 가기 제거
+                showHomeIcon = false, // TopicList 화면에서는 우측 상단 홈버튼 제거
+                onBackClick = { /* TODO: 뒤로가기 로직 */ },
+                onHomeClick = { onNavigate(Routes.HOME) }
+            )
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                items = bottomNavItems,
+                currentRoute = "topic",
+                onNavigate = onNavigate
+            )
+        }
+    ) { innerPadding ->
+        when (val state = uiState) {
+            is TopicUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF4A90E2))
+                }
+            }
+            is TopicUiState.Error -> {
+                // 에러 발생 시 UI 표출 안함(요구사항)
+            }
+            is TopicUiState.Success -> {
+                val topics = state.topics
+                val scrollState = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .verticalScroll(scrollState)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    topics.forEach { topic ->
+                        TopicCard(
+                            title = topic.displayName,
+                            onClick = {
+                                onNavigate(Routes.step(topic.topicId, topic.displayName))
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TopicCard(title: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF333333)
+            )
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "이동",
+                tint = Color.Gray
+            )
+        }
+    }
+}

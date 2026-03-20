@@ -2,8 +2,10 @@ package com.example.fe.navigation
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -13,77 +15,68 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.fe.data.Difficulty
 import com.example.fe.data.Problem
+import com.example.fe.data.Concept
+import com.example.fe.data.Application
 import com.example.fe.feature.auth.AuthViewModel
-import com.example.fe.feature.auth.AuthViewModelFactory
-import com.example.fe.feature.auth.data.AuthRepository
 import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
+import com.example.fe.feature.list.DetailListScreen
+import com.example.fe.data.sampleProblems
+import com.example.fe.feature.step.ui.StepSelectionScreen
+import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.HomeScreen
-import com.example.fe.feature.list.ProblemListScreen
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.SolverViewModelFactory
 import com.example.fe.feature.solver.data.SolverRepository
-import com.example.fe.api.RetrofitClient
 import com.example.fe.feature.solver.ui.EditorFullScreen
 import com.example.fe.feature.solver.ui.EditorScreen
 import com.example.fe.feature.solver.ui.SolveScreen
-
-// 응용학습 임시 UI 확인용 import
-import com.example.fe.feature.study.practice.PracticeUiState
-import com.example.fe.data.dto.BlankDto
-import com.example.fe.data.dto.QuizItemDto
-import com.example.fe.feature.study.practice.ui.PracticeContent
-import com.example.fe.feature.study.practice.ui.PracticeScreen
+import com.example.fe.feature.study.concept.ConceptViewModel
+import com.example.fe.feature.study.concept.ConceptViewModelFactory
+import com.example.fe.feature.study.concept.ui.ConceptDetailScreen
+import com.example.fe.feature.study.practice.PracticeViewModel
+import com.example.fe.feature.study.practice.PracticeViewModelFactory
+import com.example.fe.feature.study.practice.data.PracticeRepository
+import com.example.fe.api.RetrofitClient
 
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
-    
-    val authRepository = androidx.compose.runtime.remember { AuthRepository(RetrofitClient.instance) }
-    val authViewModelFactory = androidx.compose.runtime.remember(authRepository) { AuthViewModelFactory(authRepository) }
-    val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
-    
+    val authViewModel: AuthViewModel = viewModel()
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
-    
     val solverRepository = androidx.compose.runtime.remember { SolverRepository(RetrofitClient.instance) }
     val solverViewModelFactory = androidx.compose.runtime.remember(solverRepository) { SolverViewModelFactory(solverRepository) }
     val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
 
     // 인증 상태 모니터링 및 화면 전환
-    // 지금은 응용학습 UI 확인 중이라 잠시 비활성화
-//    LaunchedEffect(authState) {
-//        when (val state = authState) {
-//            is AuthState.Success -> {
-//                navController.navigate(Routes.HOME) { //로그인 성공 시 HOME으로 이동
-//                    popUpTo(Routes.LOGIN) { inclusive = true }
-//                }
-//            }
-//            is AuthState.SignedUp -> {
-//                Toast.makeText(context, "회원가입이 완료되었습니다.", Toast.LENGTH_LONG).show()
-//                navController.navigate(Routes.LOGIN) {
-//                    popUpTo(Routes.LOGIN) { inclusive = true }
-//                }
-//            }
-//            is AuthState.NeedsExtraInfo -> {
-//                navController.navigate(Routes.SOCIAL_SIGNUP)
-//            }
-//            is AuthState.Error -> {
-//                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
-//            }
-//            else -> {}
-//        }
-//    }
+    LaunchedEffect(authState) {
+        when (val state = authState) {
+            is AuthState.Success -> {
+                navController.navigate(Routes.HOME) { // 로그인 성공 시 HOME으로 이동
+                    popUpTo(Routes.LOGIN) { inclusive = true }
+                }
+            }
+            is AuthState.SignedUp -> {
+                Toast.makeText(context, "회원가입이 완료되었습니다.", Toast.LENGTH_LONG).show()
+                navController.navigate(Routes.LOGIN) {
+                    popUpTo(Routes.LOGIN) { inclusive = true }
+                }
+            }
+            is AuthState.NeedsExtraInfo -> {
+                navController.navigate(Routes.SOCIAL_SIGNUP)
+            }
+            is AuthState.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+            }
+            else -> {}
+        }
+    }
 
     NavHost(
-        navController = navController,
-
-        // 실제 시작 화면
-        // startDestination = Routes.LOGIN
-
-        // 임시: 응용학습 화면 바로 확인용
-        startDestination = Routes.practice(1L)
+        navController = navController, 
+        startDestination = Routes.LOGIN
     ) {
         // 1. 로그인 화면
         composable(Routes.LOGIN) {
@@ -114,7 +107,7 @@ fun AppNavGraph() {
             SignUpScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onSignUpComplete = { name, email, password, language ->
-                    authViewModel.signUp(name, email, password, language)
+                    authViewModel.signUp(name, email, password, language) 
                 },
                 onGoogleSignUpClick = { idToken ->
                     authViewModel.signInWithGoogleSignUp(idToken)
@@ -125,14 +118,12 @@ fun AppNavGraph() {
             )
         }
 
-        // 3. 소셜 회원가입 추가 정보 입력 화면
+        // 3. 소셜 회원가입 시 추가 정보 입력 화면
         composable(Routes.SOCIAL_SIGNUP) {
             val currentState = authState
-            val initialName =
-                if (currentState is AuthState.NeedsExtraInfo) currentState.name else ""
-            val initialEmail =
-                if (currentState is AuthState.NeedsExtraInfo) currentState.email else ""
-
+            val initialName = if (currentState is AuthState.NeedsExtraInfo) currentState.name else ""
+            val initialEmail = if (currentState is AuthState.NeedsExtraInfo) currentState.email else ""
+            
             com.example.fe.feature.auth.ui.SocialSignUpScreen(
                 initialName = initialName,
                 initialEmail = initialEmail,
@@ -146,7 +137,7 @@ fun AppNavGraph() {
         // 4. 메인 홈 화면
         composable(Routes.HOME) {
             HomeScreen(
-                onNavigate = { route ->
+                onNavigate = { route -> 
                     navController.navigate(route) {
                         popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
@@ -156,85 +147,196 @@ fun AppNavGraph() {
             )
         }
 
-        // 5. 메인 문제 목록 화면 (학습 탭 누를 시)
-        composable(route = Routes.STUDY) {
-            val sampleProblems = listOf(
-                Problem(1, "두 수의 합", Difficulty.EASY, false),
-                Problem(2, "스택 구현하기", Difficulty.MEDIUM, true),
-                Problem(3, "큐 활용하기", Difficulty.MEDIUM, false),
-                Problem(4, "힙 정렬", Difficulty.HARD, false),
-                Problem(5, "DFS 탐색", Difficulty.HARD, true),
-            )
-            // 문제 리스트 화면으로 넘어갈 때 (main 브랜치 구조)
-            ProblemListScreen(
-                problems = sampleProblems,
-                onProblemClick = { p ->
-                    navController.navigate(Routes.solve(p.id.toLong()))
-                },
+        // 5. 메인 알고리즘 주제 목록 화면 (학습 탭 누를 시)
+        composable(route = Routes.TOPIC) {
+            TopicListScreen(
                 onNavigate = { route ->
-                    when (route) {
-                        Routes.HOME, Routes.STUDY, Routes.PROBLEM, Routes.MY -> {
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
+        // 5-1. 학습 단계 선택 화면 (주제 선택 시 진입)
+        composable(
+            route = Routes.STEP_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.TOPIC_NAME) { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 1L
+            val topicName = backStackEntry.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
+
+            StepSelectionScreen(
+                topicId = topicId,
+                topicName = topicName,
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
+        // 6. 알고리즘 분류 내 세부 목록 화면 (개념/응용/문제)
+        composable(
+            route = Routes.DETAIL_LIST_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.TOPIC_NAME) { type = NavType.StringType },
+                navArgument(Routes.STEP_TYPE) { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 1L
+            val topicName = backStackEntry.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
+            val stepType = backStackEntry.arguments?.getString(Routes.STEP_TYPE) ?: "problem"
+
+            when (stepType) {
+                "concept" -> {
+                    val factory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
+                    val conceptViewModel: ConceptViewModel = viewModel(factory = factory)
+                    val uiState by conceptViewModel.uiState.collectAsState()
+
+                    // 화면 진입 시 API 호출
+                    androidx.compose.runtime.LaunchedEffect(topicId) {
+                        conceptViewModel.loadConcepts(topicId)
+                    }
+
+                    // NotionDto -> Concept(DetailItem) 변환
+                    val conceptItems = uiState.concepts.map { notion ->
+                        Concept(
+                            id = notion.notionId,
+                            title = notion.title,
+                            difficulty = Difficulty.EASY, // 개념 학습은 난이도 없음
+                            isCompleted = notion.notionCompleted
+                        )
+                    }
+
+                    if (uiState.isLoading) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                        )
+                    } else {
+                        DetailListScreen(
+                            screenTitle = "개념학습",
+                            items = conceptItems,
+                            onItemClick = { item ->
+                                val index = conceptItems.indexOf(item).coerceAtLeast(0)
+                                navController.navigate(Routes.concept(topicId, index))
+                            },
+                            onNavigate = { route ->
+                                navController.navigate(route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
+                }
+
+                "application" -> {
+                    val factory = androidx.compose.runtime.remember {
+                        PracticeViewModelFactory(PracticeRepository(RetrofitClient.instance))
+                    }
+                    val practiceViewModel: PracticeViewModel = viewModel(factory = factory)
+                    val uiState by practiceViewModel.uiState.collectAsState()
+
+                    // 화면 진입 시 API 호출
+                    androidx.compose.runtime.LaunchedEffect(topicId) {
+                        practiceViewModel.loadQuizzes(topicId)
+                    }
+
+                    // QuizItemDto -> Application(DetailItem) 변환
+                    val applicationItems = uiState.quizzes.map { quiz ->
+                        Application(
+                            id = quiz.exerciseId,
+                            title = quiz.title,
+                            difficulty = Difficulty.EASY,
+                            isCompleted = quiz.appliedCompleted
+                        )
+                    }
+
+                    if (uiState.isLoading) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                        )
+                    } else {
+                        DetailListScreen(
+                            screenTitle = "응용학습",
+                            items = applicationItems,
+                            onItemClick = { item ->
+                                // TODO: 응용 학습 상세 화면 연결
+                                Toast.makeText(context, "${item.title} (미구현)", Toast.LENGTH_SHORT).show()
+                            },
+                            onNavigate = { route ->
+                                navController.navigate(route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
+                }
+
+                else -> {
+                    // 문제 풀이 (기존 더미 데이터 유지)
+                    val itemsList = sampleProblems
+                    DetailListScreen(
+                        screenTitle = "문제학습",
+                        items = itemsList,
+                        onItemClick = { item ->
+                            navController.navigate(Routes.solve(item.id))
+                        },
+                        onNavigate = { route ->
                             navController.navigate(route) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                        }
-                    }
+                        },
+                        onBackClick = { navController.popBackStack() }
+                    )
                 }
-            )
+            }
         }
 
-        // 6. 응용학습 화면
+        // ConceptDetailScreen: concept/{topicId}
         composable(
-            route = Routes.PRACTICE_ROUTE,
+            route = Routes.CONCEPT_ROUTE,
             arguments = listOf(
-                navArgument(Routes.TOPIC_ID) { type = NavType.LongType }
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.INITIAL_INDEX) { type = NavType.IntType }
             )
         ) { backStackEntry ->
-
             val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
+            val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0L
+            val conceptViewModelFactory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
+            val conceptViewModel: ConceptViewModel = viewModel(factory = conceptViewModelFactory)
 
-            /*
-            ==========================================================
-            서버 연결 시 사용 될 코드
-            ==========================================================
-
-            PracticeScreen(
+            ConceptDetailScreen(
                 topicId = topicId,
+                initialIndex = initialIndex.toInt(),
+                viewModel = conceptViewModel,
                 onBack = { navController.popBackStack() },
-                onHome = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.HOME) { inclusive = false }
+                onHome = { 
+                    navController.navigate(Routes.TOPIC) {
+                        popUpTo(Routes.TOPIC) { inclusive = false }
                         launchSingleTop = true
                     }
                 },
                 onNextStepClick = {
-                    // 추후 개념학습 / 문제학습 연결 시 사용
+                    Toast.makeText(context, "다음 단계 학습으로 이동 (미구현)", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack() // 임시 처리: 목록으로 돌아가기
                 }
-            )
-            */
-
-            // TODO: 백엔드 연결 시 위 PracticeScreen 주석 해제하고 아래 더미 코드 제거
-
-            // ==========================================================
-            // 임시 UI 확인용 더미 데이터 버전
-            // 백엔드 미연결 상태에서 화면만 보기 위한 코드
-            // ==========================================================
-            PracticeContent(
-                state = practicePreviewState(),
-                onBack = { navController.popBackStack() },
-                onHome = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.HOME) { inclusive = false }
-                        launchSingleTop = true
-                    }
-                },
-                onNextStepClick = {},
-                onCheckAnswer = { _, _ -> false }
             )
         }
 
-        // 7. 문제 풀이 화면
+        // SolveScreen: solve/{problemId}
         composable(
             route = Routes.SOLVE_ROUTE,
             arguments = listOf(
@@ -248,18 +350,18 @@ fun AppNavGraph() {
                 viewModel = solverViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = {
-                    navController.navigate(Routes.STUDY) {
-                        popUpTo(Routes.STUDY) { inclusive = false }
-                        launchSingleTop = true
-                    }
-                },
+            navController.navigate(Routes.TOPIC) {
+                popUpTo(Routes.TOPIC) { inclusive = false }
+                launchSingleTop = true
+            }
+        },
                 onOpenEditorFull = { id ->
                     navController.navigate(Routes.editorFull(id))
                 }
             )
         }
 
-        // 8. 에디터 화면
+        // EditorScreen: editor/{problemId}
         composable(
             route = Routes.EDITOR_ROUTE,
             arguments = listOf(
@@ -273,18 +375,19 @@ fun AppNavGraph() {
                 viewModel = solverViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = {
-                    navController.navigate(Routes.STUDY) {
-                        popUpTo(Routes.STUDY) { inclusive = false }
+                    navController.navigate(Routes.TOPIC) {
+                        popUpTo(Routes.TOPIC) { inclusive = false }
                         launchSingleTop = true
                     }
                 },
                 onGoProblem = {
-
+                    // 에디터에서 "문제" 탭 누르면 SolveScreen으로 (PROBLEM 탭이 보이게 할 거면 SolveScreen에서 탭 상태 처리)
                     navController.navigate(Routes.solve(problemId)) {
                         launchSingleTop = true
                     }
                 },
                 onGoSubmit = {
+                    // 제출 탭도 SolveScreen에서 처리하는 구조라면 SolveScreen으로 보내고 SUBMIT 탭 선택은 SolveScreen 쪽에서 제어
                     navController.navigate(Routes.solve(problemId)) {
                         launchSingleTop = true
                     }
@@ -295,7 +398,7 @@ fun AppNavGraph() {
             )
         }
 
-        // 9. 전체화면 에디터
+        // EditorFullScreen: editor_full/{problemId}
         composable(
             route = Routes.EDITOR_FULL_ROUTE,
             arguments = listOf(
@@ -311,63 +414,4 @@ fun AppNavGraph() {
             )
         }
     }
-}
-
-/*
-==========================================================
-응용학습 UI 확인용 더미 데이터
-==========================================================
-*/
-private fun practicePreviewState(): PracticeUiState {
-    return PracticeUiState(
-        isLoading = false,
-        quizzes = listOf(
-            QuizItemDto(
-                exerciseId = 1L,
-                title = "해시맵으로 문자 개수 세기",
-                description = "문자열에서 각 문자의 개수를 세는 코드의 빈칸을 채워보세요.",
-                codeTemplate = """
-function countChars(str) {
-  const map = new ____();
-
-  for (let char of str) {
-    if (map.____(____)) {
-      map.set(char, map.get(char) + 1);
-    } else {
-      map.____(char, ____);
-    }
-  }
-
-  return map;
-}
-                """.trimIndent(),
-                appliedCompleted = false,
-                totalBlanks = 5,
-                blanks = listOf(
-                    BlankDto(content = "Map", answer = 1),
-                    BlankDto(content = "has", answer = 2),
-                    BlankDto(content = "char", answer = 3),
-                    BlankDto(content = "set", answer = 4),
-                    BlankDto(content = "1", answer = 5)
-                )
-            ),
-            QuizItemDto(
-                exerciseId = 2L,
-                title = "해시 탐색 기본",
-                description = "두 번째 문제 예시입니다.",
-                codeTemplate = """
-const map = new ____();
-map.____("a", ____);
-                """.trimIndent(),
-                appliedCompleted = false,
-                totalBlanks = 3,
-                blanks = listOf(
-                    BlankDto(content = "Map", answer = 1),
-                    BlankDto(content = "set", answer = 2),
-                    BlankDto(content = "1", answer = 3)
-                )
-            )
-        ),
-        error = null
-    )
 }

@@ -32,10 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.data.Difficulty
 import com.example.fe.data.Problem
+import com.example.fe.data.DetailItem
 
 @Composable
-fun ProblemCard(
-    problem: Problem,
+fun DetailCard(
+    item: DetailItem,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -64,7 +65,7 @@ fun ProblemCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = problem.id.toString(), // 문제 번호
+                    text = item.id.toString(), // 문제 번호
                     color = Color(0xFF4A90E2), // 파란색
                     fontSize = 20.sp, // 글자 크기
                     fontWeight = FontWeight.Bold // 글자 굵기
@@ -78,7 +79,7 @@ fun ProblemCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text( // 문제 제목
-                    text = problem.title,
+                    text = item.title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1A1C1E)
@@ -86,14 +87,14 @@ fun ProblemCard(
                 
                 Spacer(modifier = Modifier.size(4.dp))
                 
-                DifficultyBadge(difficulty = problem.difficulty) // 난이도
+                DifficultyBadge(difficulty = item.difficulty) // 난이도
             }
 
             // 문제 해결 여부 아이콘
             Icon(
-                imageVector = if (problem.isSolved) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
+                imageVector = if (item.isCompleted) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
                 contentDescription = null,
-                tint = if (problem.isSolved) Color(0xFF4A90E2) else Color(0xFFE1E2E4),
+                tint = if (item.isCompleted) Color(0xFF4A90E2) else Color(0xFFE1E2E4),
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -129,18 +130,18 @@ fun DifficultyBadge(difficulty: Difficulty) {
 
 @Preview(showBackground = true)
 @Composable
-fun ProblemCardPreview() {
+fun DetailCardPreview() {
     Column(modifier = Modifier.background(Color(0xFFF7F9FB))) {
-        ProblemCard(
-            problem = Problem(1, "두 수의 합", Difficulty.EASY, false),
+        DetailCard(
+            item = Problem(1L, "두 수의 합", Difficulty.EASY, false),
             onClick = {}
         )
-        ProblemCard(
-            problem = Problem(2, "스택 구현하기", Difficulty.MEDIUM, true),
+        DetailCard(
+            item = Problem(2L, "스택 구현하기", Difficulty.MEDIUM, true),
             onClick = {}
         )
-        ProblemCard(
-            problem = Problem(3, "스택의 특징", Difficulty.HARD, true),
+        DetailCard(
+            item = Problem(3L, "스택의 특징", Difficulty.HARD, true),
             onClick = {}
         )
     }

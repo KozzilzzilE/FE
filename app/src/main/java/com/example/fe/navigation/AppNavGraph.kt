@@ -18,6 +18,8 @@ import com.example.fe.data.Problem
 import com.example.fe.data.Concept
 import com.example.fe.data.Application
 import com.example.fe.feature.auth.AuthViewModel
+import com.example.fe.feature.auth.AuthViewModelFactory
+import com.example.fe.feature.auth.data.AuthRepository
 import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
@@ -43,7 +45,9 @@ import com.example.fe.api.RetrofitClient
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
-    val authViewModel: AuthViewModel = viewModel()
+    val authRepository = androidx.compose.runtime.remember { AuthRepository(RetrofitClient.instance) }
+    val authViewModelFactory = androidx.compose.runtime.remember(authRepository) { AuthViewModelFactory(authRepository) }
+    val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
     val solverRepository = androidx.compose.runtime.remember { SolverRepository(RetrofitClient.instance) }

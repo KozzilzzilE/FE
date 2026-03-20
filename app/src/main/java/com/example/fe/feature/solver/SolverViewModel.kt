@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-import com.example.fe.feature.solver.data.SolverRepository
-
 class SolverViewModel(
     private val repository: SolverRepository
 ) : ViewModel() {

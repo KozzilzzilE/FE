@@ -39,7 +39,7 @@ class TopicViewModel : ViewModel() {
                     val body = response.body()
                     Log.d("TopicViewModel", "토픽 목록 로드 성공: code=${body?.code}, message=${body?.message}")
                     if (body != null && body.isSuccess && body.result != null) {
-                        _uiState.value = TopicUiState.Success(body.result.topics)
+                        _uiState.value = TopicUiState.Success(body.result.topics) // 토픽 목록을 성공 상태로 업데이트
                     } else {
                         _uiState.value = TopicUiState.Error("데이터를 불러올 수 없습니다")
                     }

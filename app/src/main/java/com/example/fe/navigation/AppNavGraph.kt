@@ -210,9 +210,18 @@ fun AppNavGraph() {
                     val conceptViewModel: ConceptViewModel = viewModel(factory = factory)
                     val uiState by conceptViewModel.uiState.collectAsState()
 
-                    // 화면 진입 시 API 호출
-                    androidx.compose.runtime.LaunchedEffect(topicId) {
-                        conceptViewModel.loadConcepts(topicId)
+                    // 화면 진입 또는 복귀 시 데이터 리로드 (완료 상태 갱신)
+                    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+                    androidx.compose.runtime.DisposableEffect(topicId, lifecycleOwner) {
+                        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+                            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                                conceptViewModel.loadConcepts(topicId)
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                            lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
                     }
 
                     // NotionDto -> Concept(DetailItem) 변환
@@ -255,9 +264,18 @@ fun AppNavGraph() {
                     val practiceViewModel: PracticeViewModel = viewModel(factory = factory)
                     val uiState by practiceViewModel.uiState.collectAsState()
 
-                    // 화면 진입 시 API 호출
-                    androidx.compose.runtime.LaunchedEffect(topicId) {
-                        practiceViewModel.loadQuizzes(topicId)
+                    // 화면 진입 또는 복귀 시 데이터 리로드 (완료 상태 갱신)
+                    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+                    androidx.compose.runtime.DisposableEffect(topicId, lifecycleOwner) {
+                        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+                            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                                practiceViewModel.loadQuizzes(topicId)
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                            lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
                     }
 
                     // QuizItemDto -> Application(DetailItem) 변환
@@ -279,8 +297,7 @@ fun AppNavGraph() {
                             screenTitle = "응용학습",
                             items = applicationItems,
                             onItemClick = { item ->
-                                // TODO: 응용 학습 상세 화면 연결
-                                Toast.makeText(context, "${item.title} (미구현)", Toast.LENGTH_SHORT).show()
+                                navController.navigate(Routes.practice(topicId))
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
@@ -374,8 +391,46 @@ fun AppNavGraph() {
                     }
                 },
                 onNextStepClick = {
-                    Toast.makeText(context, "다음 단계 학습으로 이동 (미구현)", Toast.LENGTH_SHORT).show()
-                    navController.popBackStack() // 임시 처리: 목록으로 돌아가기
+                    // 이전 화면(DetailList)의 TOPIC_NAME 인자 가져오기 시도, 없으면 "주제"
+                    val fallbackName = navController.previousBackStackEntry?.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
+                    navController.navigate(Routes.detailList(topicId, fallbackName, "application")) {
+                        popUpTo(Routes.STEP_ROUTE) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        // PracticeScreen: practice/{topicId}
+        composable(
+            route = Routes.PRACTICE_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
+            
+            val factory = androidx.compose.runtime.remember {
+                PracticeViewModelFactory(PracticeRepository(RetrofitClient.instance))
+            }
+            val practiceViewModel: PracticeViewModel = viewModel(factory = factory)
+
+            com.example.fe.feature.practice.ui.PracticeScreen(
+                topicId = topicId,
+                viewModel = practiceViewModel,
+                onBack = { navController.popBackStack() },
+                onHome = { 
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onNextStepClick = {
+                    val fallbackName = navController.previousBackStackEntry?.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
+                    navController.navigate(Routes.detailList(topicId, fallbackName, "problem")) {
+                        popUpTo(Routes.STEP_ROUTE) { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }
             )
         }

@@ -68,11 +68,10 @@ fun TopicListScreen(
                 }
             }
             is TopicUiState.Error -> {
-                // 에러 발생 시 UI 표출 안함(요구사항)
             }
-            is TopicUiState.Success -> {
-                val topics = state.topics
-                val scrollState = rememberScrollState()
+            is TopicUiState.Success -> { // 성공이면 토픽 목록 화면에 표시
+                val topics = state.topics // 토픽 목록
+                val scrollState = rememberScrollState() // 스크롤 상태
                 Column(
                     modifier = Modifier
                         .fillMaxSize()

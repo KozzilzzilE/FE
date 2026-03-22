@@ -92,10 +92,45 @@ class PracticeViewModel(
                 }
                 
                 repository.completeQuiz(token, quiz.exerciseId)
+
+                // 로컬 상태 업데이트: 해당 퀴즈를 완료 처리
+                val updatedQuizzes = _uiState.value.quizzes.toMutableList()
+                updatedQuizzes[quizIndex] = quiz.copy(appliedCompleted = true)
+                _uiState.value = _uiState.value.copy(quizzes = updatedQuizzes)
+
                 onSuccess()
             } catch (e: Exception) {
                 onError(e.message ?: "완료 처리에 실패했습니다.")
             }
         }
+    }
+
+    // 다음 버튼 클릭 시: 현재 퀴즈 완료 처리 후 다음 문제로 이동
+    fun nextQuizAndComplete(
+        currentIndex: Int,
+        onMoveNext: () -> Unit
+    ) {
+        val quiz = _uiState.value.quizzes.getOrNull(currentIndex)
+
+        // 이미 완료된 퀴즈면 바로 다음으로 이동
+        if (quiz == null || quiz.appliedCompleted) {
+            onMoveNext()
+            return
+        }
+
+        // 미완료 퀴즈면 완료 API 호출 후 다음으로 이동
+        completeQuiz(
+            quizIndex = currentIndex,
+            onSuccess = { onMoveNext() },
+            onError = { onMoveNext() } // 에러가 나도 이동은 허용
+        )
+    }
+
+    // 마지막 페이지에서 "다음 단계" 클릭 시: 현재 퀴즈 완료 처리 후 단계 전환
+    fun completeCurrentQuizAndGoNext(
+        currentIndex: Int,
+        onComplete: () -> Unit
+    ) {
+        nextQuizAndComplete(currentIndex, onComplete)
     }
 }

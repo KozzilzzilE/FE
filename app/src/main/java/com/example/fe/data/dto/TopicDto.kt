@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName
  * [알고리즘 주제 목록 API]
  * GET /api/v1/topics
  */
+
 data class TopicResponse(
     @SerializedName("isSuccess") val isSuccess: Boolean,
     @SerializedName("code") val code: String,

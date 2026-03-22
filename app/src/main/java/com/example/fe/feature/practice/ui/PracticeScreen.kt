@@ -28,6 +28,7 @@ import com.example.fe.api.RetrofitClient
 @Composable
 fun PracticeScreen(
     topicId: Long,
+    viewModel: PracticeViewModel? = null, // 외부에서 전달받은 ViewModel (NavGraph에서 사용)
     onBack: () -> Unit = {},
     onHome: () -> Unit = {},
     onNextStepClick: () -> Unit = {}
@@ -49,15 +50,15 @@ fun PracticeScreen(
         PracticeViewModelFactory(repository)
     }
 
-    // ViewModel 생성
-    val viewModel: PracticeViewModel = viewModel(factory = factory)
+    // ViewModel 생성 (외부에서 전달받지 않은 경우 직접 생성)
+    val vm: PracticeViewModel = viewModel ?: viewModel(factory = factory)
 
     // ViewModel 상태 구독
-    val state = viewModel.uiState.collectAsState().value
+    val state = vm.uiState.collectAsState().value
 
     // 화면 진입 시 문제 로드
     LaunchedEffect(topicId) {
-        viewModel.loadQuizzes(topicId)
+        vm.loadQuizzes(topicId)
     }
 
     PracticeContent(
@@ -66,10 +67,16 @@ fun PracticeScreen(
         onHome = onHome,
         onNextStepClick = onNextStepClick,
         onCheckAnswer = { quizIndex, answers ->
-            viewModel.checkAnswers(
+            vm.checkAnswers(
                 quizIndex = quizIndex,
                 userAnswers = answers
             )
+        },
+        onNextWithComplete = { currentIndex, moveNext ->
+            vm.nextQuizAndComplete(currentIndex, moveNext)
+        },
+        onNextStepWithComplete = { currentIndex, goNextStep ->
+            vm.completeCurrentQuizAndGoNext(currentIndex, goNextStep)
         }
     )
 }
@@ -80,7 +87,9 @@ fun PracticeContent(
     onBack: () -> Unit = {},
     onHome: () -> Unit = {},
     onNextStepClick: () -> Unit = {},
-    onCheckAnswer: (Int, List<String>) -> Boolean = { _, _ -> false }
+    onCheckAnswer: (Int, List<String>) -> Boolean = { _, _ -> false },
+    onNextWithComplete: (Int, () -> Unit) -> Unit = { _, cb -> cb() },
+    onNextStepWithComplete: (Int, () -> Unit) -> Unit = { _, cb -> cb() }
 ) {
 
     // 현재 보고 있는 문제 index
@@ -123,12 +132,19 @@ fun PracticeContent(
                         if (currentIndex > 0) currentIndex--
                     },
 
-                    // 다음 문제
+                    // 다음 문제 (완료 API 호출 후 이동)
                     onNextClick = {
-                        if (currentIndex < totalCount - 1) currentIndex++
+                        onNextWithComplete(currentIndex) {
+                            if (currentIndex < totalCount - 1) currentIndex++
+                        }
                     },
 
-                    onNextStepClick = onNextStepClick,
+                    // 다음 단계 (완료 API 호출 후 단계 전환)
+                    onNextStepClick = {
+                        onNextStepWithComplete(currentIndex) {
+                            onNextStepClick()
+                        }
+                    },
 
                     // 정답 체크
                     onCheckAnswer = { answers ->

@@ -2,6 +2,11 @@ package com.example.fe.data.dto
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * [응용 학습 API]
+ * GET /api/v1/learnings/{topicId}/applications
+ */
+
 // 응용학습 조회 API 응답 구조
 data class PracticeResponseDto(
     @SerializedName("isSuccess") val isSuccess: Boolean,
@@ -32,6 +37,11 @@ data class BlankDto(
     @SerializedName("content") val content: String,
     @SerializedName("answer") val answer: Int?
 )
+
+/**
+ * [응용 학습 완료 API]
+ * POST /api/v1/learnings/applications/completions/{exerciseId}
+ */
 
 // 응용 문제 완료 API 응답
 data class PracticeCompletionResponseDto(

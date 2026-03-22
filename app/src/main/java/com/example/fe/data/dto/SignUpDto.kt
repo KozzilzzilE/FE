@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName
  * [회원가입 API]
  * POST /api/v1/auths/signup
  */
+
 data class SignUpRequest(
     @SerializedName("firebaseToken") val firebaseToken: String,
     @SerializedName("email") val email: String,

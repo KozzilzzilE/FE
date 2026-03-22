@@ -41,7 +41,6 @@ class ConceptViewModel(private val repository: ConceptRepository) : ViewModel() 
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        // API에 주제 이름이 없다면 임시 대체(필요 시 이전 화면에서 파라미터로 받도록 개선)
                         topicTitle = "알고리즘 개념", 
                         concepts = sortedNotions,
                         currentIndex = initialIndex

@@ -20,6 +20,10 @@ import androidx.compose.ui.unit.sp
 import com.example.fe.feature.auth.component.InputSection
 import com.example.fe.feature.auth.component.SignUpLanguageDropdown
 
+"""
+    소셜 회원 가입을 위한 추가 정보 입력 페이지
+""" 
+
 @Composable
 fun SocialSignUpScreen(
     initialName: String,

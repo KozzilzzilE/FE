@@ -8,5 +8,6 @@ data class ProblemDetail(
     val exampleInput: String = "",
     val exampleOutput: String = "",
     val constraints: List<String> = emptyList(),
-    val initialCode: String = ""
+    val initialCode: String = "",
+    var testCases: List<TestCase> = emptyList()
 )

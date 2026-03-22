@@ -20,10 +20,7 @@ class SolverViewModel(
     private val _uiState = MutableStateFlow(
         SolverUiState(
             code = "",
-            testCases = listOf(
-                TestCase(id = 1L, input = "nums = [2,7,11,15], target = 9", expectedOutput = "[0,1]"),
-                TestCase(id = 2L, input = "nums = [3,2,4], target = 6", expectedOutput = "[1,2]")
-            ),
+            testCases = emptyList(),
             // 초기 더미 제출 기록
             submissions = listOf(
                 SubmissionRecord("2026.01.21 14:29:00", "Java", "정답", true),
@@ -68,6 +65,7 @@ class SolverViewModel(
                     state.copy(
                         isLoadingProblem = false,
                         problemDetail = detail,
+                        testCases = detail.testCases,
                         // 초기 코드 주입: 빈 상태거나 기본 템플릿일 때만 덮어쓰기
                         code = if (state.code.isBlank() || state.code == detail.initialCode) detail.initialCode else state.code
                     )

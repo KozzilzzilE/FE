@@ -44,7 +44,15 @@ public class Solution {
             if (body.isSuccess) {
                 val result = body.result ?: throw Exception("결과 데이터가 비어 있습니다.")
 
-                val firstTest = result.testCases.firstOrNull()
+                val mappedTestCases = result.testCases.mapIndexed { index, tc ->
+                    com.example.fe.feature.solver.model.TestCase(
+                        id = (index + 1).toLong(),
+                        input = tc.input,
+                        expectedOutput = tc.output
+                    )
+                }
+
+                val firstTest = mappedTestCases.firstOrNull()
                 
                 return ProblemDetail(
                     problemId = result.exerciseId,
@@ -52,9 +60,10 @@ public class Solution {
                     difficultyLabel = "-",
                     description = result.description,
                     exampleInput = firstTest?.input ?: "-",
-                    exampleOutput = firstTest?.output ?: "-",
+                    exampleOutput = firstTest?.expectedOutput ?: "-",
                     constraints = result.constraint.split("\n").filter { it.isNotBlank() },
-                    initialCode = DEFAULT_JAVA_TEMPLATE
+                    initialCode = DEFAULT_JAVA_TEMPLATE,
+                    testCases = mappedTestCases
                 )
             } else {
                 throw Exception(body.message)

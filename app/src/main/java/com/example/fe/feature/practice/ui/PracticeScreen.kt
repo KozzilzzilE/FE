@@ -28,6 +28,7 @@ import com.example.fe.api.RetrofitClient
 @Composable
 fun PracticeScreen(
     topicId: Long,
+    initialIndex: Int = 0,
     viewModel: PracticeViewModel? = null, // 외부에서 전달받은 ViewModel (NavGraph에서 사용)
     onBack: () -> Unit = {},
     onHome: () -> Unit = {},
@@ -63,6 +64,7 @@ fun PracticeScreen(
 
     PracticeContent(
         state = state,
+        initialIndex = initialIndex,
         onBack = onBack,
         onHome = onHome,
         onNextStepClick = onNextStepClick,
@@ -84,6 +86,7 @@ fun PracticeScreen(
 @Composable
 fun PracticeContent(
     state: PracticeUiState,
+    initialIndex: Int = 0,
     onBack: () -> Unit = {},
     onHome: () -> Unit = {},
     onNextStepClick: () -> Unit = {},
@@ -92,8 +95,12 @@ fun PracticeContent(
     onNextStepWithComplete: (Int, () -> Unit) -> Unit = { _, cb -> cb() }
 ) {
 
-    // 현재 보고 있는 문제 index
-    var currentIndex by remember(state.quizzes) { mutableIntStateOf(0) }
+    // 현재 보고 있는 문제 index (전역 초기값 index 적용, 범위 제한 추가)
+    var currentIndex by remember(state.quizzes) { 
+        val total = state.quizzes.size
+        val safeIndex = if (total > 0) initialIndex.coerceIn(0, total - 1) else 0
+        mutableIntStateOf(safeIndex) 
+    }
 
     when {
 

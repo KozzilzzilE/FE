@@ -31,7 +31,7 @@ object Routes {
     const val CONCEPT_ROUTE = "concept/{$TOPIC_ID}/{$INITIAL_INDEX}"
 
     // Practice Route
-    const val PRACTICE_ROUTE = "practice/{$TOPIC_ID}"
+    const val PRACTICE_ROUTE = "practice/{$TOPIC_ID}/{$INITIAL_INDEX}"
 
     // Builders
     fun step(topicId: Long, topicName: String) = "step/$topicId/$topicName"
@@ -41,6 +41,6 @@ object Routes {
     fun editorFull(problemId: Long) = "editor_full/$problemId"
     fun concept(topicId: Long, initialIndex: Int) = "concept/$topicId/$initialIndex"
 
-    fun practice(topicId: Long) = "practice/$topicId"
+    fun practice(topicId: Long, initialIndex: Int) = "practice/$topicId/$initialIndex"
 }
 

@@ -39,11 +39,13 @@ class ConceptViewModel(private val repository: ConceptRepository) : ViewModel() 
                 val sortedNotions = response.result?.notions?.sortedBy { it.pageNo } ?: emptyList()
                 
                 _uiState.update {
+                    val total = sortedNotions.size
+                    val safeIndex = if (total > 0) initialIndex.coerceIn(0, total - 1) else 0
                     it.copy(
                         isLoading = false,
                         topicTitle = "알고리즘 개념", 
                         concepts = sortedNotions,
-                        currentIndex = initialIndex
+                        currentIndex = safeIndex
                     )
                 }
             } else {

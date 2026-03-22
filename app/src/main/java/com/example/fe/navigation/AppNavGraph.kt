@@ -297,7 +297,8 @@ fun AppNavGraph() {
                             screenTitle = "응용학습",
                             items = applicationItems,
                             onItemClick = { item ->
-                                navController.navigate(Routes.practice(topicId))
+                                val index = applicationItems.indexOf(item).coerceAtLeast(0)
+                                navController.navigate(Routes.practice(topicId, index))
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
@@ -375,7 +376,7 @@ fun AppNavGraph() {
             )
         ) { backStackEntry ->
             val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
-            val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0L
+            val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0
             val conceptViewModelFactory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
             val conceptViewModel: ConceptViewModel = viewModel(factory = conceptViewModelFactory)
 
@@ -401,14 +402,16 @@ fun AppNavGraph() {
             )
         }
 
-        // PracticeScreen: practice/{topicId}
+        // PracticeScreen: practice/{topicId}/{initialIndex}
         composable(
             route = Routes.PRACTICE_ROUTE,
             arguments = listOf(
-                navArgument(Routes.TOPIC_ID) { type = NavType.LongType }
+                navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.INITIAL_INDEX) { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
+            val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0
             
             val factory = androidx.compose.runtime.remember {
                 PracticeViewModelFactory(PracticeRepository(RetrofitClient.instance))
@@ -417,6 +420,7 @@ fun AppNavGraph() {
 
             com.example.fe.feature.practice.ui.PracticeScreen(
                 topicId = topicId,
+                initialIndex = initialIndex,
                 viewModel = practiceViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = { 

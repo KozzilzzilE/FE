@@ -11,10 +11,15 @@ class HomeRepository(private val apiService: ApiService) {
     suspend fun getHomeData(): HomeUiState {
         return withContext(Dispatchers.IO) {
             try {
-                // apiService (RetrofitClient)를 통한 데이터 요청
-                val response = apiService.getHomeData()
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    return@withContext HomeUiState.Error("로그인 토큰이 없습니다.")
+                }
+                
+                val response = apiService.getHomeData("Bearer $token")
                 if (response.isSuccessful) {
                     val body = response.body()
+                    Log.d("HomeRepository", "메인 데이터 로드 성공: code=${body?.code}, message=${body?.message}")
                     if (body != null && body.isSuccess) {
                         val result = body.result
                         if (result != null) {

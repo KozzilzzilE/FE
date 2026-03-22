@@ -8,8 +8,6 @@ import com.google.gson.annotations.SerializedName
  */
 data class SignUpRequest(
     @SerializedName("firebaseToken") val firebaseToken: String,
-    @SerializedName("resistered") val registered: Boolean,
-    @SerializedName("refreshToken") val refreshToken: String,
     @SerializedName("email") val email: String,
     @SerializedName("nickname") val nickname: String,
     @SerializedName("language") val language: String

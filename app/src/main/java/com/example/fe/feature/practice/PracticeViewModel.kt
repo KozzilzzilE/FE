@@ -34,7 +34,16 @@ class PracticeViewModel(
             )
 
             try {
-                val quizzes = repository.getQuizzes(topicId, language)
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = "로그인 토큰이 없습니다."
+                    )
+                    return@launch
+                }
+
+                val quizzes = repository.getQuizzes(token, topicId, language)
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -77,7 +86,12 @@ class PracticeViewModel(
 
         viewModelScope.launch {
             try {
-                repository.completeQuiz(quiz.exerciseId)
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    throw Exception("로그인 토큰이 없습니다.")
+                }
+                
+                repository.completeQuiz(token, quiz.exerciseId)
                 onSuccess()
             } catch (e: Exception) {
                 onError(e.message ?: "완료 처리에 실패했습니다.")

@@ -26,7 +26,13 @@ class ConceptViewModel(private val repository: ConceptRepository) : ViewModel() 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            val response = repository.getConcepts(topicId, language)
+            val token = com.example.fe.common.TokenManager.getAccessToken()
+            if (token == null) {
+                _uiState.update { it.copy(isLoading = false, error = "로그인 토큰이 없습니다.") }
+                return@launch
+            }
+            
+            val response = repository.getConcepts(token, topicId, language)
             
             if (response != null && response.isSuccess) {
                 // 응답 데이터에서 notions 추출 및 pageNo 기준 정렬
@@ -65,12 +71,15 @@ class ConceptViewModel(private val repository: ConceptRepository) : ViewModel() 
             // 만약 현재 개념이 완료되지 않았다면 완료 처리 서버 전송
             if (!currentNotion.notionCompleted) {
                 viewModelScope.launch {
-                    val success = repository.completeConcept(currentNotion.notionId)
-                    if (success) {
-                        // 로컬 상태를 업데이트하여 다음 렌더링 시 완료 반영
-                        val updatedConcepts = currentConcepts.toMutableList()
-                        updatedConcepts[currentIndex] = currentNotion.copy(notionCompleted = true)
-                        _uiState.update { it.copy(concepts = updatedConcepts) }
+                    val token = com.example.fe.common.TokenManager.getAccessToken()
+                    if (token != null) {
+                        val success = repository.completeConcept(token, currentNotion.notionId)
+                        if (success) {
+                            // 로컬 상태를 업데이트하여 다음 렌더링 시 완료 반영
+                            val updatedConcepts = currentConcepts.toMutableList()
+                            updatedConcepts[currentIndex] = currentNotion.copy(notionCompleted = true)
+                            _uiState.update { it.copy(concepts = updatedConcepts) }
+                        }
                     }
                 }
             }
@@ -91,11 +100,14 @@ class ConceptViewModel(private val repository: ConceptRepository) : ViewModel() 
             
             if (!currentNotion.notionCompleted) {
                 viewModelScope.launch {
-                    val success = repository.completeConcept(currentNotion.notionId)
-                    if (success) {
-                        val updatedConcepts = currentConcepts.toMutableList()
-                        updatedConcepts[currentIndex] = currentNotion.copy(notionCompleted = true)
-                        _uiState.update { it.copy(concepts = updatedConcepts) }
+                    val token = com.example.fe.common.TokenManager.getAccessToken()
+                    if (token != null) {
+                        val success = repository.completeConcept(token, currentNotion.notionId)
+                        if (success) {
+                            val updatedConcepts = currentConcepts.toMutableList()
+                            updatedConcepts[currentIndex] = currentNotion.copy(notionCompleted = true)
+                            _uiState.update { it.copy(concepts = updatedConcepts) }
+                        }
                     }
                     // 성공 여부와 무관하게 일단 다음 단계로 넘어가도록 처리
                     onComplete()

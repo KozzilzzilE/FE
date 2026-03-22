@@ -28,8 +28,35 @@ object RetrofitClient { // 싱글톤 객체로 생성
         chain.proceed(requestBuilder.build())
     }
 
+    // API 요청 성공/실패 시 일관된 포맷으로 안드로이드 로그(Logcat)를 띄워주는 커스텀 인터셉터
+    private val customLoggingInterceptor = okhttp3.Interceptor { chain ->
+        val request = chain.request()
+        val t1 = System.nanoTime()
+        
+        val response = chain.proceed(request)
+        
+        val t2 = System.nanoTime()
+        val timeStr = String.format("%.1f", (t2 - t1) / 1e6)
+
+        if (response.isSuccessful) {
+            // body 스트림을 소모하지 않고 안전하게 확인 (최대 2KB)
+            val bodyString = response.peekBody(2048).string()
+            android.util.Log.d(
+                "API_SUCCESS",
+                "✅ [${request.method}] ${request.url} (${timeStr}ms)\n응답 코드: ${response.code}\n결과: $bodyString"
+            )
+        } else {
+            android.util.Log.e(
+                "API_ERROR",
+                "❌ [${request.method}] ${request.url} (${timeStr}ms)\n응답 코드: ${response.code}\n에러 메시지: ${response.message}"
+            )
+        }
+        response
+    }
+
     private val okHttpClient = OkHttpClient.Builder() // OkHttp 클라이언트 생성
-        .addInterceptor(loggingInterceptor) // 로그 기록기 추가
+        .addInterceptor(loggingInterceptor) // 기존 상세 로그 기록기
+        .addInterceptor(customLoggingInterceptor) // ★ 추가: 성공/실패 한눈에 요약하는 커스텀 로깅
         .addInterceptor(authInterceptor)    // 인증 인터셉터 추가
         .build()
 

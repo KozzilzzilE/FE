@@ -20,12 +20,13 @@ class PracticeRepository(
 
     // 응용학습 문제 조회
     suspend fun getQuizzes(
+        token: String,
         topicId: Long,
         language: String = "JAVA"
     ): List<QuizItemDto> {
         if (USE_MOCK) return getMockQuizzes()
 
-        val response = apiService.getPracticeQuizzes(topicId, language)
+        val response = apiService.getPracticeQuizzes("Bearer $token", topicId, language)
 
         if (response.isSuccessful) {
             val body = response.body() ?: throw Exception("응답 본문이 비어 있습니다.")
@@ -43,6 +44,7 @@ class PracticeRepository(
 
     // 응용 문제 완료 처리
     suspend fun completeQuiz(
+        token: String,
         exerciseId: Long
     ) {
         if (USE_MOCK) {
@@ -50,7 +52,7 @@ class PracticeRepository(
             return
         }
 
-        val response = apiService.completePractice(exerciseId)
+        val response = apiService.completePractice("Bearer $token", exerciseId)
 
         if (response.isSuccessful) {
             val body = response.body() ?: throw Exception("응답 본문이 비어 있습니다.")

@@ -31,14 +31,36 @@ public class Solution {
         """.trimIndent()
     }
 
-    suspend fun loadProblemDetail(problemId: Long, language: String): ProblemDetail {
+    suspend fun loadProblemDetail(token: String, problemId: Long, language: String): ProblemDetail {
         if (USE_MOCK) {
             delay(200)
             return getMockProblemDetail(problemId)
         }
-        // TODO: 실제 API 호출
-        // return apiService.getProblemDetail(problemId, language).body()!!.toDomain()
-        error("실제 API 미구현")
+
+        val response = apiService.getProblemDetail("Bearer $token", problemId, language)
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+            if (body.isSuccess) {
+                val result = body.result ?: throw Exception("결과 데이터가 비어 있습니다.")
+
+                val firstTest = result.testCases.firstOrNull()
+                
+                return ProblemDetail(
+                    problemId = result.exerciseId,
+                    title = result.title,
+                    difficultyLabel = "-", // 명세에 난이도가 없으므로 '-' 처리 (원할 경우 이전 화면 파라미터 재활용 가능)
+                    description = result.description,
+                    exampleInput = firstTest?.input ?: "-",
+                    exampleOutput = firstTest?.output ?: "-",
+                    constraints = result.constraint.split("\n").filter { it.isNotBlank() },
+                    initialCode = DEFAULT_JAVA_TEMPLATE // 명세에 초기 템플릿 정보가 없으므로 임시 공통 템플릿 할당
+                )
+            } else {
+                throw Exception(body.message)
+            }
+        } else {
+            throw Exception("문제 상세 조회 실패: ${response.code()}")
+        }
     }
 
     suspend fun runCode(problemId: Long, code: String, language: String): RunResult {
@@ -78,7 +100,7 @@ public class Solution {
         error("실제 API 미구현")
     }
 
-    suspend fun loadSolution(problemId: Long, language: String): SolutionDetail {
+    suspend fun loadSolution(token: String, problemId: Long, language: String): SolutionDetail {
         if (USE_MOCK) {
             Log.d("SolverRepository", "[MOCK] 모범 답안 조회: problemId=$problemId")
             delay(350)
@@ -101,8 +123,22 @@ class Solution {
                 explanation = "해시맵을 사용하면 O(n)으로 해결할 수 있습니다."
             )
         }
-        // TODO: 실제 API 호출
-        error("실제 API 미구현")
+
+        val response = apiService.getProblemSolution("Bearer $token", problemId, language)
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+            if (body.isSuccess) {
+                val result = body.result ?: throw Exception("모범 답안 데이터가 없습니다.")
+                return SolutionDetail(
+                    code = result.solutionCode,
+                    explanation = result.lineSolution + "\n\n" + result.solutionText
+                )
+            } else {
+                throw Exception(body.message)
+            }
+        } else {
+            throw Exception("모범 답안 조회 실패: ${response.code()}")
+        }
     }
 
     suspend fun loadSubmissionHistory(problemId: Long) {

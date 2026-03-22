@@ -18,11 +18,11 @@ class ConceptRepository(private val apiService: ApiService) {
         const val USE_MOCK = true
     }
 
-    suspend fun getConcepts(topicId: Long, language: String): ConceptResponse? {
+    suspend fun getConcepts(token: String, topicId: Long, language: String): ConceptResponse? {
         if (USE_MOCK) return getMockConcepts(topicId)
 
         return try {
-            val response = apiService.getNotions(topicId = topicId, language = language)
+            val response = apiService.getNotions(token = "Bearer $token", topicId = topicId, language = language)
             if (response.isSuccessful) {
                 response.body()
             } else {
@@ -35,14 +35,14 @@ class ConceptRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun completeConcept(notionId: Long): Boolean {
+    suspend fun completeConcept(token: String, notionId: Long): Boolean {
         if (USE_MOCK) {
             Log.d("ConceptRepository", "[MOCK] 개념 완료 처리: notionId=$notionId")
             return true
         }
 
         return try {
-            val response = apiService.postNotionCompletion(notionId)
+            val response = apiService.postNotionCompletion(token = "Bearer $token", notionId = notionId)
             if (response.isSuccessful) {
                 response.body()?.isSuccess == true
             } else {

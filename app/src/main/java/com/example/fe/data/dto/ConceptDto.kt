@@ -2,6 +2,11 @@ package com.example.fe.data.dto
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * [개념 학습 API]
+ * GET /api/v1/languages/lists
+ */
+
 data class ConceptResponse(
     @SerializedName("isSuccess") val isSuccess: Boolean,
     @SerializedName("code") val code: String,

@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.fe.feature.list.model.Difficulty
+import com.example.fe.feature.list.model.Problem
 import com.example.fe.feature.list.model.Concept
 import com.example.fe.feature.list.model.Application
 import com.example.fe.feature.auth.AuthViewModel
@@ -39,6 +40,10 @@ import com.example.fe.feature.concept.ui.ConceptDetailScreen
 import com.example.fe.feature.practice.PracticeViewModel
 import com.example.fe.feature.practice.PracticeViewModelFactory
 import com.example.fe.feature.practice.data.PracticeRepository
+import com.example.fe.feature.list.ProblemListViewModel
+import com.example.fe.feature.list.ProblemListViewModelFactory
+import com.example.fe.feature.list.ProblemUiState
+import com.example.fe.feature.list.data.ProblemRepository
 import com.example.fe.api.RetrofitClient
 
 @Composable
@@ -289,22 +294,57 @@ fun AppNavGraph() {
                 }
 
                 else -> {
-                    // 문제 풀이 (기존 더미 데이터 유지)
-                    val itemsList = sampleProblems
-                    DetailListScreen(
-                        screenTitle = "문제학습",
-                        items = itemsList,
-                        onItemClick = { item ->
-                            navController.navigate(Routes.solve(item.id))
-                        },
-                        onNavigate = { route ->
-                            navController.navigate(route) {
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        onBackClick = { navController.popBackStack() }
-                    )
+                    // 문제 풀이 (서버 API 연동)
+                    val factory = androidx.compose.runtime.remember {
+                        ProblemListViewModelFactory(ProblemRepository(RetrofitClient.instance))
+                    }
+                    val problemViewModel: ProblemListViewModel = viewModel(factory = factory)
+                    val uiState by problemViewModel.uiState.collectAsState()
+
+                    // 화면 진입 시 API 호출
+                    androidx.compose.runtime.LaunchedEffect(topicId) {
+                        problemViewModel.loadProblems(topicId)
+                    }
+
+                    if (uiState is ProblemUiState.Loading) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                        )
+                    } else if (uiState is ProblemUiState.Success) {
+                        val problems = (uiState as ProblemUiState.Success).problems.map { res ->
+                            Problem(
+                                id = res.problemId,
+                                title = res.title,
+                                difficulty = when (res.difficulty) {
+                                    "EASY" -> Difficulty.EASY
+                                    "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
+                                    "HARD" -> Difficulty.HARD
+                                    else -> Difficulty.EASY
+                                },
+                                isCompleted = false // 서버 명세에 완료 여부 필드 추가 필요할 수 있음
+                            )
+                        }
+                        DetailListScreen(
+                            screenTitle = "문제학습",
+                            items = problems,
+                            onItemClick = { item ->
+                                navController.navigate(Routes.solve(item.id))
+                            },
+                            onNavigate = { route ->
+                                navController.navigate(route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    } else {
+                        // Error State
+                        androidx.compose.material3.Text(
+                            text = (uiState as? ProblemUiState.Error)?.message ?: "오류 발생",
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
         }

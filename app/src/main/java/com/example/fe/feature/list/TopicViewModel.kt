@@ -28,11 +28,18 @@ class TopicViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = TopicUiState.Loading
             try {
-                val response = RetrofitClient.instance.getTopics()
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    _uiState.value = TopicUiState.Error("로그인 토큰이 없습니다.")
+                    return@launch
+                }
+
+                val response = RetrofitClient.instance.getTopics("Bearer $token")
                 if (response.isSuccessful) {
                     val body = response.body()
+                    Log.d("TopicViewModel", "토픽 목록 로드 성공: code=${body?.code}, message=${body?.message}")
                     if (body != null && body.isSuccess && body.result != null) {
-                        _uiState.value = TopicUiState.Success(body.result)
+                        _uiState.value = TopicUiState.Success(body.result.topics)
                     } else {
                         _uiState.value = TopicUiState.Error("데이터를 불러올 수 없습니다")
                     }

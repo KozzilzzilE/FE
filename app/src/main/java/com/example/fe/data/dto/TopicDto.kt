@@ -10,8 +10,12 @@ data class TopicResponse(
     @SerializedName("isSuccess") val isSuccess: Boolean,
     @SerializedName("code") val code: String,
     @SerializedName("message") val message: String,
+    @SerializedName("result") val result: TopicListResult?
+)
+
+data class TopicListResult(
     @SerializedName("count") val count: Int,
-    @SerializedName("result") val result: List<TopicResult>?
+    @SerializedName("topics") val topics: List<TopicResult>
 )
 
 data class TopicResult(

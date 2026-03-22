@@ -56,15 +56,29 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(problemId = problemId, language = language, isLoadingProblem = true) }
 
-            val detail = repository.loadProblemDetail(problemId, language)
+            try {
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    throw Exception("로그인 토큰이 없습니다.")
+                }
 
-            _uiState.update { state ->
-                state.copy(
-                    isLoadingProblem = false,
-                    problemDetail = detail,
-                    // 초기 코드 주입: 빈 상태거나 기본 템플릿일 때만 덮어쓰기
-                    code = if (state.code.isBlank() || state.code == detail.initialCode) detail.initialCode else state.code
-                )
+                val detail = repository.loadProblemDetail(token, problemId, language)
+
+                _uiState.update { state ->
+                    state.copy(
+                        isLoadingProblem = false,
+                        problemDetail = detail,
+                        // 초기 코드 주입: 빈 상태거나 기본 템플릿일 때만 덮어쓰기
+                        code = if (state.code.isBlank() || state.code == detail.initialCode) detail.initialCode else state.code
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { state ->
+                    state.copy(
+                        isLoadingProblem = false,
+                        errorToast = "문제 로드 실패: ${e.message}"
+                    )
+                }
             }
         }
     }
@@ -133,13 +147,27 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingSolution = true, solution = null) }
 
-            val loadedSolution = repository.loadSolution(problemId, language)
+            try {
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    throw Exception("로그인 토큰이 없습니다.")
+                }
 
-            _uiState.update {
-                it.copy(
-                    isLoadingSolution = false,
-                    solution = loadedSolution
-                )
+                val loadedSolution = repository.loadSolution(token, problemId, language)
+
+                _uiState.update {
+                    it.copy(
+                        isLoadingSolution = false,
+                        solution = loadedSolution
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoadingSolution = false,
+                        errorToast = "모범 답안 로드 실패: ${e.message}"
+                    )
+                }
             }
         }
     }

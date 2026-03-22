@@ -44,9 +44,7 @@ class AuthRepository(
                 firebaseToken = firebaseToken,
                 name = name,
                 email = email,
-                language = language,
-                registered = true,
-                refreshToken = ""
+                language = language
             )
             if (isSuccess) {
                 auth.signOut()
@@ -123,9 +121,7 @@ class AuthRepository(
                 firebaseToken = firebaseToken,
                 name = name,
                 email = email,
-                language = language,
-                registered = true,
-                refreshToken = ""
+                language = language
             )
             if (isSuccess) {
                 AuthState.SignedUp(message)
@@ -141,16 +137,12 @@ class AuthRepository(
         firebaseToken: String,
         name: String,
         email: String,
-        language: String,
-        registered: Boolean = true,
-        refreshToken: String = ""
+        language: String
     ): Pair<Boolean, String> {
         return try {
             val response = apiService.signUp(
                 SignUpRequest(
                     firebaseToken = firebaseToken,
-                    registered = registered,
-                    refreshToken = refreshToken,
                     email = email,
                     nickname = name,
                     language = language

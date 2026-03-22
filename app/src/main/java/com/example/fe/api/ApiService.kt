@@ -21,6 +21,8 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
+    // --- [인증] ---
+
     // 회원가입 : 회원 정보 서버에 등록 (소셜 연동 포함)
     @POST("api/v1/auths/signup")
     suspend fun signUp(@Body signUpRequest: SignUpRequest): Response<SignUpResponse>
@@ -29,12 +31,7 @@ interface ApiService {
     @POST("api/v1/auths/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<LoginResponse>
 
-    // 특정 알고리즘 주제의 문제 목록 가져오기
-    @GET("api/v1/topics/{topicId}/problems")
-    suspend fun getTopicProblems(
-        @retrofit2.http.Header("Authorization") token: String,
-        @Path("topicId") topicId: Long
-    ): Response<ProblemListResponse>
+    // --- [메인화면] ---
 
     // 메인화면 : 홈 화면 데이터 가져오기
     @GET("api/v1/users/main")
@@ -42,12 +39,15 @@ interface ApiService {
         @retrofit2.http.Header("Authorization") token: String
     ): Response<HomeResponse>
 
+    // --- [알고리즘 주제 목록 조회] ---
 
     // 알고리즘 주제 목록 조회
     @GET("api/v1/topics")
     suspend fun getTopics(
         @retrofit2.http.Header("Authorization") token: String
     ): Response<TopicResponse>
+    
+    // --- [개념학습] ---
 
     // 개념 학습(notions) 조회 (특정 알고리즘 주제 및 언어)
     @GET("api/v1/learnings/{topicId}/notions")
@@ -64,8 +64,7 @@ interface ApiService {
         @Path("notionId") notionId: Long
     ): Response<com.example.fe.data.dto.ConceptCompletionResponse>
 
-
-    // --- [응용학습 Practice] ---
+    // --- [응용학습] ---
 
     // 응용학습 문제 조회
     @GET("/api/v1/learnings/{topicId}/applications")
@@ -82,9 +81,14 @@ interface ApiService {
         @Path("exerciseId") exerciseId: Long
     ): Response<PracticeCompletionResponseDto>
 
-    // 언어 목록 조회
-    @GET("api/v1/languages/lists")
-    suspend fun getLanguages(): Response<LanguageResponse>
+    // --- [문제학습] ---
+    
+    // 특정 알고리즘 주제의 문제 목록 가져오기
+    @GET("api/v1/topics/{topicId}/problems")
+    suspend fun getTopicProblems(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("topicId") topicId: Long
+    ): Response<ProblemListResponse>
 
     // 문제 상세 정보 조회
     @GET("api/v1/problems/{problemId}")
@@ -101,4 +105,11 @@ interface ApiService {
         @Path("problemId") problemId: Long,
         @Query("language") language: String
     ): Response<com.example.fe.data.dto.SolutionResponse>
+
+    // --- [언어] ---
+    
+    // 언어 목록 조회
+    @GET("api/v1/languages/lists")
+    suspend fun getLanguages(): Response<LanguageResponse>
+    
 }

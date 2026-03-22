@@ -15,7 +15,7 @@ class PracticeRepository(
         // true  → 더미 데이터 사용 (서버 없이 UI 테스트)
         // false → 실제 API 호출 (서버 연결 시 변경)
         // ============================================================
-        const val USE_MOCK = true
+        const val USE_MOCK = false
     }
 
     // 응용학습 문제 조회

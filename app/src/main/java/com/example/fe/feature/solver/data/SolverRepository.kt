@@ -12,12 +12,10 @@ import kotlinx.coroutines.delay
 class SolverRepository(private val apiService: ApiService) {
 
     companion object {
-        // ============================================================
-        // ★ Mock 데이터 전환 플래그 ★
-        // true  → 더미 데이터 사용 (서버 없이 UI 테스트)
-        // false → 실제 API 호출 (서버 연결 시 변경)
-        // ============================================================
-        const val USE_MOCK = true
+        // 기능별 Mock 제어 플래그
+        const val USE_MOCK_LOAD = false    // 문제 상세/솔루션 조회 (API 존재)
+        const val USE_MOCK_RUN = true      // 코드 실행 (API 미구현)
+        const val USE_MOCK_SUBMIT = true   // 코드 제출 (API 미구현)
 
         private val DEFAULT_JAVA_TEMPLATE = """
 import java.util.*;
@@ -31,8 +29,11 @@ public class Solution {
         """.trimIndent()
     }
 
+    /**
+     * 문제 상세 정보 로드
+     */
     suspend fun loadProblemDetail(token: String, problemId: Long, language: String): ProblemDetail {
-        if (USE_MOCK) {
+        if (USE_MOCK_LOAD) {
             delay(200)
             return getMockProblemDetail(problemId)
         }
@@ -48,12 +49,12 @@ public class Solution {
                 return ProblemDetail(
                     problemId = result.exerciseId,
                     title = result.title,
-                    difficultyLabel = "-", // 명세에 난이도가 없으므로 '-' 처리 (원할 경우 이전 화면 파라미터 재활용 가능)
+                    difficultyLabel = "-",
                     description = result.description,
                     exampleInput = firstTest?.input ?: "-",
                     exampleOutput = firstTest?.output ?: "-",
                     constraints = result.constraint.split("\n").filter { it.isNotBlank() },
-                    initialCode = DEFAULT_JAVA_TEMPLATE // 명세에 초기 템플릿 정보가 없으므로 임시 공통 템플릿 할당
+                    initialCode = result.codeTemplate ?: DEFAULT_JAVA_TEMPLATE
                 )
             } else {
                 throw Exception(body.message)
@@ -63,8 +64,11 @@ public class Solution {
         }
     }
 
+    /**
+     * 코드 실행 (Run 버튼)
+     */
     suspend fun runCode(problemId: Long, code: String, language: String): RunResult {
-        if (USE_MOCK) {
+        if (USE_MOCK_RUN) {
             Log.d("SolverRepository", "[MOCK] 코드 실행: problemId=$problemId")
             delay(800)
             return RunResult(
@@ -79,12 +83,15 @@ public class Solution {
                 )
             )
         }
-        // TODO: 실제 API 호출
-        error("실제 API 미구현")
+        // TODO: 실제 코드 실행 API 연동 필요
+        error("코드 실행 API가 아직 서버에 구현되지 않았습니다.")
     }
 
+    /**
+     * 코드 제출 (Submit 버튼)
+     */
     suspend fun submitCode(problemId: Long, code: String, language: String): Pair<SubmitResult, SubmissionRecord> {
-        if (USE_MOCK) {
+        if (USE_MOCK_SUBMIT) {
             Log.d("SolverRepository", "[MOCK] 코드 제출: problemId=$problemId")
             delay(700)
             val result = SubmitResult(isCorrect = true, runtimeMs = 210, errorMessage = null)
@@ -96,12 +103,15 @@ public class Solution {
             )
             return Pair(result, record)
         }
-        // TODO: 실제 API 호출
-        error("실제 API 미구현")
+        // TODO: 실제 코드 제출 API 연동 필요
+        error("코드 제출 API가 아직 서버에 구현되지 않았습니다.")
     }
 
+    /**
+     * 모범 답안 로드
+     */
     suspend fun loadSolution(token: String, problemId: Long, language: String): SolutionDetail {
-        if (USE_MOCK) {
+        if (USE_MOCK_LOAD) {
             Log.d("SolverRepository", "[MOCK] 모범 답안 조회: problemId=$problemId")
             delay(350)
             return SolutionDetail(
@@ -141,13 +151,16 @@ class Solution {
         }
     }
 
+    /**
+     * 제출 이력 로드 (현재 Mock만 존재)
+     */
     suspend fun loadSubmissionHistory(problemId: Long) {
-        if (USE_MOCK) {
+        if (USE_MOCK_SUBMIT) { // 제출 관련이므로 SUBMIT 플래그 공유
             Log.d("SolverRepository", "[MOCK] 제출 기록 조회: problemId=$problemId")
             delay(200)
             return
         }
-        // TODO: 실제 API 호출
+        // TODO: 실제 API 호출 (필요 시)
     }
 
     // ================================================================

@@ -30,7 +30,7 @@ fun TopBar(
     title: String,
     subtitle: String? = null,
     leftContent: @Composable (() -> Unit)? = null, // 화살표 옆 커스텀 아이콘 등을 위한 슬롯
-    showBackIcon: Boolean = false, // 뒤로 가기 화살표 렌더링 여부 속성
+    showBackIcon: Boolean = true, // 뒤로 가기 화살표 렌더링 여부 속성 (기본 활성화)
     showHomeIcon: Boolean = false, // 홈 아이콘 렌더링 여부 속성
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit = {},

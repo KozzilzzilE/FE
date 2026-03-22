@@ -54,7 +54,7 @@ public class Solution {
                     exampleInput = firstTest?.input ?: "-",
                     exampleOutput = firstTest?.output ?: "-",
                     constraints = result.constraint.split("\n").filter { it.isNotBlank() },
-                    initialCode = result.codeTemplate ?: DEFAULT_JAVA_TEMPLATE
+                    initialCode = DEFAULT_JAVA_TEMPLATE
                 )
             } else {
                 throw Exception(body.message)

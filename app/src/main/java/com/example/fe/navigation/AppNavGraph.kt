@@ -1,12 +1,13 @@
 package com.example.fe.navigation
 
 import android.widget.Toast
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -24,7 +25,6 @@ import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.list.ui.DetailListScreen
-import com.example.fe.data.sampleProblems
 import com.example.fe.feature.step.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.ui.HomeScreen
@@ -49,13 +49,13 @@ import com.example.fe.api.RetrofitClient
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
-    val authRepository = androidx.compose.runtime.remember { AuthRepository(RetrofitClient.instance) }
-    val authViewModelFactory = androidx.compose.runtime.remember(authRepository) { AuthViewModelFactory(authRepository) }
+    val authRepository = remember { AuthRepository(RetrofitClient.instance) }
+    val authViewModelFactory = remember(authRepository) { AuthViewModelFactory(authRepository) }
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
-    val solverRepository = androidx.compose.runtime.remember { SolverRepository(RetrofitClient.instance) }
-    val solverViewModelFactory = androidx.compose.runtime.remember(solverRepository) { SolverViewModelFactory(solverRepository) }
+    val solverRepository = remember { SolverRepository(RetrofitClient.instance) }
+    val solverViewModelFactory = remember(solverRepository) { SolverViewModelFactory(solverRepository) }
     val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
 
     // 인증 상태 모니터링 및 화면 전환
@@ -211,10 +211,10 @@ fun AppNavGraph() {
                     val uiState by conceptViewModel.uiState.collectAsState()
 
                     // 화면 진입 또는 복귀 시 데이터 리로드 (완료 상태 갱신)
-                    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-                    androidx.compose.runtime.DisposableEffect(topicId, lifecycleOwner) {
-                        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-                            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    DisposableEffect(topicId, lifecycleOwner) {
+                        val observer = LifecycleEventObserver { _, event ->
+                            if (event == Lifecycle.Event.ON_RESUME) {
                                 conceptViewModel.loadConcepts(topicId)
                             }
                         }
@@ -265,10 +265,10 @@ fun AppNavGraph() {
                     val uiState by practiceViewModel.uiState.collectAsState()
 
                     // 화면 진입 또는 복귀 시 데이터 리로드 (완료 상태 갱신)
-                    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-                    androidx.compose.runtime.DisposableEffect(topicId, lifecycleOwner) {
-                        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-                            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    DisposableEffect(topicId, lifecycleOwner) {
+                        val observer = LifecycleEventObserver { _, event ->
+                            if (event == Lifecycle.Event.ON_RESUME) {
                                 practiceViewModel.loadQuizzes(topicId)
                             }
                         }

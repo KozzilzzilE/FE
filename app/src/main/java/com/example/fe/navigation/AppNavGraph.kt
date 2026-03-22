@@ -14,7 +14,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.fe.data.Difficulty
-import com.example.fe.data.Problem
 import com.example.fe.data.Concept
 import com.example.fe.data.Application
 import com.example.fe.feature.auth.AuthViewModel
@@ -23,7 +22,7 @@ import com.example.fe.feature.auth.data.AuthRepository
 import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
-import com.example.fe.feature.list.DetailListScreen
+import com.example.fe.feature.list.ui.DetailListScreen
 import com.example.fe.data.sampleProblems
 import com.example.fe.feature.step.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
@@ -34,12 +33,12 @@ import com.example.fe.feature.solver.data.SolverRepository
 import com.example.fe.feature.solver.ui.EditorFullScreen
 import com.example.fe.feature.solver.ui.EditorScreen
 import com.example.fe.feature.solver.ui.SolveScreen
-import com.example.fe.feature.study.concept.ConceptViewModel
-import com.example.fe.feature.study.concept.ConceptViewModelFactory
-import com.example.fe.feature.study.concept.ui.ConceptDetailScreen
-import com.example.fe.feature.study.practice.PracticeViewModel
-import com.example.fe.feature.study.practice.PracticeViewModelFactory
-import com.example.fe.feature.study.practice.data.PracticeRepository
+import com.example.fe.feature.concept.ConceptViewModel
+import com.example.fe.feature.concept.ConceptViewModelFactory
+import com.example.fe.feature.concept.ui.ConceptDetailScreen
+import com.example.fe.feature.practice.PracticeViewModel
+import com.example.fe.feature.practice.PracticeViewModelFactory
+import com.example.fe.feature.practice.data.PracticeRepository
 import com.example.fe.api.RetrofitClient
 
 @Composable
@@ -182,7 +181,8 @@ fun AppNavGraph() {
                         launchSingleTop = true
                         restoreState = true
                     }
-                }
+                },
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -328,8 +328,8 @@ fun AppNavGraph() {
                 viewModel = conceptViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = { 
-                    navController.navigate(Routes.TOPIC) {
-                        popUpTo(Routes.TOPIC) { inclusive = false }
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = false }
                         launchSingleTop = true
                     }
                 },
@@ -354,8 +354,8 @@ fun AppNavGraph() {
                 viewModel = solverViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = {
-            navController.navigate(Routes.TOPIC) {
-                popUpTo(Routes.TOPIC) { inclusive = false }
+            navController.navigate(Routes.HOME) {
+                popUpTo(Routes.HOME) { inclusive = false }
                 launchSingleTop = true
             }
         },
@@ -379,8 +379,8 @@ fun AppNavGraph() {
                 viewModel = solverViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = {
-                    navController.navigate(Routes.TOPIC) {
-                        popUpTo(Routes.TOPIC) { inclusive = false }
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = false }
                         launchSingleTop = true
                     }
                 },

@@ -54,6 +54,18 @@ import com.example.fe.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import android.content.Context
+import android.content.ContextWrapper
+
+private fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+/*
+    로그인 페이지
+*/ 
 
 @Composable
 fun LoginScreen(
@@ -218,7 +230,7 @@ fun LoginScreen(
                     // 5-2. 깃허브 소셜 로그인 버튼
                     Button(
                         onClick = {
-                            val activity = context as? Activity
+                            val activity = context.findActivity()
                             if (activity != null) {
                                 onGithubLoginClick(activity)
                             } else {

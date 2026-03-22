@@ -1,4 +1,4 @@
-package com.example.fe.feature.study.concept
+package com.example.fe.feature.concept
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

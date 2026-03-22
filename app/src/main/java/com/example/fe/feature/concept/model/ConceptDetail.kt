@@ -1,4 +1,4 @@
-package com.example.fe.feature.study.concept.model
+package com.example.fe.feature.concept.model
 
 data class ConceptDetail(
     val id: Long,

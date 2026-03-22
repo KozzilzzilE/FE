@@ -29,7 +29,8 @@ import androidx.compose.ui.tooling.preview.Preview
 fun StepSelectionScreen(
     topicId: Long = 1,
     topicName: String = "해시",
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     Scaffold(
         containerColor = Color.White,
@@ -37,10 +38,10 @@ fun StepSelectionScreen(
             TopBar(
                 title = topicName,
                 subtitle = "학습 단계를 선택하세요",
-                showBackIcon = false, // 사용자의 로직에 따라 뒤로가기 숨김 처리
-                showHomeIcon = false, // 홈 버튼도 숨김
-                onBackClick = { },
-                onHomeClick = { }
+                showBackIcon = true,
+                showHomeIcon = true,
+                onBackClick = onNavigateBack,
+                onHomeClick = { onNavigate(com.example.fe.navigation.Routes.HOME) }
             )
         },
         bottomBar = {
@@ -189,6 +190,7 @@ fun StepSelectionScreenPreview() {
     StepSelectionScreen(
         topicId = 1,
         topicName = "해시",
-        onNavigate = {}
+        onNavigate = {},
+        onNavigateBack = {}
     )
 }

@@ -1,4 +1,4 @@
-package com.example.fe.feature.study.practice.ui.blank
+package com.example.fe.feature.practice.ui.blank
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.example.fe.feature.study.practice.data
+package com.example.fe.feature.practice.data
 
 import android.util.Log
 import com.example.fe.api.ApiService

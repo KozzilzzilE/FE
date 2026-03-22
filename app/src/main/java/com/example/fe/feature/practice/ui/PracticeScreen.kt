@@ -1,4 +1,4 @@
-package com.example.fe.feature.study.practice.ui
+package com.example.fe.feature.practice.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,13 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.fe.ui.theme.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.fe.feature.study.practice.PracticeUiState
-import com.example.fe.feature.study.practice.PracticeViewModel
-import com.example.fe.feature.study.practice.PracticeViewModelFactory
-import com.example.fe.feature.study.practice.data.PracticeRepository
+import com.example.fe.feature.practice.PracticeUiState
+import com.example.fe.feature.practice.PracticeViewModel
+import com.example.fe.feature.practice.PracticeViewModelFactory
+import com.example.fe.feature.practice.data.PracticeRepository
 import com.example.fe.data.dto.QuizItemDto
-import com.example.fe.feature.study.practice.ui.blank.BlankScreen
-import com.example.fe.feature.study.practice.ui.blank.buildChoiceOptions
+import com.example.fe.feature.practice.ui.blank.BlankScreen
+import com.example.fe.feature.practice.ui.blank.buildChoiceOptions
 import com.example.fe.api.RetrofitClient
 
 @Composable

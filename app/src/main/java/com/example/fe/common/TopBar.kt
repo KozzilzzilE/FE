@@ -38,7 +38,6 @@ fun TopBar(
 ) {
     TopAppBar(
         title = {
-            // 부제목 유무와 상관없이 동일한 높이를 차지하도록 설정하여 타이틀의 y축 위치를 고정
             Column(
                 modifier = Modifier.padding(start = 8.dp),
                 verticalArrangement = Arrangement.Center
@@ -49,13 +48,14 @@ fun TopBar(
                     fontSize = 20.sp,
                     color = Color(0xFF1A1F27)
                 )
-                // subtitle이 null이어도 공간을 차지하게 만들어 타이틀을 밀어올리는 정도를 동일하게 유지
-                Text(
-                    text = subtitle ?: " ", 
-                    fontSize = 14.sp,
-                    color = if (subtitle != null) Color(0xFF7A828A) else Color.Transparent,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle, 
+                        fontSize = 14.sp,
+                        color = Color(0xFF7A828A),
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
             }
         },
         navigationIcon = {

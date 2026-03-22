@@ -62,6 +62,18 @@ import com.example.fe.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import android.content.Context
+import android.content.ContextWrapper
+
+private fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+/*
+    일반 회원 가입 페이지 (소셜로그인 x)
+*/ 
 
 @Composable
 fun SignUpScreen(
@@ -130,7 +142,7 @@ fun SignUpScreen(
         ) {
             // 1. 소셜 로그인 버튼들
             SocialLoginButton(text = "Github로 회원가입", iconResId =  null, onClick = {
-                val activity = context as? Activity
+                val activity = context.findActivity()
                 if (activity != null) {
                     onGithubSignUpClick(activity)
                 } else {

@@ -1,4 +1,4 @@
-package com.example.fe.feature.study.concept.ui
+package com.example.fe.feature.concept.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.common.MoveButtonBar
 import com.example.fe.common.TopBar
-import com.example.fe.feature.study.concept.ConceptViewModel
+import com.example.fe.feature.concept.ConceptViewModel
 
 @Composable
 fun ConceptDetailScreen(

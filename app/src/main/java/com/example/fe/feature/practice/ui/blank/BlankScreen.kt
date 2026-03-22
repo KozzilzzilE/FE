@@ -1,4 +1,4 @@
-package com.example.fe.feature.study.practice.ui.blank
+package com.example.fe.feature.practice.ui.blank
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

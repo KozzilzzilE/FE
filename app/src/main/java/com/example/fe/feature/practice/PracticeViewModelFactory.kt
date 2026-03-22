@@ -1,8 +1,8 @@
-package com.example.fe.feature.study.practice
+package com.example.fe.feature.practice
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.fe.feature.study.practice.data.PracticeRepository
+import com.example.fe.feature.practice.data.PracticeRepository
 
 class PracticeViewModelFactory(
     private val repository: PracticeRepository

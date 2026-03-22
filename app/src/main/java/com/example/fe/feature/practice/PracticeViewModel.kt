@@ -1,8 +1,8 @@
-package com.example.fe.feature.study.practice
+package com.example.fe.feature.practice
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fe.feature.study.practice.data.PracticeRepository
+import com.example.fe.feature.practice.data.PracticeRepository
 import com.example.fe.data.dto.QuizItemDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

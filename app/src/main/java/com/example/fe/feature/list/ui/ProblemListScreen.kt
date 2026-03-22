@@ -1,10 +1,9 @@
-package com.example.fe.feature.list
+package com.example.fe.feature.list.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,23 +19,22 @@ import com.example.fe.common.TopBar
 import com.example.fe.common.DetailCard
 import com.example.fe.common.bottomNavItems
 import com.example.fe.data.Difficulty
-import com.example.fe.data.DetailItem
 import com.example.fe.data.Problem
 
 @Composable
-fun DetailListScreen(
-    screenTitle: String, // 동적 타이틀 (예: 개념학습, 응용학습, 문제학습)
-    items: List<DetailItem>, // 범용 리스트 (Concept, Application, Problem)
-    onItemClick: (DetailItem) -> Unit, // 클릭 이벤트
-    onBackClick: () -> Unit, // 뒤로 가기 동작 연동
-    onNavigate: (String) -> Unit
+fun ProblemListScreen(
+    problems: List<Problem>, // 문제 리스트
+    onProblemClick: (Problem) -> Unit, // 클릭이벤트
+    onNavigate: (String) -> Unit //
 ) {
     Scaffold(
         topBar = {
             TopBar(
-                title = screenTitle,
-                onBackClick = onBackClick,
-                onHomeClick = { onNavigate("home") }
+                title = "알고리즘 학습",
+                showBackIcon = false,
+                showHomeIcon = false,
+                onBackClick = {},
+                onHomeClick = {}
             )
         },
         bottomBar = {
@@ -57,13 +55,13 @@ fun DetailListScreen(
                 LazyColumn(
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
-                    items(items) { item ->
-                        DetailCard(
-                            item = item,
-                            onClick = { onItemClick(item) }
-                        )
-                    }
+                items(problems) { problem ->
+                    DetailCard(
+                        item = problem,
+                        onClick = { onProblemClick(problem) }
+                    )
                 }
+            }
         }
     }
     }
@@ -71,20 +69,18 @@ fun DetailListScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun DetailListScreenPreview() {
-    val sampleItems = listOf(
-        Problem(1L, "두 수의 합", Difficulty.EASY, false),
-        Problem(2L, "스택 구현하기", Difficulty.MEDIUM, true),
-        Problem(3L, "큐 활용하기", Difficulty.MEDIUM, false),
-        Problem(4L, "힙 정렬", Difficulty.HARD, false),
-        Problem(5L, "DFS 탐색", Difficulty.HARD, true),
+fun ProblemListScreenPreview() {
+    val sampleProblems = listOf(
+        Problem(1, "두 수의 합", Difficulty.EASY, false),
+        Problem(2, "스택 구현하기", Difficulty.MEDIUM, true),
+        Problem(3, "큐 활용하기", Difficulty.MEDIUM, false),
+        Problem(4, "힙 정렬", Difficulty.HARD, false),
+        Problem(5, "DFS 탐색", Difficulty.HARD, true),
     )
     
-    DetailListScreen(
-        screenTitle = "문제학습",
-        items = sampleItems,
-        onItemClick = {},
-        onBackClick = {},
+    ProblemListScreen(
+        problems = sampleProblems,
+        onProblemClick = {},
         onNavigate = {}
     )
 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.fe.common.BottomNavigationBar
 import com.example.fe.common.TopBar
 import com.example.fe.common.bottomNavItems
+import com.example.fe.feature.step.component.StepCard
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -117,73 +118,6 @@ fun StepSelectionScreen(
     }
 }
 
-@Composable
-fun StepCard(
-    title: String,
-    description: String,
-    backgroundColor: Color,
-    icon: ImageVector,
-    iconTint: Color,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 왼쪽 아이콘 영역 (하얀 박스 배경)
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = iconTint,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // 중앙 텍스트 컨텐츠
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = description,
-                    fontSize = 14.sp,
-                    color = Color(0xFF666666)
-                )
-            }
-
-            // 우측 화살표 아이콘
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "이동",
-                tint = Color.Gray
-            )
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun StepSelectionScreenPreview() {
@@ -194,3 +128,4 @@ fun StepSelectionScreenPreview() {
         onNavigateBack = {}
     )
 }
+

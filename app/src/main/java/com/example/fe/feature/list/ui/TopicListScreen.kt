@@ -28,6 +28,7 @@ import com.example.fe.common.bottomNavItems
 import com.example.fe.navigation.Routes
 import com.example.fe.feature.list.TopicViewModel
 import com.example.fe.feature.list.TopicUiState
+import com.example.fe.feature.list.component.TopicCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,35 +95,3 @@ fun TopicListScreen(
     }
 }
 
-@Composable
-fun TopicCard(title: String, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF333333)
-            )
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "이동",
-                tint = Color.Gray
-            )
-        }
-    }
-}

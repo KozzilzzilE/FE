@@ -1,6 +1,6 @@
 package com.example.fe.api
 
-import com.example.fe.data.Problem
+import com.example.fe.feature.list.model.Problem
 import com.example.fe.data.dto.SignUpRequest
 import com.example.fe.data.dto.SignUpResponse
 import com.example.fe.data.dto.LoginRequest

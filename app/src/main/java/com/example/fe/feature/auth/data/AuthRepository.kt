@@ -1,6 +1,7 @@
 package com.example.fe.feature.auth.data
 
 import android.app.Activity
+import android.util.Log
 import com.example.fe.api.ApiService
 import com.example.fe.common.TokenManager
 import com.example.fe.data.dto.LoginRequest
@@ -39,7 +40,14 @@ class AuthRepository(
             val tokenResult = user.getIdToken(true).await()
             val firebaseToken = tokenResult.token ?: return AuthState.Error("토큰 발급 실패")
 
-            val (isSuccess, message) = registerUserToServer(firebaseToken, name, email, language)
+            val (isSuccess, message) = registerUserToServer(
+                firebaseToken = firebaseToken,
+                name = name,
+                email = email,
+                language = language,
+                registered = true,
+                refreshToken = ""
+            )
             if (isSuccess) {
                 auth.signOut()
                 AuthState.SignedUp(message)
@@ -111,7 +119,14 @@ class AuthRepository(
             val tokenResult = user.getIdToken(true).await()
             val firebaseToken = tokenResult.token ?: return AuthState.Error("Firebase 토큰 획득 실패")
             
-            val (isSuccess, message) = registerUserToServer(firebaseToken, name, email, language)
+            val (isSuccess, message) = registerUserToServer(
+                firebaseToken = firebaseToken,
+                name = name,
+                email = email,
+                language = language,
+                registered = true,
+                refreshToken = ""
+            )
             if (isSuccess) {
                 AuthState.SignedUp(message)
             } else {
@@ -122,20 +137,33 @@ class AuthRepository(
         }
     }
 
-    private suspend fun registerUserToServer(firebaseToken: String, name: String, email: String, language: String): Pair<Boolean, String> {
+    private suspend fun registerUserToServer(
+        firebaseToken: String,
+        name: String,
+        email: String,
+        language: String,
+        registered: Boolean = true,
+        refreshToken: String = ""
+    ): Pair<Boolean, String> {
         return try {
             val response = apiService.signUp(
                 SignUpRequest(
                     firebaseToken = firebaseToken,
+                    registered = registered,
+                    refreshToken = refreshToken,
                     email = email,
                     nickname = name,
                     language = language
                 )
             )
             if (response.isSuccessful && response.body()?.isSuccess == true) {
-                Pair(true, response.body()?.message ?: "회원가입 완료")
+                val body = response.body()
+                Log.d("AuthRepository", "회원가입 성공: code=${body?.code}, message=${body?.message}")
+                Pair(true, body?.message ?: "회원가입 완료")
             } else {
-                Pair(false, response.body()?.message ?: "서버 등록 실패")
+                val body = response.body()
+                Log.e("AuthRepository", "회원가입 실패: code=${body?.code}, message=${body?.message}")
+                Pair(false, body?.message ?: "서버 등록 실패")
             }
         } catch (e: Exception) {
             Pair(false, "네트워크 오류: ${e.message}")
@@ -146,7 +174,9 @@ class AuthRepository(
         return try {
             val response = apiService.login(LoginRequest(firebaseToken = firebaseToken))
             if (response.isSuccessful && response.body()?.isSuccess == true) {
-                val loginResult = response.body()?.result
+                val body = response.body()
+                Log.d("AuthRepository", "로그인 성공: code=${body?.code}, message=${body?.message}")
+                val loginResult = body?.result
                 if (loginResult != null && loginResult.accessToken.isNotEmpty()) {
                     TokenManager.saveAccessToken(loginResult.accessToken)
                     AuthState.Success
@@ -155,8 +185,10 @@ class AuthRepository(
                     AuthState.Error("서버 토큰 발급 실패")
                 }
             } else {
+                val body = response.body()
+                Log.e("AuthRepository", "로그인 실패: code=${body?.code}, message=${body?.message}")
                 auth.signOut()
-                AuthState.Error(response.body()?.message ?: "서버 로그인 인증 실패")
+                AuthState.Error(body?.message ?: "서버 로그인 인증 실패")
             }
         } catch (e: Exception) {
             auth.signOut()

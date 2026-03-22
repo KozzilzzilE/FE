@@ -13,9 +13,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.fe.data.Difficulty
-import com.example.fe.data.Concept
-import com.example.fe.data.Application
+import com.example.fe.feature.list.model.Difficulty
+import com.example.fe.feature.list.model.Concept
+import com.example.fe.feature.list.model.Application
 import com.example.fe.feature.auth.AuthViewModel
 import com.example.fe.feature.auth.AuthViewModelFactory
 import com.example.fe.feature.auth.data.AuthRepository

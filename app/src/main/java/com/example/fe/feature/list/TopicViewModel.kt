@@ -28,17 +28,18 @@ class TopicViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = TopicUiState.Loading
             try {
-                // TODO: 백엔드 API가 준비되면 아래 응답 코드 블록 주석을 해제하세요.
-                /*
                 val response = RetrofitClient.instance.getTopics()
                 if (response.isSuccessful) {
-                    ...
+                    val body = response.body()
+                    if (body != null && body.isSuccess && body.result != null) {
+                        _uiState.value = TopicUiState.Success(body.result)
+                    } else {
+                        _uiState.value = TopicUiState.Error("데이터를 불러올 수 없습니다")
+                    }
+                } else {
+                    Log.e("TopicViewModel", "API 실패: ${response.code()}")
+                    _uiState.value = TopicUiState.Error("")
                 }
-                */
-                // [임시] API 대신 로컬 샘플 데이터 즉시 로드 (시각적 UI 확인용)
-                val sampleData = com.example.fe.data.TopicSampleData.sampleTopics
-                _uiState.value = TopicUiState.Success(sampleData)
-
             } catch (e: Exception) {
                 Log.e("TopicViewModel", "예외 발생", e)
                 _uiState.value = TopicUiState.Error("")

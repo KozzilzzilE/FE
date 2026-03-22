@@ -18,9 +18,9 @@ import com.example.fe.common.BottomNavigationBar
 import com.example.fe.common.TopBar
 import com.example.fe.common.DetailCard
 import com.example.fe.common.bottomNavItems
-import com.example.fe.data.Difficulty
-import com.example.fe.data.DetailItem
-import com.example.fe.data.Problem
+import com.example.fe.feature.list.model.Difficulty
+import com.example.fe.feature.list.model.DetailItem
+import com.example.fe.feature.list.model.Problem
 
 @Composable
 fun DetailListScreen(

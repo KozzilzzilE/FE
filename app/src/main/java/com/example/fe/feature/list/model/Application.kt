@@ -1,4 +1,4 @@
-package com.example.fe.data
+package com.example.fe.feature.list.model
 
 data class Application(
     override val id: Long,

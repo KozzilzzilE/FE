@@ -1,5 +1,8 @@
 package com.example.fe.data
 
+import com.example.fe.feature.list.model.Difficulty
+import com.example.fe.feature.list.model.Problem
+
 // sampleConcepts, sampleApplications는 각 Repository의 getMock*() 함수로 대체됨
 // sampleProblems는 문제학습 목록 화면(NavGraph else 분기)에서 사용
 

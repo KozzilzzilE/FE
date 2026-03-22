@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 /**
  * [개념 학습 API]
- * GET /api/v1/languages/lists
+ * GET /api/v1/learnings/{topicId}/notions
  */
 
 data class ConceptResponse(
@@ -30,6 +30,11 @@ data class NotionDto(
     @SerializedName("exampleCode") val exampleCode: ExampleCodeDto?,
     @SerializedName("notionCompleted") val notionCompleted: Boolean
 )
+
+/**
+ * [개념 학습 완료 API]
+ * POST /api/v1/learnings/notions/completions/{notionId}
+ */
 
 data class ExampleCodeDto(
     @SerializedName("language") val language: String,

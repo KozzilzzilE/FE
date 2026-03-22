@@ -30,7 +30,183 @@
   }
   ```
 
-... (중략) ...
+  ### 로그인 (Login)
+- **Method**: `POST`
+- **URL**: `/api/v1/auths/login`
+- **Request Body**:
+  ```json
+  { "firebaseToken" : "String" }
+  ```
+- **Response Body**:
+  ```json
+  {
+    "isSuccess": true,
+    "code": "AUTH_201",
+    "message": "로그인 성공",
+    "result": {
+      "accessToken": "String",
+      "nickname": "String",
+      "language": "String"
+    }
+  }
+  ```
+
+---
+
+## 2. 사용자
+
+### 메인 화면 정보 조회
+- **Method**: `GET`
+- **URL**: `/api/v1/users/main`
+- **Header**: `Authorization: Bearer {accessToken}`
+- **Response Body**:
+  ```json
+  {
+    "isSuccess": true,
+    "code": "USER_200",
+    "message": "메인 화면 정보 조회에 성공했습니다.",
+    "result": {
+      "name": "String",
+      "languageId": "Long",
+      "languageName": "String"
+    }
+  }
+  ```
+
+---
+
+## 3. 주제 목록 
+
+### 알고리즘 주제 목록 조회
+- **Method**: `GET`
+- **URL**: `/api/v1/topics`
+- **Header**: `Authorization: Bearer {accessToken}`
+- **Response Body**:
+  ```json
+  {
+    "isSuccess": true,
+    "code": "TOPIC_200",
+    "message": "알고리즘 목록 조회 성공",
+    "result": {
+      "count": 12,
+      "topics": [
+        { "topicId" : 1, "name" : "HASH", "displayName" : "해시" },
+        ...
+      ]
+    }
+  }
+  ```
+
+## 4. 개념 학습
+
+### 개념 학습 조회
+- **Method**: `GET`
+- **URL**: `/api/v1/learnings/{topicId}/notions`
+- **Query Parameter**: `language=JAVA`
+- **Header**: `Authorization: Bearer {accessToken}`
+- **Response Body**:
+  ```json
+  {
+    "isSuccess": true,
+    "code": "LEARNING_200",
+    "message": "개념 학습 조회 성공",
+    "result": {
+      "topicId": 1,
+      "count": 3,
+      "notions": [
+        {
+          "notionId" : 1,
+          "pageNo" : 1,
+          "title" : "String",
+          "point" : "String",
+          "detail" : "String",
+          "imgUrl" : "String (Nullable)",
+          "exampleCode" : {
+            "language" : "String",
+            "content" : "String"
+          },
+          "notionCompleted" : true
+        }
+      ]
+    }
+  }
+  ```
+
+
+### 개념 학습 완료 처리
+- **Method**: `POST`
+- **URL**: `/api/v1/learnings/notions/completions/{notionId}`
+- **Header**: `Authorization: Bearer {accessToken}`
+- **Response Body**:
+  ```json
+  {
+    "isSuccess": true,
+    "code": "LEARNING_201",
+    "message": "개념 학습 완료로 변경 성공",
+    "result": {
+      "notionId": 1,
+      "userName": "사용자",
+      "notionCompleted": true
+    }
+  }
+  ```
+
+---
+
+## 5. 응용 학습
+
+### 응용 학습 조회
+- **Method**: `GET`
+- **URL**: `/api/v1/learnings/{topicId}/applications`
+- **Query Parameter**: `language=JAVA`
+- **Header**: `Authorization: Bearer {accessToken}`
+- **Response Body**:
+  ```json
+  {
+    "isSuccess": true,
+    "code": "LEARNING_202",
+    "message": "응용 학습 조회 성공",
+    "result": {
+      "count": 1,
+      "appliedExercises": [
+        {
+          "exerciseId": 101,
+          "title": "String",
+          "description": "String",
+          "codeTemplate": "String",
+          "appliedCompleted": false,
+          "totalBlanks": 5,
+          "blanks": [
+            { "content": "String", "answer": 1 },
+            { "content": "String", "answer": null }
+          ]
+        }
+      ]
+    }
+  }
+  ```
+
+### 응용 학습 완료 처리
+- **Method**: `POST`
+- **URL**: `/api/v1/learnings/applications/completions/{exerciseId}`
+- **Header**: `Authorization: Bearer {accessToken}`
+- **Response Body**:
+  ```json
+  {
+    "isSuccess": true,
+    "code": "LEARNING_203",
+    "message": "응용 학습 완료로 변경 성공",
+    "result": {
+      "exerciseId": 1,
+      "userName": "사용자",
+      "appliedCompleted": true
+    }
+  }
+  ```
+
+---
+
+## 6. 문제 학습
 
 ### 문제 목록 조회 (특정 알고리즘 주제)
 - **Method**: `GET`
@@ -103,110 +279,10 @@
     }
   }
   ```
-
-### 개념 학습 조회
-- **Method**: `GET`
-- **URL**: `/api/v1/learnings/{topicId}/notions`
-- **Query Parameter**: `language=JAVA`
-- **Header**: `Authorization: Bearer {accessToken}`
-- **Response Body**:
-  ```json
-  {
-    "isSuccess": true,
-    "code": "LEARNING_200",
-    "message": "개념 학습 조회 성공",
-    "result": {
-      "topicId": 1,
-      "count": 3,
-      "notions": [
-        {
-          "notionId" : 1,
-          "pageNo" : 1,
-          "title" : "String",
-          "point" : "String",
-          "detail" : "String",
-          "imgUrl" : "String (Nullable)",
-          "exampleCode" : {
-            "language" : "String",
-            "content" : "String"
-          },
-          "notionCompleted" : true
-        }
-      ]
-    }
-  }
-  ```
-
-### 개념 학습 완료 처리
-- **Method**: `POST`
-- **URL**: `/api/v1/learnings/notions/completions/{notionId}`
-- **Header**: `Authorization: Bearer {accessToken}`
-- **Response Body**:
-  ```json
-  {
-    "isSuccess": true,
-    "code": "LEARNING_201",
-    "message": "개념 학습 완료로 변경 성공",
-    "result": {
-      "notionId": 1,
-      "userName": "사용자",
-      "notionCompleted": true
-    }
-  }
-  ```
-
-### 응용 학습 조회
-- **Method**: `GET`
-- **URL**: `/api/v1/learnings/{topicId}/applications`
-- **Query Parameter**: `language=JAVA`
-- **Header**: `Authorization: Bearer {accessToken}`
-- **Response Body**:
-  ```json
-  {
-    "isSuccess": true,
-    "code": "LEARNING_202",
-    "message": "응용 학습 조회 성공",
-    "result": {
-      "count": 1,
-      "appliedExercises": [
-        {
-          "exerciseId": 101,
-          "title": "String",
-          "description": "String",
-          "codeTemplate": "String",
-          "appliedCompleted": false,
-          "totalBlanks": 5,
-          "blanks": [
-            { "content": "String", "answer": 1 },
-            { "content": "String", "answer": null }
-          ]
-        }
-      ]
-    }
-  }
-  ```
-
-### 응용 학습 완료 처리
-- **Method**: `POST`
-- **URL**: `/api/v1/learnings/applications/completions/{exerciseId}`
-- **Header**: `Authorization: Bearer {accessToken}`
-- **Response Body**:
-  ```json
-  {
-    "isSuccess": true,
-    "code": "LEARNING_203",
-    "message": "응용 학습 완료로 변경 성공",
-    "result": {
-      "exerciseId": 1,
-      "userName": "사용자",
-      "appliedCompleted": true
-    }
-  }
-  ```
-
 ---
 
-## 4. 기타 (Etc)
+
+## 7. 기타 (Etc)
 
 ### 언어 목록 조회
 - **Method**: `GET`
@@ -227,72 +303,4 @@
     }
   }
   ```
-
-
-
-### 로그인 (Login)
-- **Method**: `POST`
-- **URL**: `/api/v1/auths/login`
-- **Request Body**:
-  ```json
-  { "firebaseToken" : "String" }
-  ```
-- **Response Body**:
-  ```json
-  {
-    "isSuccess": true,
-    "code": "AUTH_201",
-    "message": "로그인 성공",
-    "result": {
-      "accessToken": "String",
-      "nickname": "String",
-      "language": "String"
-    }
-  }
-  ```
-
 ---
-
-## 2. 사용자 (User)
-
-### 메인 화면 정보 조회
-- **Method**: `GET`
-- **URL**: `/api/v1/users/main`
-- **Header**: `Authorization: Bearer {accessToken}`
-- **Response Body**:
-  ```json
-  {
-    "isSuccess": true,
-    "code": "USER_200",
-    "message": "메인 화면 정보 조회에 성공했습니다.",
-    "result": {
-      "name": "String",
-      "languageId": "Long",
-      "languageName": "String"
-    }
-  }
-  ```
-
----
-
-## 3. 학습 (Learning)
-
-### 알고리즘 주제 목록 조회
-- **Method**: `GET`
-- **URL**: `/api/v1/topics`
-- **Header**: `Authorization: Bearer {accessToken}`
-- **Response Body**:
-  ```json
-  {
-    "isSuccess": true,
-    "code": "TOPIC_200",
-    "message": "알고리즘 목록 조회 성공",
-    "result": {
-      "count": 12,
-      "topics": [
-        { "topicId" : 1, "name" : "HASH", "displayName" : "해시" },
-        ...
-      ]
-    }
-  }
-  ```

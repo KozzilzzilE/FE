@@ -27,13 +27,20 @@ fun BottomNavigationBar(
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     NavigationBar(
         modifier = modifier
     ) {
         items.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route,
-                onClick = { onNavigate(item.route) },
+                onClick = {
+                    if (item.title == "문제" || item.title == "MY") {
+                        android.widget.Toast.makeText(context, "기능 미 구현", android.widget.Toast.LENGTH_SHORT).show()
+                    } else {
+                        onNavigate(item.route)
+                    }
+                },
                 icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
                 label = { Text(text = item.title) }
             )

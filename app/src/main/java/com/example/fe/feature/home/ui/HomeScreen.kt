@@ -1,4 +1,4 @@
-package com.example.fe.feature.home
+package com.example.fe.feature.home.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -30,6 +30,9 @@ import com.example.fe.common.BottomNavigationBar
 import com.example.fe.feature.home.component.HomeTopBar
 import com.example.fe.feature.home.component.LanguageDropdown
 import com.example.fe.common.bottomNavItems
+import com.example.fe.feature.home.HomeUiState
+import com.example.fe.feature.home.HomeViewModel
+import com.example.fe.feature.home.HomeViewModelFactory
 
 @Composable
 fun HomeScreen(

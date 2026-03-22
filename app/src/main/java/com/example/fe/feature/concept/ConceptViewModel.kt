@@ -3,6 +3,7 @@ package com.example.fe.feature.concept
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fe.data.dto.NotionDto
+import com.example.fe.feature.concept.data.ConceptRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -26,7 +26,7 @@ import com.example.fe.feature.list.ui.DetailListScreen
 import com.example.fe.data.sampleProblems
 import com.example.fe.feature.step.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
-import com.example.fe.feature.home.HomeScreen
+import com.example.fe.feature.home.ui.HomeScreen
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.SolverViewModelFactory
 import com.example.fe.feature.solver.data.SolverRepository

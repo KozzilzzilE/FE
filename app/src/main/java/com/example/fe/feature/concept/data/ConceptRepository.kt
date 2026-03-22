@@ -1,4 +1,4 @@
-package com.example.fe.feature.concept
+package com.example.fe.feature.concept.data
 
 import android.util.Log
 import com.example.fe.api.ApiService

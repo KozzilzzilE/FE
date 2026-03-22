@@ -3,6 +3,7 @@ package com.example.fe.feature.concept
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.fe.api.RetrofitClient
+import com.example.fe.feature.concept.data.ConceptRepository
 
 class ConceptViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

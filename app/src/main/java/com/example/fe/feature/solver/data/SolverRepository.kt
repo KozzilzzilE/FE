@@ -13,7 +13,7 @@ class SolverRepository(private val apiService: ApiService) {
 
     companion object {
         // 기능별 Mock 제어 플래그
-        const val USE_MOCK_LOAD = false    // 문제 상세/솔루션 조회 (API 존재)
+        const val USE_MOCK_LOAD = true    // 문제 상세/솔루션 조회 (API 존재)
         const val USE_MOCK_RUN = true      // 코드 실행 (API 미구현)
         const val USE_MOCK_SUBMIT = true   // 코드 제출 (API 미구현)
 

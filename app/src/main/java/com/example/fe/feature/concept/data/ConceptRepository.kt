@@ -10,12 +10,7 @@ import com.example.fe.data.dto.ExampleCodeDto
 class ConceptRepository(private val apiService: ApiService) {
 
     companion object {
-        // ============================================================
-        // ★ Mock 데이터 전환 플래그 ★
-        // true  → 더미 데이터 사용 (서버 없이 UI 테스트)
-        // false → 실제 API 호출 (서버 연결 시 변경)
-        // ============================================================
-        const val USE_MOCK = false
+        const val USE_MOCK = com.example.fe.common.MockConfig.USE_MOCK_CONCEPT
     }
 
     suspend fun getConcepts(token: String, topicId: Long, language: String): ConceptResponse? {

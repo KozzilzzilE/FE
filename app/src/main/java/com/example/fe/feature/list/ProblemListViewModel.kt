@@ -25,7 +25,9 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
         viewModelScope.launch {
             _uiState.value = ProblemUiState.Loading
             try {
-                val token = TokenManager.getAccessToken()
+                val isMock = com.example.fe.common.MockConfig.USE_MOCK_PROBLEM
+                val token = TokenManager.getAccessToken() ?: if (isMock) "mock_token" else null
+                
                 if (token == null) {
                     _uiState.value = ProblemUiState.Error("로그인 토큰이 없습니다.")
                     return@launch

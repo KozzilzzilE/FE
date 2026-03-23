@@ -210,7 +210,12 @@ fun AppNavGraph() {
                     val conceptViewModel: ConceptViewModel = viewModel(factory = factory)
                     val uiState by conceptViewModel.uiState.collectAsState()
 
-                    // 화면 진입 또는 복귀 시 데이터 리로드 (완료 상태 갱신)
+                    // 화면 진입 시 초기 데이터 로드
+                    androidx.compose.runtime.LaunchedEffect(topicId) {
+                        conceptViewModel.loadConcepts(topicId)
+                    }
+
+                    // 화면 복귀 시 데이터 리로드 (완료 상태 갱신)
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(topicId, lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
@@ -236,6 +241,11 @@ fun AppNavGraph() {
 
                     if (uiState.isLoading) {
                         androidx.compose.material3.CircularProgressIndicator(
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                        )
+                    } else if (uiState.error != null) {
+                        androidx.compose.material3.Text(
+                            text = uiState.error ?: "오류 발생",
                             modifier = androidx.compose.ui.Modifier.fillMaxSize()
                         )
                     } else {
@@ -264,7 +274,12 @@ fun AppNavGraph() {
                     val practiceViewModel: PracticeViewModel = viewModel(factory = factory)
                     val uiState by practiceViewModel.uiState.collectAsState()
 
-                    // 화면 진입 또는 복귀 시 데이터 리로드 (완료 상태 갱신)
+                    // 화면 진입 시 초기 데이터 로드
+                    androidx.compose.runtime.LaunchedEffect(topicId) {
+                        practiceViewModel.loadQuizzes(topicId)
+                    }
+
+                    // 화면 복귀 시 데이터 리로드 (완료 상태 갱신)
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(topicId, lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
@@ -290,6 +305,11 @@ fun AppNavGraph() {
 
                     if (uiState.isLoading) {
                         androidx.compose.material3.CircularProgressIndicator(
+                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                        )
+                    } else if (uiState.error != null) {
+                        androidx.compose.material3.Text(
+                            text = uiState.error ?: "오류 발생",
                             modifier = androidx.compose.ui.Modifier.fillMaxSize()
                         )
                     } else {

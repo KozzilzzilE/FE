@@ -20,11 +20,27 @@ class TopicViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<TopicUiState>(TopicUiState.Loading)
     val uiState: StateFlow<TopicUiState> = _uiState.asStateFlow()
 
+    companion object {
+        private const val USE_MOCK = true
+    }
+
     init {
         fetchTopics()
     }
 
     fun fetchTopics() {
+        if (USE_MOCK) {
+            _uiState.value = TopicUiState.Success(
+                listOf(
+                    TopicResult(1L, "Hash", "해시 (Hash)"),
+                    TopicResult(2L, "StackQueue", "스택/큐 (Stack/Queue)"),
+                    TopicResult(3L, "Heap", "힙 (Heap)"),
+                    TopicResult(4L, "Sorting", "정렬 (Sorting)"),
+                    TopicResult(5L, "BinarySearch", "이분탐색 (Binary Search)")
+                )
+            )
+            return
+        }
         viewModelScope.launch {
             _uiState.value = TopicUiState.Loading
             try {

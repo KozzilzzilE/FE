@@ -34,8 +34,9 @@ class PracticeViewModel(
             )
 
             try {
-                val token = com.example.fe.common.TokenManager.getAccessToken()
-                if (token == null) {
+                val token = com.example.fe.common.TokenManager.getAccessToken() ?: "mock_token"
+                
+                if (!PracticeRepository.USE_MOCK && token == "mock_token") {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = "로그인 토큰이 없습니다."

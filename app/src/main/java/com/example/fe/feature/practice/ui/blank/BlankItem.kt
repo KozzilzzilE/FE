@@ -201,6 +201,6 @@ fun ChoiceButton(
 // blanks가 null이면 빈 리스트 반환
 fun buildChoiceOptions(quiz: QuizItemDto): List<String> {
     val correctOptions = quiz.blanks?.map { it.content } ?: emptyList()
-    val extras = listOf("get", "delete", "HashMap", "0")
+    val extras = listOf("")
     return (correctOptions + extras).distinct()
 }

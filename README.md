@@ -279,8 +279,47 @@
     }
   }
   ```
----
 
+### 코드 실행 요청
+- **Method**: `POST`
+- **URL**: `/api/v1/problems/{problemId}/runs`
+- **Query Parameter**: `language=JAVA`
+- **Header**: `Authorization: Bearer {accessToken}`
+- **Response Body**:
+  ```json
+  {
+    "isSuccess": true,
+    "code": "PROBLEM_202",
+    "message": "문제 코드 실행 요청 성공",
+    "result": [
+      {
+        "token": "12bfae4c-fe94-4db8-914b-3c66c248d22f"
+      },
+      {
+        "token": "f8ae2eaa-9e59-4ae2-b10e-8fb5efe77f5e"
+      }
+    ]
+  }
+  ```
+  
+  ### 코드 실행 요청
+- **Method**: `POST`
+- **URL**: `/api/v1/problems/{problemId}/submissions`
+- **Query Parameter**: `language=JAVA`
+- **Header**: `Authorization: Bearer {accessToken}`
+- **Response Body**:
+ ```json
+  {
+    "isSuccess": true,
+    "code": "PROBLEM_203",
+    "message": "문제 코드 채점 요청 성공",
+    "result": {
+      "submissionId": "49e8d137-1885-41a3-ab69-5b31072dc38b"
+    }
+  }
+  ```
+  
+---
 
 ## 7. 기타 (Etc)
 

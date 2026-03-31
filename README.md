@@ -302,7 +302,7 @@
   }
   ```
   
-  ### 코드 실행 요청
+### 코드 정답 요청
 - **Method**: `POST`
 - **URL**: `/api/v1/problems/{problemId}/submissions`
 - **Query Parameter**: `language=JAVA`

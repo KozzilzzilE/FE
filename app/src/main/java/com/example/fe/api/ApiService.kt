@@ -106,6 +106,24 @@ interface ApiService {
         @Query("language") language: String
     ): Response<com.example.fe.data.dto.SolutionResponse>
 
+    // 문제 코드 실행 요청
+    @POST("api/v1/problems/{problemId}/runs")
+    suspend fun runCode(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("problemId") problemId: Long,
+        @Query("language") language: String,
+        @Body request: com.example.fe.data.dto.RunRequestDto
+    ): Response<com.example.fe.data.dto.RunResponseDto>
+
+    // 문제 코드 정답 요청
+    @POST("api/v1/problems/{problemId}/submissions")
+    suspend fun submitCode(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("problemId") problemId: Long,
+        @Query("language") language: String,
+        @Body request: com.example.fe.data.dto.SubmitRequestDto
+    ): Response<com.example.fe.data.dto.SubmitResponseDto>
+
     // --- [언어] ---
     
     // 언어 목록 조회

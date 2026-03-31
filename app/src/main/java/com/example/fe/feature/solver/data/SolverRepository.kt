@@ -14,8 +14,8 @@ class SolverRepository(private val apiService: ApiService) {
     companion object {
         // 기능별 Mock 제어 플래그
         const val USE_MOCK_LOAD = false    // 문제 상세/솔루션 조회 (API 존재)
-        const val USE_MOCK_RUN = true      // 코드 실행 (API 미구현)
-        const val USE_MOCK_SUBMIT = true   // 코드 제출 (API 미구현)
+        const val USE_MOCK_RUN = false      // 코드 실행 (API 존재)
+        const val USE_MOCK_SUBMIT = false   // 코드 제출 (API 존재)
 
         private val DEFAULT_JAVA_TEMPLATE = """
 import java.util.*;
@@ -76,7 +76,7 @@ public class Solution {
     /**
      * 코드 실행 (Run 버튼)
      */
-    suspend fun runCode(problemId: Long, code: String, language: String): RunResult {
+    suspend fun runCode(token: String, problemId: Long, code: String, language: String): RunResult {
         if (USE_MOCK_RUN) {
             Log.d("SolverRepository", "[MOCK] 코드 실행: problemId=$problemId")
             delay(800)
@@ -92,14 +92,46 @@ public class Solution {
                 )
             )
         }
-        // TODO: 실제 코드 실행 API 연동 필요
-        error("코드 실행 API가 아직 서버에 구현되지 않았습니다.")
+
+        val response = apiService.runCode(
+            token = "Bearer $token",
+            problemId = problemId,
+            language = language,
+            request = com.example.fe.data.dto.RunRequestDto(
+                sourceCode = code,
+                timeLimit = 1.0,
+                memoryLimit = 128000000
+            )
+        )
+
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+
+            if (body.isSuccess) {
+                val resultList = body.result ?: emptyList()
+                val firstToken = resultList.firstOrNull()?.token
+
+                return RunResult(
+                    passed = true,
+                    runtimeMs = null,
+                    errorMessage = null,
+                    terminalLines = listOf(
+                        "$ Run request sent",
+                        "실행 토큰: ${firstToken ?: "없음"}"
+                    )
+                )
+            } else {
+                throw Exception(body.message)
+            }
+        } else {
+            throw Exception("코드 실행 실패: ${response.code()}")
+        }
     }
 
     /**
      * 코드 제출 (Submit 버튼)
      */
-    suspend fun submitCode(problemId: Long, code: String, language: String): Pair<SubmitResult, SubmissionRecord> {
+    suspend fun submitCode(token: String, problemId: Long, code: String, language: String): Pair<SubmitResult, SubmissionRecord> {
         if (USE_MOCK_SUBMIT) {
             Log.d("SolverRepository", "[MOCK] 코드 제출: problemId=$problemId")
             delay(700)
@@ -112,9 +144,43 @@ public class Solution {
             )
             return Pair(result, record)
         }
-        // TODO: 실제 코드 제출 API 연동 필요
-        error("코드 제출 API가 아직 서버에 구현되지 않았습니다.")
-    }
+        val response = apiService.submitCode(
+            token = "Bearer $token",
+            problemId = problemId,
+            language = language,
+            request = com.example.fe.data.dto.SubmitRequestDto(
+                sourceCode = code,
+                timeLimit = 1.0,
+                memoryLimit = 128000000
+            )
+        )
+
+        if(response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+
+            if (body.isSuccess) {
+                val submissionId = body.result?.submissionId ?: "unknown"
+
+                val result = SubmitResult(
+                    isCorrect = true,
+                    runtimeMs = null,
+                    errorMessage = null
+                )
+                val record = SubmissionRecord(
+                    date = "방금",
+                    language = language,
+                    result = "제출 완료",
+                    isCorrect = true
+                )
+                Log.d("SolverRepository", "제출 완료: submissionId=$submissionId")
+                return Pair(result, record)
+            } else {
+                throw Exception(body.message)
+            }
+        }  else{
+             throw Exception("코드 제출 실패: ${response.code()}")
+            }
+        }
 
     /**
      * 모범 답안 로드

@@ -96,13 +96,38 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isRunning = true, runResult = null) }
 
-            val runResultResponse = repository.runCode(state.problemId, state.code, state.language)
+            try {
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    _uiState.update {
+                        it.copy(
+                            isRunning = false,
+                            errorToast = "로그인 토큰이 없습니다."
+                        )
+                    }
+                    return@launch
+                }
 
-            _uiState.update {
-                it.copy(
-                    isRunning = false,
-                    runResult = runResultResponse
+                val runResultResponse = repository.runCode(
+                    token,
+                    state.problemId,
+                    state.code,
+                    state.language
                 )
+
+                _uiState.update {
+                    it.copy(
+                        isRunning = false,
+                        runResult = runResultResponse
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isRunning = false,
+                        errorToast = "코드 실행 실패: ${e.message}"
+                    )
+                }
             }
         }
     }
@@ -122,14 +147,39 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, submitResult = null) }
 
-            val (submitResult, newRecord) = repository.submitCode(state.problemId, state.code, state.language)
+            try {
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    _uiState.update {
+                        it.copy(
+                            isSubmitting = false,
+                            errorToast = "로그인 토큰이 없습니다."
+                        )
+                    }
+                    return@launch
+                }
 
-            _uiState.update {
-                it.copy(
-                    isSubmitting = false,
-                    submitResult = submitResult,
-                    submissions = listOf(newRecord) + it.submissions
+                val (submitResult, newRecord) = repository.submitCode(
+                    token,
+                    state.problemId,
+                    state.code,
+                    state.language
                 )
+
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        submitResult = submitResult,
+                        submissions = listOf(newRecord) + it.submissions
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        errorToast = "코드 제출 실패: ${e.message}"
+                    )
+                }
             }
         }
     }

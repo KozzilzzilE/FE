@@ -8,18 +8,7 @@ import kotlinx.coroutines.withContext
 
 class HomeRepository(private val apiService: ApiService) {
 
-    companion object {
-        private const val USE_MOCK = true
-    }
-
     suspend fun getHomeData(): HomeUiState {
-        if (USE_MOCK) {
-            kotlinx.coroutines.delay(500)
-            return HomeUiState.Success(
-                name = "홍길동 (Mock)",
-                languageName = "JAVA"
-            )
-        }
         return withContext(Dispatchers.IO) {
             try {
                 val token = com.example.fe.common.TokenManager.getAccessToken()

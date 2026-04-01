@@ -25,10 +25,11 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
         viewModelScope.launch {
             _uiState.value = ProblemUiState.Loading
             try {
-                val isMock = com.example.fe.common.MockConfig.USE_MOCK_PROBLEM
-                val token = TokenManager.getAccessToken() ?: if (isMock) "mock_token" else null
+                // [MOCK] Interceptor를 사용하므로 더 이상 개별 Mock 플래그는 필요 없습니다.
+                // 토큰이 없더라도 MockInterceptor가 처리해 줄 것이므로 기본적인 토큰 획득 로직만 남깁니다.
+                val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
                 
-                if (token == null) {
+                if (token == null) { // 실제 서버 연동 시에는 이 체크가 필요하겠지만, 현재는 가짜 토큰을 사용합니다.
                     _uiState.value = ProblemUiState.Error("로그인 토큰이 없습니다.")
                     return@launch
                 }

@@ -28,6 +28,7 @@ import com.example.fe.common.TopBar
 import com.example.fe.feature.concept.ConceptViewModel
 import com.example.fe.feature.concept.component.CodeExampleBox
 import com.example.fe.feature.concept.component.ConceptDetailBox
+import com.example.fe.feature.concept.component.ConceptImage
 import com.example.fe.feature.concept.component.ConceptSummaryBox
 import com.example.fe.feature.concept.component.PageIndicatorDots
 
@@ -129,6 +130,9 @@ fun ConceptDetailScreen(
                             )
                         }
                 )
+
+                // 개요 이미지
+                ConceptImage(imageUrl = currentConcept.imgUrl)
 
                 // 개요 설명 박스
                 ConceptSummaryBox(text = currentConcept.point)

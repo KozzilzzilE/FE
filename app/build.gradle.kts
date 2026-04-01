@@ -68,7 +68,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
     implementation(libs.play.services.auth)
-
+    implementation(libs.markdown.renderer.m3)
+    implementation(libs.coil.compose)
     //추가 ( solver 관련)
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.material:material-icons-extended")

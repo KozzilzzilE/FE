@@ -103,6 +103,8 @@ fun AppNavGraph() {
                 },
                 onSkipLoginClick = {
                     // 개발용: 로그인 절차 없이 바로 홈 화면으로 직행
+                    // [MOCK] 건너뛰기 시에도 가짜 토큰을 넣어서 Home API 실패 안 하게 방어
+                    com.example.fe.common.TokenManager.saveAccessToken("mock_access_token_PocketCo_2026")
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }

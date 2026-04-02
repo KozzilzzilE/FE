@@ -34,8 +34,8 @@ object Routes {
     const val PRACTICE_ROUTE = "practice/{$TOPIC_ID}/{$INITIAL_INDEX}"
 
     // Builders
-    fun step(topicId: Long, topicName: String) = "step/$topicId/$topicName"
-    fun detailList(topicId: Long, topicName: String, stepType: String) = "detail/$topicId/$topicName/$stepType"
+    fun step(topicId: Long, topicName: String) = "step/$topicId/${Uri.encode(topicName)}"
+    fun detailList(topicId: Long, topicName: String, stepType: String) = "detail/$topicId/${Uri.encode(topicName)}/$stepType"
     fun solve(problemId: Long) = "solve/$problemId"
     fun editor(problemId: Long) = "editor/$problemId"
     fun editorFull(problemId: Long) = "editor_full/$problemId"

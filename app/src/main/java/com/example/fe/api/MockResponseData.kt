@@ -345,23 +345,20 @@ object MockResponseData {
                 {
                     "problemId": 1,
                     "title": "두 수의 합",
-                    "level": "쉬움",
-                    "category": "Hash",
-                    "isSolved": true
+                    "difficulty": "EASY",
+                    "difficultyDisplayName": "쉬움"
                 },
                 {
                     "problemId": 2,
                     "title": "올바른 괄호",
-                    "level": "보통",
-                    "category": "Stack",
-                    "isSolved": false
+                    "difficulty": "MEDIUM",
+                    "difficultyDisplayName": "보통"
                 },
                 {
                     "problemId": 3,
                     "title": "프로세스",
-                    "level": "어려움",
-                    "category": "Queue",
-                    "isSolved": false
+                    "difficulty": "HARD",
+                    "difficultyDisplayName": "어려움"
                 }
             ]
         }

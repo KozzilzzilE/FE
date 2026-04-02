@@ -198,9 +198,7 @@ fun ChoiceButton(
 }
 
 // 보기 목록 생성
-// blanks가 null이면 빈 리스트 반환
+// Swagger 기준 blanks는 선택지 목록(정답 + 오답 포함)이므로 그대로 사용
 fun buildChoiceOptions(quiz: QuizItemDto): List<String> {
-    val correctOptions = quiz.blanks?.map { it.content } ?: emptyList()
-    val extras = listOf("")
-    return (correctOptions + extras).distinct()
+    return quiz.blanks?.map { it.content }?.distinct() ?: emptyList()
 }

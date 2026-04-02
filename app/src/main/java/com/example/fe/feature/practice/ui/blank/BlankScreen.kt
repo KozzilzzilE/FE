@@ -54,8 +54,8 @@ fun BlankScreen(
     onOptionClick: (String) -> Unit,
     onCheckAnswerClick: () -> Unit
 ) {
-    // API에서 blanks가 null일 수 있어서 안전하게 빈칸 개수 처리
-    val blankCount = quiz.blanks?.size ?: 0
+    // blanks는 선택지, 빈칸 개수는 totalBlanks 사용
+    val blankCount = quiz.totalBlanks
 
     Scaffold(
         containerColor = PageBg,

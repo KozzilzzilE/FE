@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+
 data class PracticeUiState(
     val isLoading: Boolean = false,
     val quizzes: List<QuizItemDto> = emptyList(),
@@ -45,6 +46,13 @@ class PracticeViewModel(
 
                 val quizzes = repository.getQuizzes(token, topicId, language)
 
+//                // 🔍 디버깅 로그 (서버 응답 확인)
+//                quizzes.forEach { quiz ->
+//                    android.util.Log.d("CHECK", "codeTemplate=\n${quiz.codeTemplate}")
+//                    android.util.Log.d("CHECK", "totalBlanks=${quiz.totalBlanks}")
+//                    android.util.Log.d("CHECK", "blanksSize=${quiz.blanks?.size}")
+//                }
+
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     quizzes = quizzes
@@ -58,6 +66,15 @@ class PracticeViewModel(
         }
     }
 
+    // blanks는 선택지 목록(정답 + 오답 포함)이며,
+    // answer 값이 있는 항목만 실제 정답이고 숫자 순서가 빈칸 순서
+    private fun getCorrectAnswersByOrder(quiz: QuizItemDto): List<String> {
+        return quiz.blanks
+            ?.filter { it.answer != null }
+            ?.sortedBy { it.answer }
+            ?.map { it.content }
+            ?: emptyList()
+    }
     // 사용자가 입력한 답과 정답 비교
     fun checkAnswers(
         quizIndex: Int,
@@ -65,15 +82,14 @@ class PracticeViewModel(
     ): Boolean {
         val quiz = _uiState.value.quizzes.getOrNull(quizIndex) ?: return false
 
-        // blanks가 null이면 채점 불가
-        val blanks = quiz.blanks ?: return false
+        val correctAnswers = getCorrectAnswersByOrder(quiz)
 
-        // 빈칸 수와 답 개수가 다르면 오답 처리
-        if (blanks.size != userAnswers.size) return false
+        // 실제 빈칸 수와 사용자 답 개수가 다르면 오답 처리
+        if (correctAnswers.size != userAnswers.size) return false
 
-        return blanks.mapIndexed { index, blank ->
-            userAnswers[index].trim() == blank.content.trim()
-        }.all { it }
+        return userAnswers.map { it.trim() }
+            .zip(correctAnswers.map { it.trim() })
+            .all { (user, correct) -> user == correct }
     }
 
     // 정답을 맞췄을 때 완료 처리 API 호출

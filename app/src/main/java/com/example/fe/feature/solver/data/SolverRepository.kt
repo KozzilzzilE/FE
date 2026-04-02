@@ -7,7 +7,7 @@ import com.example.fe.feature.solver.model.RunResult
 import com.example.fe.feature.solver.model.SolutionDetail
 import com.example.fe.feature.solver.model.SubmitResult
 import com.example.fe.feature.solver.model.SubmissionRecord
-import kotlinx.coroutines.delay
+import com.example.fe.feature.solver.model.TestCase
 
 class SolverRepository(private val apiService: ApiService) {
 
@@ -16,7 +16,7 @@ class SolverRepository(private val apiService: ApiService) {
 import java.util.*;
 
 public class Solution {
-    public int[] twoSum(int[] nums, int target) {
+    public int[] solution(int[] nums) {
         // 여기에 코드를 작성하세요...
         return new int[] {};
     }
@@ -24,9 +24,6 @@ public class Solution {
         """.trimIndent()
     }
 
-    /**
-     * 문제 상세 정보 로드
-     */
     suspend fun loadProblemDetail(token: String, problemId: Long, language: String): ProblemDetail {
         val response = apiService.getProblemDetail("Bearer $token", problemId, language)
         if (response.isSuccessful) {
@@ -34,17 +31,26 @@ public class Solution {
             if (body.isSuccess) {
                 val result = body.result ?: throw Exception("결과 데이터가 비어 있습니다.")
 
-                val firstTest = result.testCases.firstOrNull()
-                
+                val mappedTestCases = result.testCases.mapIndexed { index, tc ->
+                    TestCase(
+                        id = (index + 1).toLong(),
+                        input = tc.input,
+                        expectedOutput = tc.output
+                    )
+                }
+
+                val firstTest = mappedTestCases.firstOrNull()
+
                 return ProblemDetail(
                     problemId = result.exerciseId,
                     title = result.title,
                     difficultyLabel = "-",
                     description = result.description,
                     exampleInput = firstTest?.input ?: "-",
-                    exampleOutput = firstTest?.output ?: "-",
+                    exampleOutput = firstTest?.expectedOutput ?: "-",
                     constraints = result.constraint.split("\n").filter { it.isNotBlank() },
-                    initialCode = DEFAULT_JAVA_TEMPLATE
+                    initialCode = DEFAULT_JAVA_TEMPLATE,
+                    testCases = mappedTestCases
                 )
             } else {
                 throw Exception(body.message)
@@ -54,48 +60,81 @@ public class Solution {
         }
     }
 
-    /**
-     * 코드 실행 (Run 버튼)
-     */
-    suspend fun runCode(problemId: Long, code: String, language: String): RunResult {
-        // TODO: 실제 코드 실행 API 연동 필요 (현재 서버 미구현)
-        // 임시로 내부 Mock 로직 유지
-        Log.d("SolverRepository", "[MOCK] 코드 실행: problemId=$problemId")
-        delay(800)
-        return RunResult(
-            passed = true,
-            runtimeMs = 123,
-            errorMessage = null,
-            terminalLines = listOf(
-                "$ Running test cases...",
-                "Test 1: Passed ✓",
-                "Test 2: Passed ✓",
-                "All tests passed!"
+    suspend fun runCode(token: String, problemId: Long, code: String, language: String): RunResult {
+        val response = apiService.runCode(
+            token = "Bearer $token",
+            problemId = problemId,
+            language = language,
+            request = com.example.fe.data.dto.RunRequestDto(
+                sourceCode = code,
+                timeLimit = 1.0,
+                memoryLimit = 128000000
             )
         )
+
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+
+            if (body.isSuccess) {
+                val resultList = body.result ?: emptyList()
+                val firstToken = resultList.firstOrNull()?.token
+
+                return RunResult(
+                    passed = true,
+                    runtimeMs = null,
+                    errorMessage = null,
+                    terminalLines = listOf(
+                        "$ Run request sent",
+                        "실행 토큰: ${firstToken ?: "없음"}"
+                    )
+                )
+            } else {
+                throw Exception(body.message)
+            }
+        } else {
+            throw Exception("코드 실행 실패: ${response.code()}")
+        }
     }
 
-    /**
-     * 코드 제출 (Submit 버튼)
-     */
-    suspend fun submitCode(problemId: Long, code: String, language: String): Pair<SubmitResult, SubmissionRecord> {
-        // TODO: 실제 코드 제출 API 연동 필요 (현재 서버 미구현)
-        // 임시로 내부 Mock 로직 유지
-        Log.d("SolverRepository", "[MOCK] 코드 제출: problemId=$problemId")
-        delay(700)
-        val result = SubmitResult(isCorrect = true, runtimeMs = 210, errorMessage = null)
-        val record = SubmissionRecord(
-            date = "2026.02.09 13:40:00",
-            language = "Java",
-            result = if (result.isCorrect) "정답" else "오답",
-            isCorrect = result.isCorrect
+    suspend fun submitCode(token: String, problemId: Long, code: String, language: String): Pair<SubmitResult, SubmissionRecord> {
+        val response = apiService.submitCode(
+            token = "Bearer $token",
+            problemId = problemId,
+            language = language,
+            request = com.example.fe.data.dto.SubmitRequestDto(
+                sourceCode = code,
+                timeLimit = 1.0,
+                memoryLimit = 128000000
+            )
         )
-        return Pair(result, record)
+
+        if (response.isSuccessful) {
+            val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+
+            if (body.isSuccess) {
+                val submissionId = body.result?.submissionId ?: "unknown"
+
+                val result = SubmitResult(
+                    isCorrect = true,
+                    runtimeMs = null,
+                    errorMessage = null
+                )
+                val record = SubmissionRecord(
+                    date = "방금",
+                    language = language,
+                    result = "제출 완료",
+                    isCorrect = true
+                )
+                Log.d("SolverRepository", "제출 완료: submissionId=$submissionId")
+                return Pair(result, record)
+            } else {
+                throw Exception(body.message)
+            }
+        } else {
+            throw Exception("코드 제출 실패: ${response.code()}")
+        }
     }
 
-    /**
-     * 모범 답안 로드
-     */
     suspend fun loadSolution(token: String, problemId: Long, language: String): SolutionDetail {
         val response = apiService.getProblemSolution("Bearer $token", problemId, language)
         if (response.isSuccessful) {
@@ -114,12 +153,7 @@ public class Solution {
         }
     }
 
-    /**
-     * 제출 이력 로드 (현재 Mock만 존재)
-     */
     suspend fun loadSubmissionHistory(problemId: Long) {
-        Log.d("SolverRepository", "[MOCK] 제출 기록 조회: problemId=$problemId")
-        delay(200)
-        return
+        // TODO: 실제 API 호출 (서버 구현 후 연동)
     }
 }

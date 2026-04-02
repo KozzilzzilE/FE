@@ -71,3 +71,47 @@ data class SolutionResult(
     @SerializedName("language") val language: String,
     @SerializedName("solutionCode") val solutionCode: String
 )
+
+/**
+ * [문제 코드 실행 요청 API]
+ * POST /api/v1/problems/{problemId}/runs
+ */
+
+data class RunRequestDto(
+    @SerializedName("sourceCode") val sourceCode: String,
+    @SerializedName("timeLimit") val timeLimit: Double,
+    @SerializedName("memoryLimit") val memoryLimit: Int
+)
+
+data class RunResponseDto(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: List<RunResultItem>?
+)
+
+data class RunResultItem(
+    @SerializedName("token") val token: String
+)
+
+/**
+ * [문제 코드 정답 요청 API]
+ * POST /api/v1/problems/{problemId}/submissions
+ */
+
+data class SubmitRequestDto(
+    @SerializedName("sourceCode") val sourceCode: String,
+    @SerializedName("timeLimit") val timeLimit: Double,
+    @SerializedName("memoryLimit") val memoryLimit: Int
+)
+
+data class SubmitResponseDto(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: SubmitResult?
+)
+
+data class SubmitResult(
+    @SerializedName("submissionId") val submissionId: String
+)

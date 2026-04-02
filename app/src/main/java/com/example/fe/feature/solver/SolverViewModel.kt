@@ -20,10 +20,7 @@ class SolverViewModel(
     private val _uiState = MutableStateFlow(
         SolverUiState(
             code = "",
-            testCases = listOf(
-                TestCase(id = 1L, input = "nums = [2,7,11,15], target = 9", expectedOutput = "[0,1]"),
-                TestCase(id = 2L, input = "nums = [3,2,4], target = 6", expectedOutput = "[1,2]")
-            ),
+            testCases = emptyList(),
             // 초기 더미 제출 기록
             submissions = listOf(
                 SubmissionRecord("2026.01.21 14:29:00", "Java", "정답", true),
@@ -68,6 +65,7 @@ class SolverViewModel(
                     state.copy(
                         isLoadingProblem = false,
                         problemDetail = detail,
+                        testCases = detail.testCases,
                         // 초기 코드 주입: 빈 상태거나 기본 템플릿일 때만 덮어쓰기
                         code = if (state.code.isBlank() || state.code == detail.initialCode) detail.initialCode else state.code
                     )
@@ -98,13 +96,38 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isRunning = true, runResult = null) }
 
-            val runResultResponse = repository.runCode(state.problemId, state.code, state.language)
+            try {
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    _uiState.update {
+                        it.copy(
+                            isRunning = false,
+                            errorToast = "로그인 토큰이 없습니다."
+                        )
+                    }
+                    return@launch
+                }
 
-            _uiState.update {
-                it.copy(
-                    isRunning = false,
-                    runResult = runResultResponse
+                val runResultResponse = repository.runCode(
+                    token,
+                    state.problemId,
+                    state.code,
+                    state.language
                 )
+
+                _uiState.update {
+                    it.copy(
+                        isRunning = false,
+                        runResult = runResultResponse
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isRunning = false,
+                        errorToast = "코드 실행 실패: ${e.message}"
+                    )
+                }
             }
         }
     }
@@ -124,14 +147,39 @@ class SolverViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, submitResult = null) }
 
-            val (submitResult, newRecord) = repository.submitCode(state.problemId, state.code, state.language)
+            try {
+                val token = com.example.fe.common.TokenManager.getAccessToken()
+                if (token == null) {
+                    _uiState.update {
+                        it.copy(
+                            isSubmitting = false,
+                            errorToast = "로그인 토큰이 없습니다."
+                        )
+                    }
+                    return@launch
+                }
 
-            _uiState.update {
-                it.copy(
-                    isSubmitting = false,
-                    submitResult = submitResult,
-                    submissions = listOf(newRecord) + it.submissions
+                val (submitResult, newRecord) = repository.submitCode(
+                    token,
+                    state.problemId,
+                    state.code,
+                    state.language
                 )
+
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        submitResult = submitResult,
+                        submissions = listOf(newRecord) + it.submissions
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        errorToast = "코드 제출 실패: ${e.message}"
+                    )
+                }
             }
         }
     }

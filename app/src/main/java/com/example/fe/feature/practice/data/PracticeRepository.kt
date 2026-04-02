@@ -6,8 +6,6 @@ import com.example.fe.data.dto.QuizItemDto
 class PracticeRepository(
     private val apiService: ApiService
 ) {
-
-    // 응용학습 문제 조회
     suspend fun getQuizzes(
         token: String,
         topicId: Long,
@@ -29,7 +27,6 @@ class PracticeRepository(
         }
     }
 
-    // 응용 문제 완료 처리
     suspend fun completeQuiz(
         token: String,
         exerciseId: Long

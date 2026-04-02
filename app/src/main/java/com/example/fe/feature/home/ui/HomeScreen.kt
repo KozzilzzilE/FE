@@ -112,7 +112,7 @@ fun HomeScreen(
                         val name = (uiState as HomeUiState.Success).name
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "환영합니다, ${name}님!", fontWeight = FontWeight.Bold, color = Color.DarkGray)
-                            // 추천 문제 등 표시 로직 (TODO)
+                            // 추가 확장 기능 들어갈 자리
                         }
                     }
                 }

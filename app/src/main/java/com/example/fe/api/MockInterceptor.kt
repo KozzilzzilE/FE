@@ -84,6 +84,42 @@ class MockInterceptor : Interceptor {
             path.contains("/notions/completions") && method == "POST" ->
                 Pair(MockResponseData.NOTION_COMPLETION, "개념 학습 완료 처리")
 
+            // ── 응용 학습 ──
+            path.contains("/applications") && !path.contains("/completions") && method == "GET" ->
+                Pair(MockResponseData.PRACTICE_QUIZZES, "응용 학습 데이터")
+
+            // ── 응용 학습 완료 ──
+            path.contains("/applications/completions") && method == "POST" ->
+                Pair(MockResponseData.PRACTICE_COMPLETION, "응용 학습 완료 처리")
+
+            // ── 문제 학습 목록 ──
+            path.contains("/topics/") && path.contains("/problems") && method == "GET" ->
+                Pair(MockResponseData.PROBLEM_LIST, "문제 학습 목록")
+
+            // ── 문제 학습 상세 ──
+            path.contains("/problems/") && !path.contains("/runs") && 
+                    !path.contains("/submissions") && !path.contains("/solutions") && 
+                    !path.contains("/topics/") && method == "GET" -> {
+                val idStr = path.substringAfter("/problems/").substringBefore("?")
+                if (idStr == "1") {
+                     Pair(MockResponseData.PROBLEM_DETAIL_1, "두 수의 합 문제 상세")
+                } else {
+                     Pair(MockResponseData.PROBLEM_DETAIL_DEFAULT, "문제 상세 (기본)")
+                }
+            }
+
+            // ── 코드 실행 ──
+            path.contains("/runs") && method == "POST" ->
+                Pair(MockResponseData.PROBLEM_RUN, "코드 실행 결과")
+
+            // ── 코드 제출 ──
+            path.contains("/submissions") && method == "POST" ->
+                Pair(MockResponseData.PROBLEM_SUBMIT, "코드 제출 결과")
+
+            // ── 모범 답안 ──
+            path.contains("/solutions") && method == "GET" ->
+                Pair(MockResponseData.PROBLEM_SOLUTION, "모범 답안")
+
             // ── 언어 목록 ──
             path.contains("/languages") && method == "GET" ->
                 Pair(MockResponseData.LANGUAGES, "언어 목록 (4개)")

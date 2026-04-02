@@ -266,6 +266,195 @@ object MockResponseData {
     """.trimIndent()
 
     // ─────────────────────────────────────────────
+    // [응용 학습 목록] GET /api/v1/learnings/{topicId}/applications
+    // ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "count": 3,
+            "appliedExercises": [
+                {
+                    "exerciseId": 1,
+                    "title": "HashMap으로 문자 빈도 세기",
+                    "description": "문자열에서 각 문자가 몇 번 등장하는지 HashMap으로 세는 코드의 빈칸을 채워보세요.",
+                    "codeTemplate": "Map<Character, Integer> map = new ____<>();\nfor (char c : str.toCharArray()) {\n    map.____(c, map.getOrDefault(c, 0) + 1);\n}\nreturn map;",
+                    "appliedCompleted": false,
+                    "totalBlanks": 2,
+                    "blanks": [
+                        { "content": "HashMap", "answer": 1 },
+                        { "content": "put", "answer": 2 }
+                    ]
+                },
+                {
+                    "exerciseId": 2,
+                    "title": "HashSet으로 중복 원소 제거",
+                    "description": "정수 배열에서 중복된 원소를 제거하고 고유한 원소만 남기는 코드의 빈칸을 채워보세요.",
+                    "codeTemplate": "Set<Integer> set = new ____<>();\nfor (int n : nums) {\n    set.____(n);\n}\nreturn new ArrayList<>(set);",
+                    "appliedCompleted": false,
+                    "totalBlanks": 2,
+                    "blanks": [
+                        { "content": "HashSet", "answer": 1 },
+                        { "content": "add", "answer": 2 }
+                    ]
+                },
+                {
+                    "exerciseId": 3,
+                    "title": "두 배열의 교집합 찾기",
+                    "description": "두 배열에서 공통으로 존재하는 원소를 찾는 코드의 빈칸을 채워보세요.",
+                    "codeTemplate": "Set<Integer> set = new HashSet<>();\nfor (int n : nums1) set.____(n);\nList<Integer> result = new ArrayList<>();\nfor (int n : nums2) {\n    if (set.____(n)) result.add(n);\n}\nreturn result;",
+                    "appliedCompleted": true,
+                    "totalBlanks": 2,
+                    "blanks": [
+                        { "content": "add", "answer": 1 },
+                        { "content": "contains", "answer": 2 }
+                    ]
+                }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    val PRACTICE_COMPLETION = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "userName": "이성규",
+            "appliedCompleted": true
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [문제 학습 목록] GET /api/v1/topics/{topicId}/problems
+    // ─────────────────────────────────────────────
+    val PROBLEM_LIST = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "topicId": 1,
+            "count": 3,
+            "problems": [
+                {
+                    "problemId": 1,
+                    "title": "두 수의 합",
+                    "level": "쉬움",
+                    "category": "Hash",
+                    "isSolved": true
+                },
+                {
+                    "problemId": 2,
+                    "title": "올바른 괄호",
+                    "level": "보통",
+                    "category": "Stack",
+                    "isSolved": false
+                },
+                {
+                    "problemId": 3,
+                    "title": "프로세스",
+                    "level": "어려움",
+                    "category": "Queue",
+                    "isSolved": false
+                }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [문제 학습 상세] GET /api/v1/problems/{problemId}
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1 = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "title": "두 수의 합",
+            "description": "정수 배열 nums와 정수 target이 주어집니다. 합이 target이 되는 두 수의 인덱스를 반환하세요.\n각 입력에는 정확히 하나의 해답이 있으며, 같은 원소를 두 번 사용할 수 없습니다.",
+            "constraint": "2 ≤ nums.length ≤ 10⁴\n-10⁹ ≤ nums[i] ≤ 10⁹\n-10⁹ ≤ target ≤ 10⁹\n유효한 답이 하나 이상 존재합니다.",
+            "testCases": [
+                { "input": "nums = [2, 7, 11, 15], target = 9", "output": "[0, 1]" },
+                { "input": "nums = [3, 2, 4], target = 6", "output": "[1, 2]" },
+                { "input": "nums = [3, 3], target = 6", "output": "[0, 1]" }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    val PROBLEM_DETAIL_DEFAULT = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 2,
+            "title": "올바른 괄호 (Mock Data)",
+            "description": "'(' 와 ')' 로만 이루어진 문자열 s가 주어집니다. s가 올바른 괄호이면 true를, 올바르지 않으면 false를 반환하세요.",
+            "constraint": "0 < s.length ≤ 100000",
+            "testCases": [
+                { "input": "s = \"(())()\"", "output": "true" },
+                { "input": "s = \")()(\"", "output": "false" }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [코드 실행] POST /api/v1/problems/{problemId}/runs
+    // ─────────────────────────────────────────────
+    val PROBLEM_RUN = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": [
+            { "token": "mock_test_token_1" }
+        ]
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [코드 제출] POST /api/v1/problems/{problemId}/submissions
+    // ─────────────────────────────────────────────
+    val PROBLEM_SUBMIT = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "submissionId": 999
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [모범 답안] GET /api/v1/problems/{problemId}/solutions
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "languageId": 1,
+            "solutionCode": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> map = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            int complement = target - nums[i];\n            if (map.containsKey(complement)) return new int[]{ map.get(complement), i };\n            map.put(nums[i], i);\n        }\n        return new int[]{};\n    }\n}",
+            "solutionText": "해시맵을 사용하면 O(n)으로 해결할 수 있습니다.\n\n각 숫자를 순회하면서, `target - 현재값`이 이미 맵에 있는지 확인합니다.\n있다면 그 인덱스와 현재 인덱스를 반환합니다.",
+            "lineSolution": "12-18 라인을 참고하세요."
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
     // [기본 성공 응답] 매칭되지 않는 요청의 기본 응답
     // ─────────────────────────────────────────────
     val DEFAULT_SUCCESS = """

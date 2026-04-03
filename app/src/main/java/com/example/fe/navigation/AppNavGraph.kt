@@ -25,6 +25,10 @@ import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.list.ui.DetailListScreen
+// 문제 목록 조회 추가
+import com.example.fe.feature.list.ui.AllProblemListScreen
+import com.example.fe.feature.list.ui.AllProblemDifficultyFilter
+import com.example.fe.feature.list.ui.AllProblemItem
 import com.example.fe.feature.step.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.ui.HomeScreen
@@ -156,6 +160,82 @@ fun AppNavGraph() {
                 }
             )
         }
+
+        // 4-1. 전체 문제 목록 화면 (문제 탭 누를 시) 임시 더미 데이터
+        composable("problem") {
+            var searchQuery by remember { mutableStateOf("") }
+            var selectedDifficulty by remember { mutableStateOf(AllProblemDifficultyFilter.ALL) }
+
+            val sampleProblems = listOf(
+                AllProblemItem(
+                    problemId = 1,
+                    title = "배열 두 배 만들기",
+                    difficulty = Difficulty.EASY,
+                    author = "알고마스터",
+                    bookmarkCount = 120
+                ),
+                AllProblemItem(
+                    problemId = 2,
+                    title = "최빈값 구하기",
+                    difficulty = Difficulty.MEDIUM,
+                    author = "코딩왕",
+                    bookmarkCount = 85
+                ),
+                AllProblemItem(
+                    problemId = 3,
+                    title = "문자열 뒤집기",
+                    difficulty = Difficulty.EASY,
+                    author = "알고마스터",
+                    bookmarkCount = 210
+                ),
+                AllProblemItem(
+                    problemId = 4,
+                    title = "특정 문자 제거하기",
+                    difficulty = Difficulty.HARD,
+                    author = "JS장인",
+                    bookmarkCount = 45
+                ),
+                AllProblemItem(
+                    problemId = 5,
+                    title = "다음에 올 숫자",
+                    difficulty = Difficulty.HARD,
+                    author = "수학귀신",
+                    bookmarkCount = 310
+                )
+            )
+
+            val filteredProblems = sampleProblems.filter { problem ->
+                val matchesSearch = problem.title.contains(searchQuery, ignoreCase = true)
+
+                val matchesDifficulty = when (selectedDifficulty) {
+                    AllProblemDifficultyFilter.ALL -> true
+                    AllProblemDifficultyFilter.EASY -> problem.difficulty == Difficulty.EASY
+                    AllProblemDifficultyFilter.MEDIUM -> problem.difficulty == Difficulty.MEDIUM
+                    AllProblemDifficultyFilter.HARD -> problem.difficulty == Difficulty.HARD
+                }
+
+                matchesSearch && matchesDifficulty
+            }
+
+            AllProblemListScreen(
+                problems = filteredProblems,
+                selectedDifficulty = selectedDifficulty,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onDifficultySelected = { selectedDifficulty = it },
+                onProblemClick = { problem ->
+                    navController.navigate(Routes.solve(problem.problemId))
+                },
+                onFilterClick = {},
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
 
         // 5. 메인 알고리즘 주제 목록 화면 (학습 탭 누를 시)
         composable(route = Routes.TOPIC) {

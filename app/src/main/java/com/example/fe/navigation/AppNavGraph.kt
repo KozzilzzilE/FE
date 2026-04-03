@@ -166,54 +166,26 @@ fun AppNavGraph() {
             var searchQuery by remember { mutableStateOf("") }
             var selectedDifficulty by remember { mutableStateOf(AllProblemDifficultyFilter.ALL) }
 
-            val sampleProblems = listOf(
-                AllProblemItem(
-                    problemId = 1,
-                    title = "배열 두 배 만들기",
-                    difficulty = Difficulty.EASY,
-                    author = "알고마스터",
-                    bookmarkCount = 120
-                ),
-                AllProblemItem(
-                    problemId = 2,
-                    title = "최빈값 구하기",
-                    difficulty = Difficulty.MEDIUM,
-                    author = "코딩왕",
-                    bookmarkCount = 85
-                ),
-                AllProblemItem(
-                    problemId = 3,
-                    title = "문자열 뒤집기",
-                    difficulty = Difficulty.EASY,
-                    author = "알고마스터",
-                    bookmarkCount = 210
-                ),
-                AllProblemItem(
-                    problemId = 4,
-                    title = "특정 문자 제거하기",
-                    difficulty = Difficulty.HARD,
-                    author = "JS장인",
-                    bookmarkCount = 45
-                ),
-                AllProblemItem(
-                    problemId = 5,
-                    title = "다음에 올 숫자",
-                    difficulty = Difficulty.HARD,
-                    author = "수학귀신",
-                    bookmarkCount = 310
+            var sampleProblems by remember {
+                mutableStateOf(
+                    listOf(
+                        AllProblemItem(1, "배열 두 배 만들기", Difficulty.EASY, 120, false),
+                        AllProblemItem(2, "최빈값 구하기", Difficulty.MEDIUM, 85, false),
+                        AllProblemItem(3, "문자열 뒤집기", Difficulty.EASY, 210, true),
+                        AllProblemItem(4, "특정 문자 제거하기", Difficulty.HARD, 45, false),
+                        AllProblemItem(5, "다음에 올 숫자", Difficulty.HARD, 310, true)
+                    )
                 )
-            )
+            }
 
             val filteredProblems = sampleProblems.filter { problem ->
                 val matchesSearch = problem.title.contains(searchQuery, ignoreCase = true)
-
                 val matchesDifficulty = when (selectedDifficulty) {
                     AllProblemDifficultyFilter.ALL -> true
                     AllProblemDifficultyFilter.EASY -> problem.difficulty == Difficulty.EASY
                     AllProblemDifficultyFilter.MEDIUM -> problem.difficulty == Difficulty.MEDIUM
                     AllProblemDifficultyFilter.HARD -> problem.difficulty == Difficulty.HARD
                 }
-
                 matchesSearch && matchesDifficulty
             }
 
@@ -225,6 +197,15 @@ fun AppNavGraph() {
                 onDifficultySelected = { selectedDifficulty = it },
                 onProblemClick = { problem ->
                     navController.navigate(Routes.solve(problem.problemId))
+                },
+                onBookmarkClick = { problemId ->
+                    sampleProblems = sampleProblems.map { problem ->
+                        if (problem.problemId == problemId) {
+                            problem.copy(isBookmarked = !problem.isBookmarked)
+                        } else {
+                            problem
+                        }
+                    }
                 },
                 onFilterClick = {},
                 onNavigate = { route ->

@@ -4,6 +4,6 @@ data class AllProblemItem(
     val problemId: Long,
     val title: String,
     val difficulty: Difficulty,
-    val author: String,
-    val bookmarkCount: Int
+    val bookmarkCount: Int,
+    val isBookmarked: Boolean = false
 )

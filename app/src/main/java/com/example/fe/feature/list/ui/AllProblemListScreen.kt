@@ -19,7 +19,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,8 +55,8 @@ data class AllProblemItem(
     val problemId: Long,
     val title: String,
     val difficulty: Difficulty,
-    val author: String = "알고마스터",
-    val bookmarkCount: Int = 0
+    val bookmarkCount: Int = 0,
+    val isBookmarked: Boolean = false
 )
 
 @Composable
@@ -65,6 +67,7 @@ fun AllProblemListScreen(
     onSearchQueryChange: (String) -> Unit,
     onDifficultySelected: (AllProblemDifficultyFilter) -> Unit,
     onProblemClick: (AllProblemItem) -> Unit,
+    onBookmarkClick: (Long) -> Unit,
     onFilterClick: () -> Unit = {},
     onNavigate: (String) -> Unit
 ) {
@@ -134,7 +137,8 @@ fun AllProblemListScreen(
                 items(problems) { problem ->
                     AllProblemCard(
                         problem = problem,
-                        onClick = { onProblemClick(problem) }
+                        onClick = { onProblemClick(problem) },
+                        onBookmarkClick = { onBookmarkClick(problem.problemId) }
                     )
                 }
             }
@@ -271,7 +275,8 @@ private fun DifficultyChip(
 @Composable
 private fun AllProblemCard(
     problem: AllProblemItem,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onBookmarkClick: () -> Unit
 ) {
     Card(
         onClick = onClick,
@@ -290,11 +295,28 @@ private fun AllProblemCard(
             ) {
                 DifficultyBadge(difficulty = problem.difficulty)
 
-                Text(
-                    text = "☆ ${problem.bookmarkCount}",
-                    fontSize = 12.sp,
-                    color = Color(0xFF94A3B8)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (problem.isBookmarked) {
+                            Icons.Filled.Star
+                        } else {
+                            Icons.Outlined.StarBorder
+                        },
+                        contentDescription = "즐겨찾기",
+                        tint = if (problem.isBookmarked) Color(0xFFFFC107) else Color(0xFF94A3B8),
+                        modifier = Modifier.clickable { onBookmarkClick() }
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "${problem.bookmarkCount}",
+                        fontSize = 12.sp,
+                        color = Color(0xFF94A3B8)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -304,14 +326,6 @@ private fun AllProblemCard(
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF111827)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "출제자: ${problem.author}",
-                fontSize = 12.sp,
-                color = Color(0xFF94A3B8)
             )
         }
     }
@@ -353,44 +367,47 @@ private fun DifficultyBadge(
 private fun AllProblemListScreenPreview() {
     var searchQuery by remember { mutableStateOf("") }
     var selectedDifficulty by remember { mutableStateOf(AllProblemDifficultyFilter.ALL) }
-
-    val sampleProblems = listOf(
-        AllProblemItem(
-            problemId = 1,
-            title = "배열 두 배 만들기",
-            difficulty = Difficulty.EASY,
-            author = "알고마스터",
-            bookmarkCount = 120
-        ),
-        AllProblemItem(
-            problemId = 2,
-            title = "최빈값 구하기",
-            difficulty = Difficulty.MEDIUM,
-            author = "코딩왕",
-            bookmarkCount = 85
-        ),
-        AllProblemItem(
-            problemId = 3,
-            title = "문자열 뒤집기",
-            difficulty = Difficulty.EASY,
-            author = "알고마스터",
-            bookmarkCount = 210
-        ),
-        AllProblemItem(
-            problemId = 4,
-            title = "특정 문자 제거하기",
-            difficulty = Difficulty.HARD,
-            author = "JS장인",
-            bookmarkCount = 45
-        ),
-        AllProblemItem(
-            problemId = 5,
-            title = "다음에 올 숫자",
-            difficulty = Difficulty.HARD,
-            author = "수학귀신",
-            bookmarkCount = 310
+    var sampleProblems by remember {
+        mutableStateOf(
+            listOf(
+                AllProblemItem(
+                    problemId = 1,
+                    title = "배열 두 배 만들기",
+                    difficulty = Difficulty.EASY,
+                    bookmarkCount = 120,
+                    isBookmarked = false
+                ),
+                AllProblemItem(
+                    problemId = 2,
+                    title = "최빈값 구하기",
+                    difficulty = Difficulty.MEDIUM,
+                    bookmarkCount = 85,
+                    isBookmarked = false
+                ),
+                AllProblemItem(
+                    problemId = 3,
+                    title = "문자열 뒤집기",
+                    difficulty = Difficulty.EASY,
+                    bookmarkCount = 210,
+                    isBookmarked = true
+                ),
+                AllProblemItem(
+                    problemId = 4,
+                    title = "특정 문자 제거하기",
+                    difficulty = Difficulty.HARD,
+                    bookmarkCount = 45,
+                    isBookmarked = false
+                ),
+                AllProblemItem(
+                    problemId = 5,
+                    title = "다음에 올 숫자",
+                    difficulty = Difficulty.HARD,
+                    bookmarkCount = 310,
+                    isBookmarked = true
+                )
+            )
         )
-    )
+    }
 
     val filteredProblems = sampleProblems.filter { problem ->
         val matchesSearch = problem.title.contains(searchQuery, ignoreCase = true)
@@ -410,6 +427,15 @@ private fun AllProblemListScreenPreview() {
         onSearchQueryChange = { searchQuery = it },
         onDifficultySelected = { selectedDifficulty = it },
         onProblemClick = {},
+        onBookmarkClick = { problemId ->
+            sampleProblems = sampleProblems.map { problem ->
+                if (problem.problemId == problemId) {
+                    problem.copy(isBookmarked = !problem.isBookmarked)
+                } else {
+                    problem
+                }
+            }
+        },
         onFilterClick = {},
         onNavigate = {}
     )

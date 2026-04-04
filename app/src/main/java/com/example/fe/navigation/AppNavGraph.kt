@@ -44,6 +44,11 @@ import com.example.fe.feature.concept.ui.ConceptDetailScreen
 import com.example.fe.feature.practice.PracticeViewModel
 import com.example.fe.feature.practice.PracticeViewModelFactory
 import com.example.fe.feature.practice.data.PracticeRepository
+// 마이페이지 추가
+import com.example.fe.feature.profile.MyPageViewModel
+import com.example.fe.feature.profile.MyPageViewModelFactory
+import com.example.fe.feature.profile.data.ProfileRepository
+import com.example.fe.feature.profile.ui.MyPageScreen
 import com.example.fe.feature.list.ProblemListViewModel
 import com.example.fe.feature.list.ProblemListViewModelFactory
 import com.example.fe.feature.list.ProblemUiState
@@ -216,7 +221,37 @@ fun AppNavGraph() {
                 }
             )
         }
+        composable(Routes.MY) {
+            val profileRepository = remember {
+                ProfileRepository(RetrofitClient.instance)
+            }
+            val factory = remember(profileRepository) {
+                MyPageViewModelFactory(profileRepository)
+            }
+            val viewModel: MyPageViewModel = viewModel(factory = factory)
 
+            MyPageScreen(
+                viewModel = viewModel,
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onEditProfileClick = {},
+                onLanguageClick = {},
+                onFavoriteClick = {},
+                onSubmissionClick = {},
+                onLogoutClick = {
+                    com.example.fe.common.TokenManager.clearAccessToken()
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onSettingsClick = {}
+            )
+        }
 
         // 5. 메인 알고리즘 주제 목록 화면 (학습 탭 누를 시)
         composable(route = Routes.TOPIC) {

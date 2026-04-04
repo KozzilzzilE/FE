@@ -13,12 +13,15 @@ import com.example.fe.data.dto.PracticeResponseDto
 import com.example.fe.data.dto.PracticeCompletionResponseDto
 import com.example.fe.data.dto.LanguageResponse
 
+import com.example.fe.data.dto.MyPageResponseDto
+
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Header
 
 interface ApiService {
     // --- [인증] ---
@@ -129,5 +132,13 @@ interface ApiService {
     // 언어 목록 조회
     @GET("api/v1/languages/lists")
     suspend fun getLanguages(): Response<LanguageResponse>
-    
+
+    // 마이페이지 관련
+    @GET("api/v1/users/main")
+    suspend fun getMyPageInfo(
+        @Header("Authorization") token: String
+    ): Response<MyPageResponseDto>
+
 }
+
+

@@ -30,7 +30,7 @@ class MyPageViewModel(
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     userName = response.result.name,
-                    bio = response.result.languageName
+                    languageName = response.result.languageName
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -66,6 +66,34 @@ class MyPageViewModel(
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
                     error = e.message ?: "프로필 수정 실패"
+                )
+            }
+        }
+    }
+
+    fun updatePreferredLanguageTemp(
+        languageName: String,
+        onSuccess: () -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isSaving = true,
+                error = null
+            )
+
+            try {
+                delay(300)
+
+                _uiState.value = _uiState.value.copy(
+                    isSaving = false,
+                    languageName = languageName
+                )
+
+                onSuccess()
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isSaving = false,
+                    error = e.message ?: "선호 언어 변경 실패"
                 )
             }
         }

@@ -7,6 +7,7 @@ data class MyPageUiState(
     val isSaving: Boolean = false,
     val userName: String = "",
     val bio: String = "",
+    val languageName: String = "",
     val level: Int = 1,
     val stat: ProfileStat = ProfileStat(
         rank = "#142",

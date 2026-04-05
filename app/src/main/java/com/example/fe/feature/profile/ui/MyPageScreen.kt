@@ -109,7 +109,7 @@ private fun MyPageScreenContent(
 
             ProfileHeader(
                 userName = if (uiState.userName.isBlank()) "사용자" else uiState.userName,
-                bio = if (uiState.bio.isBlank()) "언어 정보 없음" else uiState.bio,
+                bio = if (uiState.languageName.isBlank()) "언어 정보 없음" else uiState.languageName,
                 level = uiState.level
             )
 
@@ -263,7 +263,7 @@ private fun MyPageScreenPreview() {
     MyPageScreenContent(
         uiState = MyPageUiState(
             userName = "이성규",
-            bio = "JAVA",
+            languageName = "JAVA",
             level = 1,
             stat = ProfileStat(
                 rank = "#142",

@@ -49,6 +49,8 @@ import com.example.fe.feature.profile.MyPageViewModel
 import com.example.fe.feature.profile.MyPageViewModelFactory
 import com.example.fe.feature.profile.data.ProfileRepository
 import com.example.fe.feature.profile.ui.MyPageScreen
+import com.example.fe.feature.profile.ui.EditProfileScreen
+import com.example.fe.feature.profile.ui.LanguageSettingScreen
 import com.example.fe.feature.list.ProblemListViewModel
 import com.example.fe.feature.list.ProblemListViewModelFactory
 import com.example.fe.feature.list.ProblemUiState
@@ -242,7 +244,9 @@ fun AppNavGraph() {
                 onEditProfileClick = {
                     navController.navigate(Routes.EDIT_PROFILE)
                 },
-                onLanguageClick = {},
+                onLanguageClick = {
+                    navController.navigate(Routes.LANGUAGE_SETTING)
+                },
                 onFavoriteClick = {},
                 onSubmissionClick = {},
                 onLogoutClick = {
@@ -274,6 +278,29 @@ fun AppNavGraph() {
                 onBackClick = { navController.popBackStack() },
                 onSaveClick = { name, bio ->
                     viewModel.updateProfileTemp(name, bio) {
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
+        //언어 수정 임의
+        composable(Routes.LANGUAGE_SETTING) {
+            val profileRepository = remember {
+                ProfileRepository(RetrofitClient.instance)
+            }
+            val factory = remember(profileRepository) {
+                MyPageViewModelFactory(profileRepository)
+            }
+            val viewModel: MyPageViewModel = viewModel(factory = factory)
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            LanguageSettingScreen(
+                initialLanguage = if (uiState.languageName.isBlank()) "Python" else uiState.languageName,
+                isSaving = uiState.isSaving,
+                onBackClick = { navController.popBackStack() },
+                onSaveClick = { language ->
+                    viewModel.updatePreferredLanguageTemp(language) {
                         navController.popBackStack()
                     }
                 }

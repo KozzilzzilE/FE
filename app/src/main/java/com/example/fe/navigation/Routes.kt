@@ -14,7 +14,10 @@ object Routes {
     const val STEP = "step"
     const val PROBLEM = "problem"
     const val MY = "my"
+
+    //Mypage
     const val EDIT_PROFILE = "edit_profile"
+    const val LANGUAGE_SETTING = "language_setting"
 
     // Args
     const val PROBLEM_ID = "problemId"

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fe.feature.profile.data.ProfileRepository
 import com.example.fe.feature.profile.ui.MyPageUiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +36,36 @@ class MyPageViewModel(
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = e.message ?: "마이페이지 정보 조회 실패"
+                )
+            }
+        }
+    }
+
+    fun updateProfileTemp(
+        name: String,
+        bio: String,
+        onSuccess: () -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isSaving = true,
+                error = null
+            )
+
+            try {
+                delay(300)
+
+                _uiState.value = _uiState.value.copy(
+                    isSaving = false,
+                    userName = name,
+                    bio = bio
+                )
+
+                onSuccess()
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isSaving = false,
+                    error = e.message ?: "프로필 수정 실패"
                 )
             }
         }

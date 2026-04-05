@@ -221,6 +221,7 @@ fun AppNavGraph() {
                 }
             )
         }
+        //마이페이지
         composable(Routes.MY) {
             val profileRepository = remember {
                 ProfileRepository(RetrofitClient.instance)
@@ -238,7 +239,9 @@ fun AppNavGraph() {
                         restoreState = true
                     }
                 },
-                onEditProfileClick = {},
+                onEditProfileClick = {
+                    navController.navigate(Routes.EDIT_PROFILE)
+                },
                 onLanguageClick = {},
                 onFavoriteClick = {},
                 onSubmissionClick = {},
@@ -250,6 +253,30 @@ fun AppNavGraph() {
                     }
                 },
                 onSettingsClick = {}
+            )
+        }
+        //개인정보 수정 임시
+        composable(Routes.EDIT_PROFILE) {
+            val profileRepository = remember {
+                ProfileRepository(RetrofitClient.instance)
+            }
+            val factory = remember(profileRepository) {
+                MyPageViewModelFactory(profileRepository)
+            }
+            val viewModel: MyPageViewModel = viewModel(factory = factory)
+
+            val uiState by viewModel.uiState.collectAsState()
+
+            com.example.fe.feature.profile.ui.EditProfileScreen(
+                initialName = uiState.userName,
+                initialBio = uiState.bio,
+                isSaving = uiState.isSaving,
+                onBackClick = { navController.popBackStack() },
+                onSaveClick = { name, bio ->
+                    viewModel.updateProfileTemp(name, bio) {
+                        navController.popBackStack()
+                    }
+                }
             )
         }
 

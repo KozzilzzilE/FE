@@ -1,7 +1,6 @@
 package com.example.fe.feature.profile.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.common.TopBar
+import com.example.fe.data.dto.LanguageResult
 import com.example.fe.feature.profile.component.SaveButtonBar
 
 data class LanguageOptionUi(
@@ -47,38 +47,19 @@ data class LanguageOptionUi(
 @Composable
 fun LanguageSettingScreen(
     initialLanguage: String = "Python",
+    languages: List<LanguageResult>,
     isSaving: Boolean = false,
     onBackClick: () -> Unit = {},
     onSaveClick: (String) -> Unit = {}
 ) {
-    val languageOptions = remember {
-        listOf(
+    val languageOptions = remember(languages) {
+        languages.map {
             LanguageOptionUi(
-                id = 1,
-                name = "Python",
-                description = "알고리즘 코테테스트 추천"
-            ),
-            LanguageOptionUi(
-                id = 2,
-                name = "Java",
-                description = "엔터프라이즈 환경 추천"
-            ),
-            LanguageOptionUi(
-                id = 3,
-                name = "C++",
-                description = "가장 빠른 실행 속도"
-            ),
-            LanguageOptionUi(
-                id = 4,
-                name = "JavaScript",
-                description = "프론트엔드/백엔드 범용"
-            ),
-            LanguageOptionUi(
-                id = 5,
-                name = "Go",
-                description = "효율적인 동시성 처리"
+                id = it.languageId,
+                name = it.name,
+                description = getLanguageDescription(it.name)
             )
-        )
+        }
     }
 
     var selectedLanguage by remember { mutableStateOf(initialLanguage) }
@@ -127,7 +108,7 @@ fun LanguageSettingScreen(
                     LanguageOptionCard(
                         title = language.name,
                         description = language.description,
-                        isSelected = selectedLanguage == language.name,
+                        isSelected = selectedLanguage.equals(language.name, ignoreCase = true),
                         onClick = {
                             selectedLanguage = language.name
                         }
@@ -135,6 +116,18 @@ fun LanguageSettingScreen(
                 }
             }
         }
+    }
+}
+
+private fun getLanguageDescription(name: String): String {
+    return when (name.uppercase()) {
+        "PYTHON" -> "알고리즘 코딩 테스트 추천"
+        "JAVA" -> "엔터프라이즈 환경 추천"
+        "C++", "CPP" -> "가장 빠른 실행 속도"
+        "JAVASCRIPT" -> "프론트엔드/백엔드 범용"
+        "GO" -> "효율적인 동시성 처리"
+        "KOTLIN" -> "안드로이드 개발 추천"
+        else -> "선호 언어로 사용할 수 있어요"
     }
 }
 
@@ -213,6 +206,11 @@ private fun LanguageOptionCard(
 @Composable
 private fun LanguageSettingScreenPreview() {
     LanguageSettingScreen(
-        initialLanguage = "Python"
+        initialLanguage = "Python",
+        languages = listOf(
+            LanguageResult(languageId = 1, name = "PYTHON"),
+            LanguageResult(languageId = 2, name = "JAVA"),
+            LanguageResult(languageId = 3, name = "C++")
+        )
     )
 }

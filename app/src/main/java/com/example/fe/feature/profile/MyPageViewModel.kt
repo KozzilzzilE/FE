@@ -1,97 +1,141 @@
 package com.example.fe.feature.profile
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fe.common.LanguagePreferenceManager
 import com.example.fe.feature.profile.data.ProfileRepository
 import com.example.fe.feature.profile.ui.MyPageUiState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MyPageViewModel(
+    application: Application,
     private val repository: ProfileRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(MyPageUiState())
     val uiState: StateFlow<MyPageUiState> = _uiState.asStateFlow()
 
-    fun loadMyPageInfo() {
+    init {
+        loadMyPageAndLanguages()
+    }
+
+    fun loadMyPageAndLanguages() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 error = null
             )
 
-            try {
-                val response = repository.getMyPageInfo()
+            runCatching {
+                val myPageResponse = repository.getMyPageInfo()
+                val languageList = repository.getLanguageList()
+                Pair(myPageResponse, languageList)
+            }.onSuccess { (myPageResponse, languageList) ->
+                val result = myPageResponse.result
+
+                val serverLanguage = result.languageName
+                val savedLanguage = LanguagePreferenceManager.getLanguage(getApplication())
+
+                val finalLanguage = when {
+                    savedLanguage.isNotBlank() -> savedLanguage
+                    serverLanguage.isNotBlank() -> serverLanguage
+                    else -> "JAVA"
+                }
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    userName = response.result.name,
-                    languageName = response.result.languageName
+                    userName = result.name, // DTO 필드명 확인: name인지 nickname인지
+                    languageName = finalLanguage,
+                    languageOptions = languageList,
+                    error = null
                 )
-            } catch (e: Exception) {
+            }.onFailure { e ->
+                val savedLanguage = LanguagePreferenceManager.getLanguage(getApplication())
+
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = e.message ?: "마이페이지 정보 조회 실패"
+                    userName = _uiState.value.userName.ifBlank { "사용자" },
+                    languageName = if (savedLanguage.isNotBlank()) savedLanguage else "JAVA",
+                    error = e.message
                 )
             }
         }
     }
 
-    fun updateProfileTemp(
-        name: String,
-        onSuccess: () -> Unit = {}
-    ) {
+    fun loadMyPageInfo() {
+        loadMyPageAndLanguages()
+    }
+
+    fun loadLanguageList() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                error = null
+            )
+
+            runCatching {
+                repository.getLanguageList()
+            }.onSuccess { languages ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    languageOptions = languages
+                )
+            }.onFailure { e ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+            }
+        }
+    }
+
+    fun updatePreferredLanguage(language: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isSaving = true,
                 error = null
             )
 
-            try {
-                delay(300)
+            runCatching {
+                LanguagePreferenceManager.saveLanguage(getApplication(), language)
+            }.onSuccess {
+                _uiState.value = _uiState.value.copy(
+                    isSaving = false,
+                    languageName = language
+                )
+                onSuccess()
+            }.onFailure { e ->
+                _uiState.value = _uiState.value.copy(
+                    isSaving = false,
+                    error = e.message
+                )
+            }
+        }
+    }
 
+    fun updateProfileTemp(name: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isSaving = true,
+                error = null
+            )
+
+            runCatching {
+                // 임시 반영
+            }.onSuccess {
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
                     userName = name
                 )
-
                 onSuccess()
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
-                    error = e.message ?: "프로필 수정 실패"
-                )
-            }
-        }
-    }
-
-    fun updatePreferredLanguageTemp(
-        languageName: String,
-        onSuccess: () -> Unit = {}
-    ) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isSaving = true,
-                error = null
-            )
-
-            try {
-                delay(300)
-
-                _uiState.value = _uiState.value.copy(
-                    isSaving = false,
-                    languageName = languageName
-                )
-
-                onSuccess()
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isSaving = false,
-                    error = e.message ?: "선호 언어 변경 실패"
+                    error = e.message
                 )
             }
         }

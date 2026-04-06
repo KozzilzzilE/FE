@@ -225,11 +225,14 @@ fun AppNavGraph() {
         }
         //마이페이지
         composable(Routes.MY) {
+            val context = LocalContext.current
+            val application = context.applicationContext as android.app.Application
+
             val profileRepository = remember {
                 ProfileRepository(RetrofitClient.instance)
             }
             val factory = remember(profileRepository) {
-                MyPageViewModelFactory(profileRepository)
+                MyPageViewModelFactory(application, profileRepository)
             }
             val viewModel: MyPageViewModel = viewModel(factory = factory)
 
@@ -261,11 +264,14 @@ fun AppNavGraph() {
         }
         //개인정보 수정 임시
         composable(Routes.EDIT_PROFILE) {
+            val context = LocalContext.current
+            val application = context.applicationContext as android.app.Application
+
             val profileRepository = remember {
                 ProfileRepository(RetrofitClient.instance)
             }
             val factory = remember(profileRepository) {
-                MyPageViewModelFactory(profileRepository)
+                MyPageViewModelFactory(application, profileRepository)
             }
             val viewModel: MyPageViewModel = viewModel(factory = factory)
 
@@ -273,34 +279,38 @@ fun AppNavGraph() {
 
             com.example.fe.feature.profile.ui.EditProfileScreen(
                 initialName = uiState.userName,
-
                 isSaving = uiState.isSaving,
                 onBackClick = { navController.popBackStack() },
-                onSaveClick = { name->
+                onSaveClick = { name ->
                     viewModel.updateProfileTemp(name) {
                         navController.popBackStack()
                     }
                 }
             )
         }
-        //언어 수정 임의
+        // 선호 언어 수정
         composable(Routes.LANGUAGE_SETTING) {
+            val context = LocalContext.current
+            val application = context.applicationContext as android.app.Application
+
             val profileRepository = remember {
                 ProfileRepository(RetrofitClient.instance)
             }
-            val factory = remember(profileRepository) {
-                MyPageViewModelFactory(profileRepository)
-            }
-            val viewModel: MyPageViewModel = viewModel(factory = factory)
 
+            val factory = remember(profileRepository) {
+                MyPageViewModelFactory(application, profileRepository)
+            }
+
+            val viewModel: MyPageViewModel = viewModel(factory = factory)
             val uiState by viewModel.uiState.collectAsState()
 
             LanguageSettingScreen(
-                initialLanguage = if (uiState.languageName.isBlank()) "Python" else uiState.languageName,
+                initialLanguage = if (uiState.languageName.isBlank()) "JAVA" else uiState.languageName,
+                languages = uiState.languageOptions,
                 isSaving = uiState.isSaving,
                 onBackClick = { navController.popBackStack() },
                 onSaveClick = { language ->
-                    viewModel.updatePreferredLanguageTemp(language) {
+                    viewModel.updatePreferredLanguage(language) {
                         navController.popBackStack()
                     }
                 }

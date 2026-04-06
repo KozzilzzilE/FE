@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun StatSection(
-    rank: String,
     streak: String,
     solved: String,
     modifier: Modifier = Modifier
@@ -31,12 +30,7 @@ fun StatSection(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        StatItem(
-            icon = "🏆",
-            iconBg = Color(0xFFF9F2D9),
-            label = "RANK",
-            value = rank
-        )
+
         StatItem(
             icon = "⚡",
             iconBg = Color(0xFFFBECEE),

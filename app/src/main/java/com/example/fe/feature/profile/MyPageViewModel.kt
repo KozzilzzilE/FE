@@ -43,7 +43,6 @@ class MyPageViewModel(
 
     fun updateProfileTemp(
         name: String,
-        bio: String,
         onSuccess: () -> Unit = {}
     ) {
         viewModelScope.launch {
@@ -57,8 +56,7 @@ class MyPageViewModel(
 
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
-                    userName = name,
-                    bio = bio
+                    userName = name
                 )
 
                 onSuccess()

@@ -273,11 +273,11 @@ fun AppNavGraph() {
 
             com.example.fe.feature.profile.ui.EditProfileScreen(
                 initialName = uiState.userName,
-                initialBio = uiState.bio,
+
                 isSaving = uiState.isSaving,
                 onBackClick = { navController.popBackStack() },
-                onSaveClick = { name, bio ->
-                    viewModel.updateProfileTemp(name, bio) {
+                onSaveClick = { name->
+                    viewModel.updateProfileTemp(name) {
                         navController.popBackStack()
                     }
                 }

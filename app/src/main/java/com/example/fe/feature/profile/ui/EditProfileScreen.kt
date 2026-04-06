@@ -44,17 +44,14 @@ import com.example.fe.feature.profile.component.SaveButtonBar
 @Composable
 fun EditProfileScreen(
     initialName: String = "",
-    initialBio: String = "",
     isSaving: Boolean = false,
     onBackClick: () -> Unit = {},
-    onSaveClick: (String, String) -> Unit = { _, _ -> }
+    onSaveClick: (String) -> Unit = {}
 ) {
     var name by remember { mutableStateOf("") }
-    var bio by remember { mutableStateOf("") }
 
-    LaunchedEffect(initialName, initialBio) {
+    LaunchedEffect(initialName) {
         name = initialName
-        bio = initialBio
     }
 
     Scaffold(
@@ -70,7 +67,7 @@ fun EditProfileScreen(
         bottomBar = {
             SaveButtonBar(
                 isLoading = isSaving,
-                onClick = { onSaveClick(name, bio) }
+                onClick = { onSaveClick(name) }
             )
         }
     ) { innerPadding ->
@@ -101,13 +98,6 @@ fun EditProfileScreen(
                         value = name,
                         onValueChange = { name = it },
                         placeholder = "이름을 입력하세요"
-                    )
-
-                    ProfileInputField(
-                        label = "한 줄 소개",
-                        value = bio,
-                        onValueChange = { bio = it },
-                        placeholder = "한 줄 소개를 입력하세요"
                     )
                 }
             }
@@ -220,7 +210,6 @@ private fun ProfileInputField(
 @Composable
 private fun EditProfileScreenPreview() {
     EditProfileScreen(
-        initialName = "김개발",
-        initialBio = "Algorithm Conqueror"
+        initialName = "김개발"
     )
 }

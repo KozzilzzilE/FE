@@ -123,7 +123,6 @@ private fun MyPageScreenContent(
             Spacer(modifier = Modifier.height(20.dp))
 
             StatSection(
-                rank = uiState.stat.rank,
                 streak = uiState.stat.streak,
                 solved = uiState.stat.solved
             )
@@ -266,7 +265,6 @@ private fun MyPageScreenPreview() {
             languageName = "JAVA",
             level = 1,
             stat = ProfileStat(
-                rank = "#142",
                 streak = "14D",
                 solved = "85"
             )

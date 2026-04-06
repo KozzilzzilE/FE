@@ -6,11 +6,9 @@ data class MyPageUiState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val userName: String = "",
-    val bio: String = "",
     val languageName: String = "",
     val level: Int = 1,
     val stat: ProfileStat = ProfileStat(
-        rank = "#142",
         streak = "14D",
         solved = "85"
     ),

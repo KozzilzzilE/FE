@@ -35,12 +35,13 @@ class MockInterceptor : Interceptor {
         val request = chain.request()
         val path = request.url.encodedPath   // 예: /api/v1/users/main
         val method = request.method           // 예: GET, POST
+        val language = request.url.queryParameter("language") ?: "JAVA"
 
         // [MOCK] URL 경로에 따라 적절한 가짜 JSON 응답을 선택합니다.
-        val (responseJson, description) = matchResponse(path, method)
+        val (responseJson, description) = matchResponse(path, method, language)
 
         // [MOCK] 가짜 응답을 사용 중임을 Logcat에 명확히 표시합니다.
-        Log.d(TAG, "🟡 [MOCK 응답] $method $path → $description")
+        Log.d(TAG, "🟡 [MOCK 응답] $method $path?language=$language → $description")
 
         // [MOCK] 실제 네트워크 통신 없이 가짜 응답을 생성하여 반환합니다.
         return Response.Builder()
@@ -57,7 +58,7 @@ class MockInterceptor : Interceptor {
      *
      * @return Pair<JSON 문자열, 설명 문자열>
      */
-    private fun matchResponse(path: String, method: String): Pair<String, String> {
+    private fun matchResponse(path: String, method: String, language: String): Pair<String, String> {
         return when {
             // ── 인증 ──
             path.contains("/auths/login") && method == "POST" ->
@@ -77,16 +78,30 @@ class MockInterceptor : Interceptor {
                 Pair(MockResponseData.TOPICS, "주제 목록 (12개)")
 
             // ── 개념 학습 ──
-            path.contains("/notions") && !path.contains("/completions") && method == "GET" ->
-                Pair(MockResponseData.NOTIONS, "개념 학습 데이터 (10페이지)")
+            path.contains("/notions") && !path.contains("/completions") && method == "GET" -> {
+                val responseJson = when (language.uppercase()) {
+                    "PYTHON" -> MockResponseData.NOTIONS_PYTHON
+                    "C++", "CPP" -> MockResponseData.NOTIONS_CPP
+                    "JAVASCRIPT" -> MockResponseData.NOTIONS_JAVASCRIPT
+                    else -> MockResponseData.NOTIONS
+                }
+                Pair(responseJson, "개념 학습 데이터 (10페이지, $language)")
+            }
 
             // ── 개념 학습 완료 ──
             path.contains("/notions/completions") && method == "POST" ->
                 Pair(MockResponseData.NOTION_COMPLETION, "개념 학습 완료 처리")
 
             // ── 응용 학습 ──
-            path.contains("/applications") && !path.contains("/completions") && method == "GET" ->
-                Pair(MockResponseData.PRACTICE_QUIZZES, "응용 학습 데이터")
+            path.contains("/applications") && !path.contains("/completions") && method == "GET" -> {
+                val responseJson = when (language.uppercase()) {
+                    "PYTHON" -> MockResponseData.PRACTICE_QUIZZES_PYTHON
+                    "C++", "CPP" -> MockResponseData.PRACTICE_QUIZZES_CPP
+                    "JAVASCRIPT" -> MockResponseData.PRACTICE_QUIZZES_JAVASCRIPT
+                    else -> MockResponseData.PRACTICE_QUIZZES
+                }
+                Pair(responseJson, "응용 학습 데이터 ($language)")
+            }
 
             // ── 응용 학습 완료 ──
             path.contains("/applications/completions") && method == "POST" ->
@@ -97,15 +112,21 @@ class MockInterceptor : Interceptor {
                 Pair(MockResponseData.PROBLEM_LIST, "문제 학습 목록")
 
             // ── 문제 학습 상세 ──
-            path.contains("/problems/") && !path.contains("/runs") && 
-                    !path.contains("/submissions") && !path.contains("/solutions") && 
+            path.contains("/problems/") && !path.contains("/runs") &&
+                    !path.contains("/submissions") && !path.contains("/solutions") &&
                     !path.contains("/topics/") && method == "GET" -> {
                 val idStr = path.substringAfter("/problems/").substringBefore("?")
-                if (idStr == "1") {
-                     Pair(MockResponseData.PROBLEM_DETAIL_1, "두 수의 합 문제 상세")
-                } else {
-                     Pair(MockResponseData.PROBLEM_DETAIL_DEFAULT, "문제 상세 (기본)")
+                val responseJson = when {
+                    idStr == "1" && language.uppercase() == "PYTHON" -> MockResponseData.PROBLEM_DETAIL_1_PYTHON
+                    idStr == "1" && (language.uppercase() == "C++" || language.uppercase() == "CPP") -> MockResponseData.PROBLEM_DETAIL_1_CPP
+                    idStr == "1" && language.uppercase() == "JAVASCRIPT" -> MockResponseData.PROBLEM_DETAIL_1_JAVASCRIPT
+                    idStr == "1" -> MockResponseData.PROBLEM_DETAIL_1
+                    language.uppercase() == "PYTHON" -> MockResponseData.PROBLEM_DETAIL_DEFAULT_PYTHON
+                    language.uppercase() == "C++" || language.uppercase() == "CPP" -> MockResponseData.PROBLEM_DETAIL_DEFAULT_CPP
+                    language.uppercase() == "JAVASCRIPT" -> MockResponseData.PROBLEM_DETAIL_DEFAULT_JAVASCRIPT
+                    else -> MockResponseData.PROBLEM_DETAIL_DEFAULT
                 }
+                Pair(responseJson, "문제 상세 ($language)")
             }
 
             // ── 코드 실행 ──
@@ -117,8 +138,15 @@ class MockInterceptor : Interceptor {
                 Pair(MockResponseData.PROBLEM_SUBMIT, "코드 제출 결과")
 
             // ── 모범 답안 ──
-            path.contains("/solutions") && method == "GET" ->
-                Pair(MockResponseData.PROBLEM_SOLUTION, "모범 답안")
+            path.contains("/solutions") && method == "GET" -> {
+                val responseJson = when (language.uppercase()) {
+                    "PYTHON" -> MockResponseData.PROBLEM_SOLUTION_PYTHON
+                    "C++", "CPP" -> MockResponseData.PROBLEM_SOLUTION_CPP
+                    "JAVASCRIPT" -> MockResponseData.PROBLEM_SOLUTION_JAVASCRIPT
+                    else -> MockResponseData.PROBLEM_SOLUTION
+                }
+                Pair(responseJson, "모범 답안 ($language)")
+            }
 
             // ── 언어 목록 ──
             path.contains("/languages") && method == "GET" ->

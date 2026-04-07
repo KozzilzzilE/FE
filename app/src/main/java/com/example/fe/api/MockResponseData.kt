@@ -461,4 +461,348 @@ object MockResponseData {
         "message": "Mock 기본 응답입니다."
     }
     """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [개념 학습 - PYTHON 버전] (추가)
+    // ─────────────────────────────────────────────
+    val NOTIONS_PYTHON = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "topicId": 1,
+        "count": 1,
+        "notions": [
+            {
+                "notionId": 1,
+                "pageNo": 1,
+                "title": "해시(Hash)란 무엇인가? (PYTHON)",
+                "point": "파이썬에서도 딕셔너리(dict)를 사용하면 해시를 활용할 수 있습니다.",
+                "detail": "파이썬에서는 HashMap 대신 dict를 사용합니다.",
+                "imgUrl": null,
+                "exampleCode": {
+                    "language": "PYTHON",
+                    "content": "my_dict = {}\nmy_dict['apple'] = 1\nprint(my_dict['apple'])"
+                },
+                "notionCompleted": false
+            }
+        ]
+    }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [응용 학습 - PYTHON 버전] (추가)
+    // ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_PYTHON = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "count": 1,
+        "appliedExercises": [
+            {
+                "exerciseId": 1,
+                "title": "딕셔너리로 빈도 세기",
+                "description": "문자열에서 문자 빈도를 세어보세요.",
+                "codeTemplate": "d = {}\nfor c in s:\n    d[c] = d.get(c, 0) + 1\nreturn d",
+                "appliedCompleted": false,
+                "totalBlanks": 0,
+                "blanks": []
+            }
+        ]
+    }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [문제 상세 - PYTHON 버전] (추가)
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_PYTHON = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 1,
+        "title": "두 수의 합 (PYTHON)",
+        "description": "Python으로 두 수의 합을 구하세요.",
+        "constraint": "",
+        "testCases": [
+            { "input": "[2,7,11,15], 9", "output": "[0,1]" }
+        ]
+    }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - PYTHON 버전] (추가)
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_PYTHON = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 1,
+        "languageId": 2,
+        "solutionCode": "def twoSum(nums, target):\n    d = {}\n    for i, n in enumerate(nums):\n        if target - n in d:\n            return [d[target-n], i]\n        d[n] = i",
+        "solutionText": "딕셔너리를 활용한 풀이입니다.",
+        "lineSolution": ""
+    }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+// [개념 학습 - C++ 버전] (추가)
+// ─────────────────────────────────────────────
+    val NOTIONS_CPP = """
+{
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "topicId": 1,
+        "count": 1,
+        "notions": [
+            {
+                "notionId": 1,
+                "pageNo": 1,
+                "title": "해시(Hash)란 무엇인가? (C++)",
+                "point": "C++에서는 unordered_map을 사용하여 해시를 활용할 수 있습니다.",
+                "detail": "C++에서는 unordered_map이 대표적인 해시 기반 자료구조입니다.",
+                "imgUrl": null,
+                "exampleCode": {
+                    "language": "C++",
+                    "content": "#include <iostream>\n#include <unordered_map>\nusing namespace std;\n\nint main() {\n    unordered_map<string, int> mp;\n    mp[\"apple\"] = 1;\n    cout << mp[\"apple\"] << endl;\n    return 0;\n}"
+                },
+                "notionCompleted": false
+            }
+        ]
+    }
+}
+""".trimIndent()
+
+    // ─────────────────────────────────────────────
+// [개념 학습 - JAVASCRIPT 버전] (추가)
+// ─────────────────────────────────────────────
+    val NOTIONS_JAVASCRIPT = """
+{
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "topicId": 1,
+        "count": 1,
+        "notions": [
+            {
+                "notionId": 1,
+                "pageNo": 1,
+                "title": "해시(Hash)란 무엇인가? (JAVASCRIPT)",
+                "point": "JavaScript에서는 Map 객체를 사용하여 해시를 활용할 수 있습니다.",
+                "detail": "JavaScript에서는 Map 또는 일반 객체를 활용해 해시처럼 사용할 수 있습니다.",
+                "imgUrl": null,
+                "exampleCode": {
+                    "language": "JAVASCRIPT",
+                    "content": "const map = new Map();\nmap.set('apple', 1);\nconsole.log(map.get('apple'));"
+                },
+                "notionCompleted": false
+            }
+        ]
+    }
+}
+""".trimIndent()
+
+    // ─────────────────────────────────────────────
+// [응용 학습 - C++ 버전] (추가)
+// ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_CPP = """
+{
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "count": 1,
+        "appliedExercises": [
+            {
+                "exerciseId": 1,
+                "title": "unordered_map으로 빈도 세기",
+                "description": "문자열에서 문자 빈도를 세어보세요.",
+                "codeTemplate": "unordered_map<char, int> mp;\nfor (char c : s) {\n    mp[c]++;\n}\nreturn mp;",
+                "appliedCompleted": false,
+                "totalBlanks": 0,
+                "blanks": []
+            }
+        ]
+    }
+}
+""".trimIndent()
+
+    // ─────────────────────────────────────────────
+// [응용 학습 - JAVASCRIPT 버전] (추가)
+// ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_JAVASCRIPT = """
+{
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "count": 1,
+        "appliedExercises": [
+            {
+                "exerciseId": 1,
+                "title": "Map으로 빈도 세기",
+                "description": "문자열에서 문자 빈도를 세어보세요.",
+                "codeTemplate": "const map = new Map();\nfor (const c of s) {\n    map.set(c, (map.get(c) || 0) + 1);\n}\nreturn map;",
+                "appliedCompleted": false,
+                "totalBlanks": 0,
+                "blanks": []
+            }
+        ]
+    }
+}
+""".trimIndent()
+
+    // ─────────────────────────────────────────────
+// [문제 상세 - C++ 버전] (추가)
+// ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_CPP = """
+{
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 1,
+        "title": "두 수의 합 (C++)",
+        "description": "C++로 두 수의 합을 구하세요.",
+        "constraint": "",
+        "testCases": [
+            { "input": "[2,7,11,15], 9", "output": "[0,1]" }
+        ]
+    }
+}
+""".trimIndent()
+
+    // ─────────────────────────────────────────────
+// [문제 상세 - JAVASCRIPT 버전] (추가)
+// ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_JAVASCRIPT = """
+{
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 1,
+        "title": "두 수의 합 (JAVASCRIPT)",
+        "description": "JavaScript로 두 수의 합을 구하세요.",
+        "constraint": "",
+        "testCases": [
+            { "input": "[2,7,11,15], 9", "output": "[0,1]" }
+        ]
+    }
+}
+""".trimIndent()
+
+    // ─────────────────────────────────────────────
+// [기본 문제 상세 - PYTHON 버전] (추가)
+// ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_PYTHON = """
+{
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 2,
+        "title": "올바른 괄호 (PYTHON Mock Data)",
+        "description": "Python으로 올바른 괄호를 판별하세요.",
+        "constraint": "0 < s.length ≤ 100000",
+        "testCases": [
+            { "input": "\"(())()\"", "output": "True" },
+            { "input": "\")()(\"", "output": "False" }
+        ]
+    }
+}
+""".trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [기본 문제 상세 - C++ 버전] (추가)
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_CPP = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 2,
+        "title": "올바른 괄호 (C++ Mock Data)",
+        "description": "C++로 올바른 괄호를 판별하세요.",
+        "constraint": "0 < s.length ≤ 100000",
+        "testCases": [
+            { "input": "\"(())()\"", "output": "true" },
+            { "input": "\")()(\"", "output": "false" }
+        ]
+    }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [기본 문제 상세 - JAVASCRIPT 버전] (추가)
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_JAVASCRIPT = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 2,
+        "title": "올바른 괄호 (JAVASCRIPT Mock Data)",
+        "description": "JavaScript로 올바른 괄호를 판별하세요.",
+        "constraint": "0 < s.length ≤ 100000",
+        "testCases": [
+            { "input": "\"(())()\"", "output": "true" },
+            { "input": "\")()(\"", "output": "false" }
+        ]
+    }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - C++ 버전] (추가)
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_CPP = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 1,
+        "languageId": 3,
+        "solutionCode": "#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nvector<int> twoSum(vector<int>& nums, int target) {\n    unordered_map<int, int> mp;\n    for (int i = 0; i < nums.size(); i++) {\n        int need = target - nums[i];\n        if (mp.count(need)) return {mp[need], i};\n        mp[nums[i]] = i;\n    }\n    return {};\n}",
+        "solutionText": "unordered_map을 활용한 C++ 풀이입니다.",
+        "lineSolution": ""
+    }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - JAVASCRIPT 버전] (추가)
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_JAVASCRIPT = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "exerciseId": 1,
+        "languageId": 4,
+        "solutionCode": "function twoSum(nums, target) {\n    const map = new Map();\n    for (let i = 0; i < nums.length; i++) {\n        const need = target - nums[i];\n        if (map.has(need)) return [map.get(need), i];\n        map.set(nums[i], i);\n    }\n    return [];\n}",
+        "solutionText": "Map을 활용한 JavaScript 풀이입니다.",
+        "lineSolution": ""
+    }
+    }
+    """.trimIndent()
+
+
 }

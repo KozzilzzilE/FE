@@ -41,6 +41,7 @@ import com.example.fe.feature.solver.ui.SolveScreen
 import com.example.fe.feature.concept.ConceptViewModel
 import com.example.fe.feature.concept.ConceptViewModelFactory
 import com.example.fe.feature.concept.ui.ConceptDetailScreen
+import com.example.fe.feature.practice.ui.PracticeScreen
 import com.example.fe.feature.practice.PracticeViewModel
 import com.example.fe.feature.practice.PracticeViewModelFactory
 import com.example.fe.feature.practice.data.PracticeRepository
@@ -373,8 +374,12 @@ fun AppNavGraph() {
                     val uiState by conceptViewModel.uiState.collectAsState()
 
                     // 화면 진입 시 초기 데이터 로드
-                    androidx.compose.runtime.LaunchedEffect(topicId) {
-                        conceptViewModel.loadConcepts(topicId)
+                    val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                        .getLanguage(context)
+                        .ifBlank { "JAVA" }
+
+                    LaunchedEffect(topicId, preferredLanguage) {
+                        conceptViewModel.loadConcepts(topicId, preferredLanguage)
                     }
 
                     // 화면 복귀 시 데이터 리로드 (완료 상태 갱신)
@@ -382,7 +387,11 @@ fun AppNavGraph() {
                     DisposableEffect(topicId, lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
                             if (event == Lifecycle.Event.ON_RESUME) {
-                                conceptViewModel.loadConcepts(topicId)
+                                val language = com.example.fe.common.LanguagePreferenceManager
+                                    .getLanguage(context)
+                                    .ifBlank { "JAVA" }
+
+                                conceptViewModel.loadConcepts(topicId, language)
                             }
                         }
                         lifecycleOwner.lifecycle.addObserver(observer)
@@ -437,8 +446,12 @@ fun AppNavGraph() {
                     val uiState by practiceViewModel.uiState.collectAsState()
 
                     // 화면 진입 시 초기 데이터 로드
-                    androidx.compose.runtime.LaunchedEffect(topicId) {
-                        practiceViewModel.loadQuizzes(topicId)
+                    val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                        .getLanguage(context)
+                        .ifBlank { "JAVA" }
+
+                    LaunchedEffect(topicId, preferredLanguage) {
+                        practiceViewModel.loadQuizzes(topicId, preferredLanguage)
                     }
 
                     // 화면 복귀 시 데이터 리로드 (완료 상태 갱신)
@@ -446,7 +459,11 @@ fun AppNavGraph() {
                     DisposableEffect(topicId, lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
                             if (event == Lifecycle.Event.ON_RESUME) {
-                                practiceViewModel.loadQuizzes(topicId)
+                                val language = com.example.fe.common.LanguagePreferenceManager
+                                    .getLanguage(context)
+                                    .ifBlank { "JAVA" }
+
+                                practiceViewModel.loadQuizzes(topicId, language)
                             }
                         }
                         lifecycleOwner.lifecycle.addObserver(observer)
@@ -561,7 +578,14 @@ fun AppNavGraph() {
             val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0
             val conceptViewModelFactory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
             val conceptViewModel: ConceptViewModel = viewModel(factory = conceptViewModelFactory)
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
 
+            // 개념 상세 (언어 반영)
+            LaunchedEffect(topicId, preferredLanguage) {
+                conceptViewModel.loadConcepts(topicId, preferredLanguage, initialIndex)
+            }
             ConceptDetailScreen(
                 topicId = topicId,
                 initialIndex = initialIndex.toInt(),
@@ -599,8 +623,16 @@ fun AppNavGraph() {
                 PracticeViewModelFactory(PracticeRepository(RetrofitClient.instance))
             }
             val practiceViewModel: PracticeViewModel = viewModel(factory = factory)
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
 
-            com.example.fe.feature.practice.ui.PracticeScreen(
+            //응용 상세 (언어 반영)
+            LaunchedEffect(topicId, preferredLanguage) {
+                practiceViewModel.loadQuizzes(topicId, preferredLanguage)
+            }
+
+            PracticeScreen(
                 topicId = topicId,
                 initialIndex = initialIndex,
                 viewModel = practiceViewModel,
@@ -629,7 +661,14 @@ fun AppNavGraph() {
             )
         ) { backStackEntry ->
             val problemId = backStackEntry.arguments?.getLong(Routes.PROBLEM_ID) ?: 0L
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
 
+            // 문제 상세 로드 (언어 반영)
+            LaunchedEffect(problemId, preferredLanguage) {
+                solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+            }
             SolveScreen(
                 problemId = problemId,
                 viewModel = solverViewModel,
@@ -654,7 +693,13 @@ fun AppNavGraph() {
             )
         ) { backStackEntry ->
             val problemId = backStackEntry.arguments?.getLong(Routes.PROBLEM_ID) ?: 0L
-
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
+            // (언어 반영)
+            LaunchedEffect(problemId, preferredLanguage) {
+                solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+            }
             EditorScreen(
                 problemId = problemId,
                 viewModel = solverViewModel,
@@ -691,7 +736,13 @@ fun AppNavGraph() {
             )
         ) { backStackEntry ->
             val problemId = backStackEntry.arguments?.getLong(Routes.PROBLEM_ID) ?: 0L
-
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
+            //언어 반영
+            LaunchedEffect(problemId, preferredLanguage) {
+                solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+            }
             EditorFullScreen(
                 problemId = problemId,
                 viewModel = solverViewModel,

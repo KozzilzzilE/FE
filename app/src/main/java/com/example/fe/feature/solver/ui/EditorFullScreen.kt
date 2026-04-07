@@ -33,7 +33,9 @@ fun EditorFullScreen(
     viewModel: SolverViewModel,
     onBack: () -> Unit = {}
 ) {
-    LaunchedEffect(problemId) { viewModel.loadProblemDetail(problemId) }
+//    LaunchedEffect(problemId) {
+//        viewModel.loadProblemDetail(problemId)
+//    }
 
     val uiState by viewModel.uiState.collectAsState()
     val codeFromVm = uiState.code

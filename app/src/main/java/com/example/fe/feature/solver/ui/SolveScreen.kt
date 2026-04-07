@@ -57,7 +57,9 @@ fun SolveScreen(
     onHome: () -> Unit = {},
     onOpenEditorFull: (Long) -> Unit = {}
 ) {
-    LaunchedEffect(problemId) { viewModel.loadProblemDetail(problemId) }
+//    LaunchedEffect(problemId) {
+//        viewModel.loadProblemDetail(problemId)
+//    }
 
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by rememberSaveable { mutableStateOf(SolveTab.PROBLEM) }

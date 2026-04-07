@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
@@ -28,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,9 +63,12 @@ data class AllProblemItem(
 fun AllProblemListScreen(
     problems: List<AllProblemItem>,
     selectedDifficulty: AllProblemDifficultyFilter,
+    currentPage: Int,
+    totalPages: Int,
     onDifficultySelected: (AllProblemDifficultyFilter) -> Unit,
     onProblemClick: (AllProblemItem) -> Unit,
     onBookmarkClick: (Long) -> Unit,
+    onPageChange: (Int) -> Unit,
     onNavigate: (String) -> Unit
 ) {
     Scaffold(
@@ -110,7 +116,7 @@ fun AllProblemListScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -122,6 +128,14 @@ fun AllProblemListScreen(
                     )
                 }
             }
+
+            PaginationSection(
+                currentPage = currentPage,
+                totalPages = totalPages,
+                onPageChange = onPageChange
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -131,7 +145,9 @@ private fun DifficultyFilterRow(
     selectedDifficulty: AllProblemDifficultyFilter,
     onDifficultySelected: (AllProblemDifficultyFilter) -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         DifficultyChip(
             text = "전체",
             selected = selectedDifficulty == AllProblemDifficultyFilter.ALL,
@@ -192,23 +208,37 @@ private fun AllProblemCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                DifficultyBadge(problem.difficulty)
+                DifficultyBadge(difficulty = problem.difficulty)
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        imageVector = if (problem.isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                        contentDescription = null,
+                        imageVector = if (problem.isBookmarked) {
+                            Icons.Filled.Star
+                        } else {
+                            Icons.Outlined.StarBorder
+                        },
+                        contentDescription = "즐겨찾기",
                         tint = if (problem.isBookmarked) Color(0xFFFFC107) else Color(0xFF94A3B8),
                         modifier = Modifier.clickable { onBookmarkClick() }
                     )
+
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("${problem.bookmarkCount}", fontSize = 12.sp, color = Color(0xFF94A3B8))
+
+                    Text(
+                        text = "${problem.bookmarkCount}",
+                        fontSize = 12.sp,
+                        color = Color(0xFF94A3B8)
+                    )
                 }
             }
 
@@ -225,7 +255,9 @@ private fun AllProblemCard(
 }
 
 @Composable
-private fun DifficultyBadge(difficulty: Difficulty) {
+private fun DifficultyBadge(
+    difficulty: Difficulty
+) {
     val backgroundColor = when (difficulty) {
         Difficulty.EASY -> Color(0xFFE7F8F0)
         Difficulty.MEDIUM -> Color(0xFFEAF1FF)
@@ -253,34 +285,144 @@ private fun DifficultyBadge(difficulty: Difficulty) {
     }
 }
 
+@Composable
+private fun PaginationSection(
+    currentPage: Int,
+    totalPages: Int,
+    onPageChange: (Int) -> Unit
+) {
+    if (totalPages <= 0) return
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Filled.ChevronLeft,
+            contentDescription = "이전 페이지",
+            tint = if (currentPage > 1) Color(0xFF64748B) else Color(0xFFCBD5E1),
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(enabled = currentPage > 1) {
+                    onPageChange(currentPage - 1)
+                }
+                .padding(6.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        for (page in 1..totalPages) {
+            val isSelected = page == currentPage
+
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(
+                        if (isSelected) Color(0xFF7EA3F7) else Color.Transparent
+                    )
+                    .clickable { onPageChange(page) }
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = page.toString(),
+                    color = if (isSelected) Color.White else Color(0xFF64748B),
+                    fontSize = 14.sp,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = "다음 페이지",
+            tint = if (currentPage < totalPages) Color(0xFF64748B) else Color(0xFFCBD5E1),
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable(enabled = currentPage < totalPages) {
+                    onPageChange(currentPage + 1)
+                }
+                .padding(6.dp)
+        )
+    }
+}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun PreviewAllProblemList() {
+private fun AllProblemListScreenPreview() {
     var selectedDifficulty by remember { mutableStateOf(AllProblemDifficultyFilter.ALL) }
+    var currentPage by remember { mutableIntStateOf(1) }
+    var sampleProblems by remember {
+        mutableStateOf(
+            listOf(
+                AllProblemItem(
+                    problemId = 1,
+                    title = "배열 두 배 만들기",
+                    difficulty = Difficulty.EASY,
+                    bookmarkCount = 120,
+                    isBookmarked = false
+                ),
+                AllProblemItem(
+                    problemId = 2,
+                    title = "최빈값 구하기",
+                    difficulty = Difficulty.MEDIUM,
+                    bookmarkCount = 85,
+                    isBookmarked = false
+                ),
+                AllProblemItem(
+                    problemId = 3,
+                    title = "문자열 뒤집기",
+                    difficulty = Difficulty.EASY,
+                    bookmarkCount = 210,
+                    isBookmarked = true
+                ),
+                AllProblemItem(
+                    problemId = 4,
+                    title = "특정 문자 제거하기",
+                    difficulty = Difficulty.HARD,
+                    bookmarkCount = 45,
+                    isBookmarked = false
+                ),
+                AllProblemItem(
+                    problemId = 5,
+                    title = "다음에 올 숫자",
+                    difficulty = Difficulty.HARD,
+                    bookmarkCount = 310,
+                    isBookmarked = true
+                )
+            )
+        )
+    }
 
-    val sample = listOf(
-        AllProblemItem(1, "배열 두 배 만들기", Difficulty.EASY, 120, false),
-        AllProblemItem(2, "최빈값 구하기", Difficulty.MEDIUM, 85, false),
-        AllProblemItem(3, "문자열 뒤집기", Difficulty.EASY, 210, true),
-        AllProblemItem(4, "특정 문자 제거하기", Difficulty.HARD, 45, false),
-        AllProblemItem(5, "다음에 올 숫자", Difficulty.HARD, 310, true)
-    )
-
-    val filtered = sample.filter {
+    val filteredProblems = sampleProblems.filter { problem ->
         when (selectedDifficulty) {
             AllProblemDifficultyFilter.ALL -> true
-            AllProblemDifficultyFilter.EASY -> it.difficulty == Difficulty.EASY
-            AllProblemDifficultyFilter.MEDIUM -> it.difficulty == Difficulty.MEDIUM
-            AllProblemDifficultyFilter.HARD -> it.difficulty == Difficulty.HARD
+            AllProblemDifficultyFilter.EASY -> problem.difficulty == Difficulty.EASY
+            AllProblemDifficultyFilter.MEDIUM -> problem.difficulty == Difficulty.MEDIUM
+            AllProblemDifficultyFilter.HARD -> problem.difficulty == Difficulty.HARD
         }
     }
 
     AllProblemListScreen(
-        problems = filtered,
+        problems = filteredProblems,
         selectedDifficulty = selectedDifficulty,
+        currentPage = currentPage,
+        totalPages = 3,
         onDifficultySelected = { selectedDifficulty = it },
         onProblemClick = {},
-        onBookmarkClick = {},
+        onBookmarkClick = { problemId ->
+            sampleProblems = sampleProblems.map { problem ->
+                if (problem.problemId == problemId) {
+                    problem.copy(isBookmarked = !problem.isBookmarked)
+                } else {
+                    problem
+                }
+            }
+        },
+        onPageChange = { currentPage = it },
         onNavigate = {}
     )
 }

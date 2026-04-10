@@ -1,14 +1,21 @@
 package com.example.fe.data.dto
 
-data class MyPageResponseDto(
-    val isSuccess: Boolean,
-    val code: String,
-    val message: String,
-    val result: MyPageResultDto
+import com.google.gson.annotations.SerializedName
+
+/**
+ * [마이페이지 조회 API]
+ * GET /api/v1/users/main
+ */
+
+data class MyPageResponse(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: MyPageResult?
 )
 
-data class MyPageResultDto(
-    val name: String,
-    val languageId: Long,
-    val languageName: String
+data class MyPageResult(
+    @SerializedName("nickname") val nickname: String,
+    @SerializedName("languageId") val languageId: Int,
+    @SerializedName("languageName") val languageName: String
 )

@@ -13,7 +13,7 @@ import com.example.fe.data.dto.PracticeResponseDto
 import com.example.fe.data.dto.PracticeCompletionResponseDto
 import com.example.fe.data.dto.LanguageResponse
 
-import com.example.fe.data.dto.MyPageResponseDto
+import com.example.fe.data.dto.MyPageResponse
 
 import retrofit2.Response
 import retrofit2.http.Body
@@ -133,12 +133,13 @@ interface ApiService {
     @GET("api/v1/languages/lists")
     suspend fun getLanguages(): Response<LanguageResponse>
 
-    // 마이페이지 관련
+    // --- [마이페이지] ---
+
+    // 마이페이지 조회
     @GET("api/v1/users/main")
     suspend fun getMyPageInfo(
         @Header("Authorization") token: String
-    ): Response<MyPageResponseDto>
-
+    ): Response<MyPageResponse>
 }
 
 

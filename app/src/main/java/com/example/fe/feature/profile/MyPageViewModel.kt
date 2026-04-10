@@ -36,9 +36,9 @@ class MyPageViewModel(
                 Pair(myPageResponse, languageList)
             }.onSuccess { (myPageResponse, languageList) ->
                 val result = myPageResponse.result
-
-                val serverLanguage = result.languageName
                 val savedLanguage = LanguagePreferenceManager.getLanguage(getApplication())
+
+                val serverLanguage = result?.languageName.orEmpty()
 
                 val finalLanguage = when {
                     savedLanguage.isNotBlank() -> savedLanguage
@@ -48,7 +48,7 @@ class MyPageViewModel(
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    userName = result.name, // DTO 필드명 확인: name인지 nickname인지
+                    userName = result?.nickname ?: "사용자",
                     languageName = finalLanguage,
                     languageOptions = languageList,
                     error = null
@@ -82,7 +82,8 @@ class MyPageViewModel(
             }.onSuccess { languages ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    languageOptions = languages
+                    languageOptions = languages,
+                    error = null
                 )
             }.onFailure { e ->
                 _uiState.value = _uiState.value.copy(
@@ -125,7 +126,7 @@ class MyPageViewModel(
             )
 
             runCatching {
-                // 임시 반영
+                // 이름 수정 API 나오기 전까지 임시 반영
             }.onSuccess {
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,

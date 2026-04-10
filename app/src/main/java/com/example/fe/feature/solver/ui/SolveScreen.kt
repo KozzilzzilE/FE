@@ -57,7 +57,10 @@ fun SolveScreen(
     onHome: () -> Unit = {},
     onOpenEditorFull: (Long) -> Unit = {}
 ) {
-    LaunchedEffect(problemId) { viewModel.loadProblemDetail(problemId) }
+    LaunchedEffect(problemId) {
+        viewModel.loadProblemDetail(problemId)
+        viewModel.loadDraft(problemId)
+    }
 
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by rememberSaveable { mutableStateOf(SolveTab.PROBLEM) }
@@ -233,6 +236,9 @@ fun SolveScreen(
                                         viewModel.runCode()
                                         selectedTab = SolveTab.SUBMIT
                                     },
+                                    onSaveDraft = {
+                                        viewModel.saveDraft()
+                                    },
                                     isRunning = uiState.isRunning,
                                     onEditorFocusChange = { focused -> editorFocused = focused }
                                 )
@@ -340,10 +346,29 @@ private fun EditorTabContent(
     onExpand: () -> Unit,
     onReset: () -> Unit,
     onRun: () -> Unit,
+    onSaveDraft: () -> Unit,
     isRunning: Boolean,
     onEditorFocusChange: (Boolean) -> Unit
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(onClick = onSaveDraft) {
+                Text(
+                    text = "임시 저장",
+                    color = Color(0xFF5B7FFF),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -375,18 +400,20 @@ private fun EditorTabContent(
                     )
                 )
 
-                Box(modifier = Modifier.align(Alignment.TopEnd).zIndex(1f)) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {
                     IconButton(
                         onClick = onExpand,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(8.dp)
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.OpenInFull,
                             contentDescription = "Fullscreen",
                             tint = Color(0xFFE6EDF7),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -428,7 +455,9 @@ private fun EditorTabContent(
                 .height(52.dp),
             shape = RoundedCornerShape(14.dp),
             border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-        ) { Text("초기화", color = Color.Black) }
+        ) {
+            Text("초기화", color = Color.Black)
+        }
     }
 }
 

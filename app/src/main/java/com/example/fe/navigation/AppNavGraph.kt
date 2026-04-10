@@ -48,6 +48,7 @@ import com.example.fe.feature.list.ProblemListViewModel
 import com.example.fe.feature.list.ProblemListViewModelFactory
 import com.example.fe.feature.list.ProblemUiState
 import com.example.fe.feature.list.data.ProblemRepository
+import com.example.fe.feature.solver.data.SolverDraftDataStore
 import com.example.fe.api.RetrofitClient
 
 @Composable
@@ -59,7 +60,10 @@ fun AppNavGraph() {
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
     val solverRepository = remember { SolverRepository(RetrofitClient.instance) }
-    val solverViewModelFactory = remember(solverRepository) { SolverViewModelFactory(solverRepository) }
+    val solverDraftDataStore = remember(context) { SolverDraftDataStore(context) }
+    val solverViewModelFactory = remember(solverRepository, solverDraftDataStore) {
+        SolverViewModelFactory(solverRepository, solverDraftDataStore)
+    }
     val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
 
     // 인증 상태 모니터링 및 화면 전환

@@ -51,7 +51,10 @@ fun EditorScreen(
     onGoSubmit: () -> Unit = {},
     onFullscreenClick: () -> Unit = {}
 ) {
-    LaunchedEffect(problemId) { viewModel.loadProblemDetail(problemId) }
+    LaunchedEffect(problemId) {
+        viewModel.loadProblemDetail(problemId)
+        viewModel.loadDraft(problemId)
+    }
 
     val uiState by viewModel.uiState.collectAsState()
     val titleToShow = uiState.problemDetail?.title.orEmpty()

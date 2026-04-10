@@ -43,6 +43,7 @@ import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.ExecutionTerminal
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
 import com.example.fe.feature.solver.component.SubmitTabContent
+import com.example.fe.feature.solver.component.DraftSaveButton
 import com.example.fe.feature.solver.model.ProblemDetail
 import com.example.fe.feature.solver.model.TestCase
 import kotlin.math.max
@@ -359,14 +360,10 @@ private fun EditorTabContent(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = onSaveDraft) {
-                Text(
-                    text = "임시 저장",
-                    color = Color(0xFF5B7FFF),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            DraftSaveButton(
+                onClick = onSaveDraft
+            )
+        }
         }
 
         Surface(
@@ -459,7 +456,7 @@ private fun EditorTabContent(
             Text("초기화", color = Color.Black)
         }
     }
-}
+
 
 @Composable
 private fun SolveTabBar(

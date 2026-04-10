@@ -124,6 +124,14 @@ interface ApiService {
         @Body request: com.example.fe.data.dto.SubmitRequestDto
     ): Response<com.example.fe.data.dto.SubmitResponseDto>
 
+    // 문제 코드 실행 결과 조회
+    @GET("api/v1/problems/runs/{token}/results")
+    suspend fun getRunResult(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("token") runToken: String
+    ): Response<com.example.fe.data.dto.RunResultResponseDto>
+
+
     // --- [언어] ---
     
     // 언어 목록 조회

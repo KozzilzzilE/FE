@@ -428,8 +428,79 @@ object MockResponseData {
         "code": "COMMON200",
         "message": "성공입니다.",
         "result": {
-            "submissionId": 999
+            "historyId": 101,
+            "submissionId": "mock_submission_token_101"
         }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [코드 실행 결과 조회] GET /api/v1/problems/runs/{token}/results
+    // ─────────────────────────────────────────────
+    val PROBLEM_RUN_RESULT = """
+    {
+    "isSuccess": true,
+    "code": "COMMON200",
+    "message": "성공입니다.",
+    "result": {
+        "statusId": 3,
+        "status": "Accepted",
+        "input": "nums = [2, 7, 11, 15], target = 9",
+        "output": "[0, 1]"
+    }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [코드 채점 결과 조회] GET /api/v1/problems/submissions/{historyId}/results
+    // ─────────────────────────────────────────────
+    val PROBLEM_SUBMISSION_RESULT = """
+    {
+        "isSuccess": true,
+        "code": "PROBLEM_205",
+        "message": "문제 코드 채점 결과 조회 성공",
+        "result": {
+            "success": true,
+            "status": "ACCEPTED",
+            "message": "채점이 완료되었습니다."
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [문제별 사용자 제출 기록 조회] GET /api/v1/problems/{problemId}/histories
+    // ─────────────────────────────────────────────
+    val PROBLEM_HISTORIES = """
+    {
+        "isSuccess": true,
+        "code": "PROBLEM_206",
+        "message": "사용자 문제 제출 기록 조회 성공",
+        "result": [
+            {
+                "sourceCode": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> map = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            int complement = target - nums[i];\n            if (map.containsKey(complement)) {\n                return new int[]{map.get(complement), i};\n            }\n            map.put(nums[i], i);\n        }\n        return new int[]{};\n    }\n}",
+                "status": "ACCEPTED",
+                "language": "JAVA",
+                "createdAt": "2026-04-10 10:25:46"
+            },
+            {
+                "sourceCode": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[]{0, 0};\n    }\n}",
+                "status": "WRONG_ANSWER",
+                "language": "JAVA",
+                "createdAt": "2026-04-10 10:20:12"
+            },
+            {
+                "sourceCode": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        int error = 10 / 0;\n        return new int[]{};\n    }\n}",
+                "status": "RUNTIME_ERROR",
+                "language": "JAVA",
+                "createdAt": "2026-04-10 10:18:01"
+            },
+            {
+                "sourceCode": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[]{}\n    }\n}",
+                "status": "COMPILATION_ERROR",
+                "language": "JAVA",
+                "createdAt": "2026-04-10 10:15:33"
+            }
+        ]
     }
     """.trimIndent()
 

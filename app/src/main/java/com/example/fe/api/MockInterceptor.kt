@@ -96,15 +96,23 @@ class MockInterceptor : Interceptor {
             path.contains("/topics/") && path.contains("/problems") && method == "GET" ->
                 Pair(MockResponseData.PROBLEM_LIST, "문제 학습 목록")
 
+            // ── 문제별 사용자 제출 기록 조회 ──
+            path.contains("/problems/") && path.contains("/histories") && method == "GET" ->
+                Pair(MockResponseData.PROBLEM_HISTORIES, "문제별 제출 기록 조회")
+
             // ── 문제 학습 상세 ──
-            path.contains("/problems/") && !path.contains("/runs") && 
-                    !path.contains("/submissions") && !path.contains("/solutions") && 
-                    !path.contains("/topics/") && method == "GET" -> {
-                val idStr = path.substringAfter("/problems/").substringBefore("?")
+            path.contains("/problems/") &&
+                    !path.contains("/runs") &&
+                    !path.contains("/submissions") &&
+                    !path.contains("/solutions") &&
+                    !path.contains("/histories") &&
+                    !path.contains("/topics/") &&
+                    method == "GET" -> {
+                val idStr = path.substringAfter("/problems/").substringBefore("/")
                 if (idStr == "1") {
-                     Pair(MockResponseData.PROBLEM_DETAIL_1, "두 수의 합 문제 상세")
+                    Pair(MockResponseData.PROBLEM_DETAIL_1, "두 수의 합 문제 상세")
                 } else {
-                     Pair(MockResponseData.PROBLEM_DETAIL_DEFAULT, "문제 상세 (기본)")
+                    Pair(MockResponseData.PROBLEM_DETAIL_DEFAULT, "문제 상세 (기본)")
                 }
             }
 
@@ -116,6 +124,14 @@ class MockInterceptor : Interceptor {
             path.contains("/submissions") && method == "POST" ->
                 Pair(MockResponseData.PROBLEM_SUBMIT, "코드 제출 결과")
 
+            // ── 코드 실행 결과 조회 ──
+            path.contains("/runs/") && path.contains("/results") && method == "GET" ->
+                Pair(MockResponseData.PROBLEM_RUN_RESULT, "코드 실행 결과 조회")
+
+            // ── 코드 채점 결과 조회 ──
+            path.contains("/submissions/") && path.contains("/results") && method == "GET" ->
+                Pair(MockResponseData.PROBLEM_SUBMISSION_RESULT, "코드 채점 결과 조회")
+
             // ── 모범 답안 ──
             path.contains("/solutions") && method == "GET" ->
                 Pair(MockResponseData.PROBLEM_SOLUTION, "모범 답안")
@@ -124,7 +140,6 @@ class MockInterceptor : Interceptor {
             path.contains("/languages") && method == "GET" ->
                 Pair(MockResponseData.LANGUAGES, "언어 목록 (4개)")
 
-            // ── 매칭되지 않는 요청 ──
             else -> {
                 Log.w(TAG, "⚠️ [MOCK] 매칭되는 Mock 데이터가 없습니다: $method $path")
                 Pair(MockResponseData.DEFAULT_SUCCESS, "기본 응답 (매칭 없음)")

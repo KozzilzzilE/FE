@@ -62,7 +62,7 @@ fun LanguageSettingScreen(
         }
     }
 
-    var selectedLanguage by remember { mutableStateOf(initialLanguage) }
+    var selectedLanguage by remember(initialLanguage) { mutableStateOf(initialLanguage) }
 
     LaunchedEffect(initialLanguage) {
         selectedLanguage = initialLanguage

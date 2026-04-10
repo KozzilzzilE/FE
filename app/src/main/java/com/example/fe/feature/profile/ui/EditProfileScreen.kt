@@ -48,11 +48,7 @@ fun EditProfileScreen(
     onBackClick: () -> Unit = {},
     onSaveClick: (String) -> Unit = {}
 ) {
-    var name by remember { mutableStateOf("") }
-
-    LaunchedEffect(initialName) {
-        name = initialName
-    }
+    var name by remember(initialName) { mutableStateOf(initialName) }
 
     Scaffold(
         containerColor = Color(0xFFF7F8FC),

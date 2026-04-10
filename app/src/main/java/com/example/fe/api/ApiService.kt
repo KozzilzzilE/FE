@@ -131,6 +131,14 @@ interface ApiService {
         @Path("token") runToken: String
     ): Response<com.example.fe.data.dto.RunResultResponseDto>
 
+    // 문제 코드 채점 결과 조회
+    // 문제 코드 채점 결과 조회
+    @GET("api/v1/problems/submissions/{historyId}/results")
+    suspend fun getSubmissionResult(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("historyId") historyId: Long,
+        @Query("submissionId") submissionId: String
+    ): Response<com.example.fe.data.dto.SubmissionResultResponseDto>
 
     // --- [언어] ---
     

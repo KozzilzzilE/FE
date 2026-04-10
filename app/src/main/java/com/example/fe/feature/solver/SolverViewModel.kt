@@ -4,9 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fe.common.TokenManager
 import com.example.fe.feature.solver.data.SolverRepository
-import com.example.fe.feature.solver.model.ProblemDetail
-import com.example.fe.feature.solver.model.RunResult
-import com.example.fe.feature.solver.model.SolutionDetail
 import com.example.fe.feature.solver.model.SolverUiState
 import com.example.fe.feature.solver.model.SubmissionRecord
 import com.example.fe.feature.solver.model.SubmitResult
@@ -110,9 +107,6 @@ class SolverViewModel(
 
     /**
      * 코드 실행
-     * 1. 실행 요청
-     * 2. 실행 토큰 발급
-     * 3. 결과 polling
      */
     fun runCode() {
         val state = _uiState.value
@@ -134,7 +128,6 @@ class SolverViewModel(
                 val token = TokenManager.getAccessToken()
                     ?: throw Exception("로그인 토큰이 없습니다.")
 
-                // 실행 요청 후 token 반환
                 val runToken = repository.runCode(
                     token = token,
                     problemId = state.problemId,
@@ -142,7 +135,6 @@ class SolverViewModel(
                     language = state.language
                 )
 
-                // 실행 결과 polling
                 pollRunResult(
                     accessToken = token,
                     runToken = runToken
@@ -160,8 +152,6 @@ class SolverViewModel(
 
     /**
      * 실행 결과 polling
-     * 현재 RunResult 모델 구조 기준으로
-     * errorMessage 에 상태 문자열이 들어오므로 그 값으로 진행 상태 판단
      */
     private suspend fun pollRunResult(
         accessToken: String,
@@ -204,9 +194,6 @@ class SolverViewModel(
 
     /**
      * 코드 제출 / 채점
-     * 1. 제출 요청
-     * 2. 제출 토큰 발급
-     * 3. 결과 polling
      */
     fun submitCode() {
         val state = _uiState.value
@@ -228,18 +215,22 @@ class SolverViewModel(
                 val token = TokenManager.getAccessToken()
                     ?: throw Exception("로그인 토큰이 없습니다.")
 
-                // 제출 요청 후 token 반환
-                val submitToken = repository.submitCode(
+                /**
+                 * 중요:
+                 * repository.submitCode() 는 이제
+                 * historyId + submissionId 를 함께 반환해야 함
+                 */
+                val submitInfo = repository.submitCode(
                     token = token,
                     problemId = state.problemId,
                     code = state.code,
                     language = state.language
                 )
 
-                // 제출 결과 polling
                 pollSubmitResult(
                     accessToken = token,
-                    submitToken = submitToken,
+                    historyId = submitInfo.historyId,
+                    submissionId = submitInfo.submissionId,
                     language = state.language
                 )
             } catch (e: Exception) {
@@ -258,30 +249,40 @@ class SolverViewModel(
      */
     private suspend fun pollSubmitResult(
         accessToken: String,
-        submitToken: String,
+        historyId: Long,
+        submissionId: String,
         language: String
     ) {
         repeat(15) {
-            val result = repository.getRunResult(accessToken, submitToken)
-            val currentStatus = result.errorMessage
+            val (isCorrect, status) = repository.getSubmissionResult(
+                token = accessToken,
+                historyId = historyId,
+                submissionId = submissionId
+            )
 
-            if (currentStatus == "In Queue" || currentStatus == "Processing") {
+            if (status == "PROCESSING") {
                 delay(1500)
                 return@repeat
             }
 
-            val isCorrect = result.passed == true
-
             val submitResult = SubmitResult(
                 isCorrect = isCorrect,
                 runtimeMs = null,
-                errorMessage = if (isCorrect) null else currentStatus
+                errorMessage = if (isCorrect) null else status
             )
+
+            val resultText = when (status) {
+                "ACCEPTED" -> "정답"
+                "WRONG_ANSWER" -> "오답"
+                "COMPILATION_ERROR" -> "컴파일 에러"
+                "RUNTIME_ERROR" -> "런타임 에러"
+                else -> status
+            }
 
             val newRecord = SubmissionRecord(
                 date = "방금",
                 language = language,
-                result = if (isCorrect) "정답" else (currentStatus ?: "오답"),
+                result = resultText,
                 isCorrect = isCorrect
             )
 

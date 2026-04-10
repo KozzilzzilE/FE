@@ -8,6 +8,11 @@ import com.example.fe.feature.solver.model.RunResult
 import com.example.fe.feature.solver.model.SolutionDetail
 import com.example.fe.feature.solver.model.TestCase
 
+data class SubmitInfo(
+    val historyId: Long,
+    val submissionId: String
+)
+
 class SolverRepository(
     private val apiService: ApiService
 ) {
@@ -164,14 +169,14 @@ public class Solution {
 
     /**
      * 코드 제출 요청
-     * submit은 polling용 token이 아니라 submissionId를 반환함
+     * 채점 결과 조회에 필요한 historyId + submissionId 반환
      */
     suspend fun submitCode(
         token: String,
         problemId: Long,
         code: String,
         language: String
-    ): String {
+    ): SubmitInfo {
         val response = apiService.submitCode(
             token = "Bearer $token",
             problemId = problemId,
@@ -192,10 +197,18 @@ public class Solution {
             throw Exception(body.message)
         }
 
-        val submissionId = body.result?.submissionId
-            ?: throw Exception("제출 ID가 없습니다.")
+        val result = body.result ?: throw Exception("제출 결과가 없습니다.")
 
-        return submissionId
+        val historyId = result.historyId
+            ?: throw Exception("historyId가 없습니다.")
+
+        val submissionId = result.submissionId
+            ?: throw Exception("submissionId가 없습니다.")
+
+        return SubmitInfo(
+            historyId = historyId,
+            submissionId = submissionId
+        )
     }
 
     /**
@@ -223,6 +236,38 @@ public class Solution {
             code = result.solutionCode,
             explanation = result.lineSolution + "\n\n" + result.solutionText
         )
+    }
+
+    /**
+     * 채점 결과 조회 (폴링용)
+     * GET /api/v1/problems/submissions/{historyId}/results
+     */
+    suspend fun getSubmissionResult(
+        token: String,
+        historyId: Long,
+        submissionId: String
+    ): Pair<Boolean, String> {
+        val response = apiService.getSubmissionResult(
+            token = "Bearer $token",
+            historyId = historyId,
+            submissionId = submissionId
+        )
+
+        if (!response.isSuccessful) {
+            throw Exception("채점 결과 조회 실패: ${response.code()}")
+        }
+
+        val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+        if (!body.isSuccess) {
+            throw Exception(body.message)
+        }
+
+        val result = body.result ?: throw Exception("결과 데이터가 없습니다.")
+
+        val status = result.status
+        val isCorrect = status == "ACCEPTED"
+
+        return Pair(isCorrect, status)
     }
 
     /**

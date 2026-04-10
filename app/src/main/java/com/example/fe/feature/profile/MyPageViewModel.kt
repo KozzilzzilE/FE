@@ -30,14 +30,12 @@ class MyPageViewModel(
                 error = null
             )
 
-            runCatching {
+            try {
                 val myPageResponse = repository.getMyPageInfo()
                 val languageList = repository.getLanguageList()
-                Pair(myPageResponse, languageList)
-            }.onSuccess { (myPageResponse, languageList) ->
+
                 val result = myPageResponse.result
                 val savedLanguage = LanguagePreferenceManager.getLanguage(getApplication())
-
                 val serverLanguage = result?.languageName.orEmpty()
 
                 val finalLanguage = when {
@@ -53,7 +51,7 @@ class MyPageViewModel(
                     languageOptions = languageList,
                     error = null
                 )
-            }.onFailure { e ->
+            } catch (e: Exception) {
                 val savedLanguage = LanguagePreferenceManager.getLanguage(getApplication())
 
                 _uiState.value = _uiState.value.copy(
@@ -77,15 +75,15 @@ class MyPageViewModel(
                 error = null
             )
 
-            runCatching {
-                repository.getLanguageList()
-            }.onSuccess { languages ->
+            try {
+                val languages = repository.getLanguageList()
+
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     languageOptions = languages,
                     error = null
                 )
-            }.onFailure { e ->
+            } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = e.message
@@ -101,15 +99,17 @@ class MyPageViewModel(
                 error = null
             )
 
-            runCatching {
+            try {
+                repository.updateLanguage(language)
                 LanguagePreferenceManager.saveLanguage(getApplication(), language)
-            }.onSuccess {
+
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
-                    languageName = language
+                    languageName = language,
+                    error = null
                 )
                 onSuccess()
-            }.onFailure { e ->
+            } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
                     error = e.message
@@ -125,15 +125,14 @@ class MyPageViewModel(
                 error = null
             )
 
-            runCatching {
-                // 이름 수정 API 나오기 전까지 임시 반영
-            }.onSuccess {
+            try {
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
-                    userName = name
+                    userName = name,
+                    error = null
                 )
                 onSuccess()
-            }.onFailure { e ->
+            } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
                     error = e.message

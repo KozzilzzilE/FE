@@ -14,6 +14,8 @@ import com.example.fe.data.dto.PracticeCompletionResponseDto
 import com.example.fe.data.dto.LanguageResponse
 
 import com.example.fe.data.dto.MyPageResponse
+import com.example.fe.data.dto.UpdateLanguageRequest
+import com.example.fe.data.dto.UpdateLanguageResponse
 
 import retrofit2.Response
 import retrofit2.http.Body
@@ -22,6 +24,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Header
+import retrofit2.http.PATCH
 
 interface ApiService {
     // --- [인증] ---
@@ -140,6 +143,13 @@ interface ApiService {
     suspend fun getMyPageInfo(
         @Header("Authorization") token: String
     ): Response<MyPageResponse>
+
+    // 언어 변경
+    @PATCH("api/v1/users/me/languages")
+    suspend fun updateLanguage(
+        @Header("Authorization") token: String,
+        @Body request: UpdateLanguageRequest
+    ): Response<UpdateLanguageResponse>
 }
 
 

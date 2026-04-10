@@ -52,7 +52,7 @@ fun TopBar(
                     Text(
                         text = subtitle, 
                         fontSize = 14.sp,
-                        color = Color(0xFF7A828A),
+                        color = Color(0xFF38B2AC),
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }

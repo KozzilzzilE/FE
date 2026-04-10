@@ -165,6 +165,8 @@ fun AppNavGraph() {
         composable("problem") {
             var searchQuery by remember { mutableStateOf("") }
             var selectedDifficulty by remember { mutableStateOf(AllProblemDifficultyFilter.ALL) }
+            var currentPage by remember { mutableIntStateOf(1) }
+            val totalPages = 3
 
             var sampleProblems by remember {
                 mutableStateOf(
@@ -192,8 +194,8 @@ fun AppNavGraph() {
             AllProblemListScreen(
                 problems = filteredProblems,
                 selectedDifficulty = selectedDifficulty,
-                searchQuery = searchQuery,
-                onSearchQueryChange = { searchQuery = it },
+                currentPage = currentPage,
+                totalPages = totalPages,
                 onDifficultySelected = { selectedDifficulty = it },
                 onProblemClick = { problem ->
                     navController.navigate(Routes.solve(problem.problemId))
@@ -207,7 +209,7 @@ fun AppNavGraph() {
                         }
                     }
                 },
-                onFilterClick = {},
+                onPageChange = { currentPage = it },
                 onNavigate = { route ->
                     navController.navigate(route) {
                         launchSingleTop = true

@@ -6,6 +6,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okio.Buffer
 
 /**
  * ============================================================
@@ -28,22 +29,26 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 class MockInterceptor : Interceptor {
 
     companion object {
-        private const val TAG = "MOCK_SERVER" // [MOCK] Logcat 필터용 태그
+        private const val TAG = "MOCK_SERVER"
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        val path = request.url.encodedPath   // 예: /api/v1/users/main
-        val method = request.method           // 예: GET, POST
+        val path = request.url.encodedPath
+        val method = request.method
         val language = request.url.queryParameter("language") ?: "JAVA"
 
-        // [MOCK] URL 경로에 따라 적절한 가짜 JSON 응답을 선택합니다.
-        val (responseJson, description) = matchResponse(path, method, language)
+        val requestBodyString = request.body?.let { body ->
+            val buffer = Buffer()
+            body.writeTo(buffer)
+            buffer.readUtf8()
+        }.orEmpty()
 
-        // [MOCK] 가짜 응답을 사용 중임을 Logcat에 명확히 표시합니다.
+        val (responseJson, description) = matchResponse(path, method, language, requestBodyString)
+
         Log.d(TAG, "🟡 [MOCK 응답] $method $path?language=$language → $description")
+        Log.d(TAG, "🟡 [MOCK 요청 바디] $requestBodyString")
 
-        // [MOCK] 실제 네트워크 통신 없이 가짜 응답을 생성하여 반환합니다.
         return Response.Builder()
             .code(200)
             .message("OK (Mock)")
@@ -58,22 +63,41 @@ class MockInterceptor : Interceptor {
      *
      * @return Pair<JSON 문자열, 설명 문자열>
      */
-    private fun matchResponse(path: String, method: String, language: String): Pair<String, String> {
+    private fun matchResponse(
+        path: String,
+        method: String,
+        language: String,
+        requestBodyString: String
+    ): Pair<String, String> {
         return when {
             // ── 인증 ──
             path.contains("/auths/login") && method == "POST" ->
-                Pair(MockResponseData.LOGIN, "로그인 성공")
+                Pair(MockResponseData.getLogin(), "로그인 성공")
 
             path.contains("/auths/signup") && method == "POST" ->
                 Pair(MockResponseData.SIGN_UP, "회원가입 성공")
 
-            // ── 메인 홈 ──
+            // ── 메인 홈 / 마이페이지 조회 ──
             path.contains("/users/main") && method == "GET" ->
-                Pair(MockResponseData.HOME, "홈 화면 데이터")
+                Pair(MockResponseData.getMyPage(), "메인 홈 / 마이페이지 정보 조회")
+
+            // ── 사용자 메인 언어 변경 ──
+            path.contains("/users/me/languages") && method == "PATCH" -> {
+                val newLanguage = extractJsonValue(requestBodyString, "language") ?: MockResponseData.currentLanguage
+                Pair(MockResponseData.updateLanguage(newLanguage), "사용자 메인 언어 변경")
+            }
+
+            // ── 사용자 이름 변경 ──
+            path.contains("/users/me/names") && method == "PATCH" -> {
+                val newNickname = extractJsonValue(requestBodyString, "nickname") ?: MockResponseData.currentNickname
+                Pair(MockResponseData.updateNickname(newNickname), "사용자 이름 변경")
+            }
 
             // ── 주제 목록 ──
-            path.contains("/topics") && !path.contains("/problems") &&
-                    !path.contains("/notions") && !path.contains("/applications") &&
+            path.contains("/topics") &&
+                    !path.contains("/problems") &&
+                    !path.contains("/notions") &&
+                    !path.contains("/applications") &&
                     method == "GET" ->
                 Pair(MockResponseData.TOPICS, "주제 목록 (12개)")
 
@@ -85,7 +109,7 @@ class MockInterceptor : Interceptor {
                     "JAVASCRIPT" -> MockResponseData.NOTIONS_JAVASCRIPT
                     else -> MockResponseData.NOTIONS
                 }
-                Pair(responseJson, "개념 학습 데이터 (10페이지, $language)")
+                Pair(responseJson, "개념 학습 데이터 ($language)")
             }
 
             // ── 개념 학습 완료 ──
@@ -112,9 +136,12 @@ class MockInterceptor : Interceptor {
                 Pair(MockResponseData.PROBLEM_LIST, "문제 학습 목록")
 
             // ── 문제 학습 상세 ──
-            path.contains("/problems/") && !path.contains("/runs") &&
-                    !path.contains("/submissions") && !path.contains("/solutions") &&
-                    !path.contains("/topics/") && method == "GET" -> {
+            path.contains("/problems/") &&
+                    !path.contains("/runs") &&
+                    !path.contains("/submissions") &&
+                    !path.contains("/solutions") &&
+                    !path.contains("/topics/") &&
+                    method == "GET" -> {
                 val idStr = path.substringAfter("/problems/").substringBefore("?")
                 val responseJson = when {
                     idStr == "1" && language.uppercase() == "PYTHON" -> MockResponseData.PROBLEM_DETAIL_1_PYTHON
@@ -158,5 +185,16 @@ class MockInterceptor : Interceptor {
                 Pair(MockResponseData.DEFAULT_SUCCESS, "기본 응답 (매칭 없음)")
             }
         }
+    }
+
+    /**
+     * [MOCK] JSON 문자열에서 특정 key의 문자열 값을 간단히 추출합니다.
+     *
+     * 예:
+     * {"nickname":"오현"} 에서 key="nickname" 이면 "오현" 반환
+     */
+    private fun extractJsonValue(json: String, key: String): String? {
+        val regex = """"$key"\s*:\s*"([^"]*)"""".toRegex()
+        return regex.find(json)?.groupValues?.getOrNull(1)
     }
 }

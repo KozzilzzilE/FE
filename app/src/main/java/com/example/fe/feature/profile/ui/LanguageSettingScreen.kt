@@ -56,8 +56,8 @@ fun LanguageSettingScreen(
         languages.map {
             LanguageOptionUi(
                 id = it.languageId,
-                name = it.name,
-                description = getLanguageDescription(it.name)
+                name = it.languageName,
+                description = getLanguageDescription(it.languageName)
             )
         }
     }
@@ -208,9 +208,9 @@ private fun LanguageSettingScreenPreview() {
     LanguageSettingScreen(
         initialLanguage = "Python",
         languages = listOf(
-            LanguageResult(languageId = 1, name = "PYTHON"),
-            LanguageResult(languageId = 2, name = "JAVA"),
-            LanguageResult(languageId = 3, name = "C++")
+            LanguageResult(languageId = 1, languageName = "PYTHON"),
+            LanguageResult(languageId = 2, languageName = "JAVA"),
+            LanguageResult(languageId = 3, languageName = "C++")
         )
     )
 }

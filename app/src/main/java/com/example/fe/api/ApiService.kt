@@ -16,6 +16,8 @@ import com.example.fe.data.dto.LanguageResponse
 import com.example.fe.data.dto.MyPageResponse
 import com.example.fe.data.dto.UpdateLanguageRequest
 import com.example.fe.data.dto.UpdateLanguageResponse
+import com.example.fe.data.dto.UpdateNicknameRequest
+import com.example.fe.data.dto.UpdateNicknameResponse
 
 import retrofit2.Response
 import retrofit2.http.Body
@@ -150,6 +152,13 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: UpdateLanguageRequest
     ): Response<UpdateLanguageResponse>
+
+    // 이름 변경
+    @PATCH("api/v1/users/me/names")
+    suspend fun updateNickname(
+        @Header("Authorization") token: String,
+        @Body request: UpdateNicknameRequest
+    ): Response<UpdateNicknameResponse>
 }
 
 

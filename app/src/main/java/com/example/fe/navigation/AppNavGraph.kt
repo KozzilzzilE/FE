@@ -283,7 +283,7 @@ fun AppNavGraph() {
                 isSaving = uiState.isSaving,
                 onBackClick = { navController.popBackStack() },
                 onSaveClick = { name ->
-                    viewModel.updateProfileTemp(name) {
+                    viewModel.updateProfile(name) {
                         navController.popBackStack()
                     }
                 }

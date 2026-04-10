@@ -152,3 +152,21 @@ data class SubmissionResultDto(
     @SerializedName("status") val status: String,
     @SerializedName("message") val message: String
 )
+
+/**
+ * [문제별 사용자 제출 기록 조회 API]
+ */
+
+data class SubmissionHistoryResponseDto(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: List<SubmissionHistoryItem>?
+)
+
+data class SubmissionHistoryItem(
+    @SerializedName("sourceCode") val sourceCode: String,
+    @SerializedName("status") val status: String,
+    @SerializedName("language") val language: String,
+    @SerializedName("createdAt") val createdAt: String
+)

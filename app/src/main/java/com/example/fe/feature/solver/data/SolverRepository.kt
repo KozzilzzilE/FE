@@ -272,9 +272,45 @@ public class Solution {
 
     /**
      * 문제별 제출 기록 조회
-     * 아직 서버 API 연결 전
      */
-    suspend fun loadSubmissionHistory(problemId: Long) {
-        // TODO: 실제 API 연결 후 구현
+    suspend fun loadSubmissionHistory(
+        token: String,
+        problemId: Long
+    ): List<com.example.fe.feature.solver.model.SubmissionRecord> {
+
+        val response = apiService.getSubmissionHistories(
+            token = "Bearer $token",
+            problemId = problemId
+        )
+
+        if (!response.isSuccessful) {
+            throw Exception("제출 기록 조회 실패: ${response.code()}")
+        }
+
+        val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+        if (!body.isSuccess) {
+            throw Exception(body.message)
+        }
+
+        val result = body.result ?: emptyList()
+
+        return result.map {
+            val isCorrect = it.status == "ACCEPTED"
+
+            val resultText = when (it.status) {
+                "ACCEPTED" -> "정답"
+                "WRONG_ANSWER" -> "오답"
+                "COMPILATION_ERROR" -> "컴파일 에러"
+                "RUNTIME_ERROR" -> "런타임 에러"
+                else -> it.status
+            }
+
+            com.example.fe.feature.solver.model.SubmissionRecord(
+                date = it.createdAt,
+                language = it.language,
+                result = resultText,
+                isCorrect = isCorrect
+            )
+        }
     }
 }

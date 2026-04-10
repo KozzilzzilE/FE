@@ -26,10 +26,7 @@ class SolverViewModel(
         SolverUiState(
             code = "",
             testCases = emptyList(),
-            submissions = listOf(
-                SubmissionRecord("2026.01.21 14:29:00", "Java", "정답", true),
-                SubmissionRecord("2026.01.21 14:28:00", "Java", "오답", false)
-            )
+            submissions = emptyList()
         )
     )
     val uiState: StateFlow<SolverUiState> = _uiState.asStateFlow()
@@ -216,9 +213,8 @@ class SolverViewModel(
                     ?: throw Exception("로그인 토큰이 없습니다.")
 
                 /**
-                 * 중요:
-                 * repository.submitCode() 는 이제
-                 * historyId + submissionId 를 함께 반환해야 함
+                 * repository.submitCode() 는
+                 * historyId + submissionId 를 함께 반환
                  */
                 val submitInfo = repository.submitCode(
                     token = token,
@@ -271,29 +267,14 @@ class SolverViewModel(
                 errorMessage = if (isCorrect) null else status
             )
 
-            val resultText = when (status) {
-                "ACCEPTED" -> "정답"
-                "WRONG_ANSWER" -> "오답"
-                "COMPILATION_ERROR" -> "컴파일 에러"
-                "RUNTIME_ERROR" -> "런타임 에러"
-                else -> status
-            }
-
-            val newRecord = SubmissionRecord(
-                date = "방금",
-                language = language,
-                result = resultText,
-                isCorrect = isCorrect
-            )
-
             _uiState.update {
                 it.copy(
                     isSubmitting = false,
-                    submitResult = submitResult,
-                    submissions = listOf(newRecord) + it.submissions
+                    submitResult = submitResult
                 )
             }
 
+            loadSubmissionHistory(_uiState.value.problemId)
             return
         }
 
@@ -310,7 +291,24 @@ class SolverViewModel(
      */
     fun loadSubmissionHistory(problemId: Long = _uiState.value.problemId) {
         viewModelScope.launch {
-            repository.loadSubmissionHistory(problemId)
+            try {
+                val token = TokenManager.getAccessToken()
+                    ?: throw Exception("로그인 토큰이 없습니다.")
+
+                val histories = repository.loadSubmissionHistory(
+                    token = token,
+                    problemId = problemId
+                )
+
+                _uiState.update {
+                    it.copy(submissions = histories)
+                }
+
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorToast = "제출 기록 조회 실패: ${e.message}")
+                }
+            }
         }
     }
 

@@ -14,5 +14,5 @@ package com.example.fe.common
  */
 object MockConfig {
     // ★★★ 이 한 줄만 바꾸면 Mock ↔ 실서버 전환 ★★★
-    const val USE_MOCK = true
+    const val USE_MOCK = false
 }

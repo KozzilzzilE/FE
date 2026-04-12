@@ -20,5 +20,6 @@ data class LanguageListResult(
 
 data class LanguageResult(
     @SerializedName("languageId") val languageId: Int,
-    @SerializedName("name") val name: String
-)
+    //@SerializedName("name") val name: String
+    @SerializedName("name") val languageName: String
+    )

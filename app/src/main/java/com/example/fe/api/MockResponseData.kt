@@ -16,17 +16,23 @@ package com.example.fe.api
 object MockResponseData {
 
     // ─────────────────────────────────────────────
+    // [MOCK 상태값] 이름/언어 변경 시 메모리에 유지되는 값
+    // ─────────────────────────────────────────────
+    var currentNickname: String = "이성규"
+    var currentLanguage: String = "JAVA"
+
+    // ─────────────────────────────────────────────
     // [인증] POST /api/v1/auths/login
     // ─────────────────────────────────────────────
-    val LOGIN = """
+    fun getLogin(): String = """
     {
         "isSuccess": true,
         "code": "COMMON200",
         "message": "성공입니다.",
         "result": {
             "accessToken": "mock_access_token_PocketCo_2026",
-            "nickname": "이성규",
-            "language": "JAVA"
+            "nickname": "$currentNickname",
+            "language": "$currentLanguage"
         }
     }
     """.trimIndent()
@@ -51,22 +57,37 @@ object MockResponseData {
     // ─────────────────────────────────────────────
     // [메인 홈] GET /api/v1/users/main
     // ─────────────────────────────────────────────
-    val HOME = """
+    fun getHome(): String = """
     {
         "isSuccess": true,
         "code": "COMMON200",
         "message": "성공입니다.",
         "result": {
-            "name": "이성규",
+            "name": "$currentNickname",
             "languageId": 1,
-            "languageName": "JAVA"
+            "languageName": "$currentLanguage"
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [마이페이지 조회] GET /api/v1/users/main
+    // ─────────────────────────────────────────────
+    fun getMyPage(): String = """
+    {
+        "isSuccess": true,
+        "code": "USER_200",
+        "message": "메인 화면 정보 조회 성공했습니다.",
+        "result": {
+            "nickname": "$currentNickname",
+            "languageId": 1,
+            "languageName": "$currentLanguage"
         }
     }
     """.trimIndent()
 
     // ─────────────────────────────────────────────
     // [주제 목록] GET /api/v1/topics
-    // 10개 이상의 알고리즘 주제 데이터
     // ─────────────────────────────────────────────
     val TOPICS = """
     {
@@ -95,7 +116,6 @@ object MockResponseData {
 
     // ─────────────────────────────────────────────
     // [개념 학습] GET /api/v1/learnings/{topicId}/notions
-    // 10개 이상의 개념 학습 페이지 데이터 (해시 기준 샘플)
     // ─────────────────────────────────────────────
     val NOTIONS = """
     {
@@ -264,6 +284,46 @@ object MockResponseData {
         }
     }
     """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [사용자 메인 언어 변경] PATCH /api/v1/users/me/languages
+    // ─────────────────────────────────────────────
+    fun updateLanguage(language: String): String {
+        currentLanguage = language
+        return """
+        {
+            "isSuccess": true,
+            "code": "USER_201",
+            "message": "메인 언어가 성공적으로 변경되었습니다.",
+            "result": {
+                "userId": 1,
+                "email": "mock@test.com",
+                "nickname": "$currentNickname",
+                "language": "$currentLanguage"
+            }
+        }
+        """.trimIndent()
+    }
+
+    // ─────────────────────────────────────────────
+    // [사용자 이름 변경] PATCH /api/v1/users/me/names
+    // ─────────────────────────────────────────────
+    fun updateNickname(nickname: String): String {
+        currentNickname = nickname
+        return """
+        {
+            "isSuccess": true,
+            "code": "USER_201",
+            "message": "사용자 정보 변경이 완료되었습니다.",
+            "result": {
+                "userId": 1,
+                "email": "mock@test.com",
+                "nickname": "$currentNickname",
+                "language": "$currentLanguage"
+            }
+        }
+        """.trimIndent()
+    }
 
     // ─────────────────────────────────────────────
     // [응용 학습 목록] GET /api/v1/learnings/{topicId}/applications
@@ -439,15 +499,15 @@ object MockResponseData {
     // ─────────────────────────────────────────────
     val PROBLEM_RUN_RESULT = """
     {
-    "isSuccess": true,
-    "code": "COMMON200",
-    "message": "성공입니다.",
-    "result": {
-        "statusId": 3,
-        "status": "Accepted",
-        "input": "nums = [2, 7, 11, 15], target = 9",
-        "output": "[0, 1]"
-    }
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "statusId": 3,
+            "status": "Accepted",
+            "input": "nums = [2, 7, 11, 15], target = 9",
+            "output": "[0, 1]"
+        }
     }
     """.trimIndent()
 
@@ -532,4 +592,79 @@ object MockResponseData {
         "message": "Mock 기본 응답입니다."
     }
     """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [개념 학습 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val NOTIONS_PYTHON = NOTIONS
+
+    // ─────────────────────────────────────────────
+    // [응용 학습 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_PYTHON = PRACTICE_QUIZZES
+
+    // ─────────────────────────────────────────────
+    // [문제 상세 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_PYTHON = PROBLEM_DETAIL_1
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_PYTHON = PROBLEM_SOLUTION
+
+    // ─────────────────────────────────────────────
+    // [개념 학습 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val NOTIONS_CPP = NOTIONS
+
+    // ─────────────────────────────────────────────
+    // [개념 학습 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val NOTIONS_JAVASCRIPT = NOTIONS
+
+    // ─────────────────────────────────────────────
+    // [응용 학습 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_CPP = PRACTICE_QUIZZES
+
+    // ─────────────────────────────────────────────
+    // [응용 학습 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_JAVASCRIPT = PRACTICE_QUIZZES
+
+    // ─────────────────────────────────────────────
+    // [문제 상세 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_CPP = PROBLEM_DETAIL_1
+
+    // ─────────────────────────────────────────────
+    // [문제 상세 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_JAVASCRIPT = PROBLEM_DETAIL_1
+
+    // ─────────────────────────────────────────────
+    // [기본 문제 상세 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_PYTHON = PROBLEM_DETAIL_DEFAULT
+
+    // ─────────────────────────────────────────────
+    // [기본 문제 상세 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_CPP = PROBLEM_DETAIL_DEFAULT
+
+    // ─────────────────────────────────────────────
+    // [기본 문제 상세 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_JAVASCRIPT = PROBLEM_DETAIL_DEFAULT
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_CPP = PROBLEM_SOLUTION
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_JAVASCRIPT = PROBLEM_SOLUTION
 }

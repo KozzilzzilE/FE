@@ -1,5 +1,6 @@
 package com.example.fe.feature.list.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,8 +12,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -45,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import com.example.fe.common.BottomNavigationBar
 import com.example.fe.common.TopBar
 import com.example.fe.common.bottomNavItems
+import com.example.fe.feature.list.component.PaginationBar
 import com.example.fe.feature.list.model.Difficulty
 
 enum class AllProblemDifficultyFilter {
@@ -88,35 +91,30 @@ fun AllProblemListScreen(
                 onNavigate = onNavigate
             )
         },
-        containerColor = Color(0xFFF7F9FB)
+        //containerColor = Color(0xFFF7F9FB)
+        containerColor = Color.White
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFFF7F9FB))
-                .padding(horizontal = 16.dp)
+                //.background(Color(0xFFF7F9FB))
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = Color(0xFFE5E7EB)
+            )
 
             DifficultyFilterRow(
                 selectedDifficulty = selectedDifficulty,
-                onDifficultySelected = onDifficultySelected
+                onDifficultySelected = onDifficultySelected,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Text(
-                text = "전체 문제",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF111827)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             LazyColumn(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -129,7 +127,7 @@ fun AllProblemListScreen(
                 }
             }
 
-            PaginationSection(
+            PaginationBar(
                 currentPage = currentPage,
                 totalPages = totalPages,
                 onPageChange = onPageChange
@@ -143,9 +141,11 @@ fun AllProblemListScreen(
 @Composable
 private fun DifficultyFilterRow(
     selectedDifficulty: AllProblemDifficultyFilter,
-    onDifficultySelected: (AllProblemDifficultyFilter) -> Unit
+    onDifficultySelected: (AllProblemDifficultyFilter) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         DifficultyChip(
@@ -177,17 +177,18 @@ private fun DifficultyChip(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (selected) Color(0xFF7EA3F7) else Color(0xFFF1F5F9)
-    val textColor = if (selected) Color.White else Color(0xFF64748B)
-
     Surface(
         modifier = Modifier.clickable { onClick() },
         shape = CircleShape,
-        color = backgroundColor
+        color = if (selected) Color(0xFF7EA3F7) else Color.White,
+        border = BorderStroke(
+            1.dp,
+            if (selected) Color(0xFF7EA3F7) else Color(0xFFE2E8F0)
+        )
     ) {
         Text(
             text = text,
-            color = textColor,
+            color = if (selected) Color.White else Color(0xFF64748B),
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
@@ -285,70 +286,6 @@ private fun DifficultyBadge(
     }
 }
 
-@Composable
-private fun PaginationSection(
-    currentPage: Int,
-    totalPages: Int,
-    onPageChange: (Int) -> Unit
-) {
-    if (totalPages <= 0) return
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Filled.ChevronLeft,
-            contentDescription = "이전 페이지",
-            tint = if (currentPage > 1) Color(0xFF64748B) else Color(0xFFCBD5E1),
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(enabled = currentPage > 1) {
-                    onPageChange(currentPage - 1)
-                }
-                .padding(6.dp)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        for (page in 1..totalPages) {
-            val isSelected = page == currentPage
-
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(
-                        if (isSelected) Color(0xFF7EA3F7) else Color.Transparent
-                    )
-                    .clickable { onPageChange(page) }
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = page.toString(),
-                    color = if (isSelected) Color.White else Color(0xFF64748B),
-                    fontSize = 14.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Icon(
-            imageVector = Icons.Filled.ChevronRight,
-            contentDescription = "다음 페이지",
-            tint = if (currentPage < totalPages) Color(0xFF64748B) else Color(0xFFCBD5E1),
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable(enabled = currentPage < totalPages) {
-                    onPageChange(currentPage + 1)
-                }
-                .padding(6.dp)
-        )
-    }
-}
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -358,41 +295,11 @@ private fun AllProblemListScreenPreview() {
     var sampleProblems by remember {
         mutableStateOf(
             listOf(
-                AllProblemItem(
-                    problemId = 1,
-                    title = "배열 두 배 만들기",
-                    difficulty = Difficulty.EASY,
-                    bookmarkCount = 120,
-                    isBookmarked = false
-                ),
-                AllProblemItem(
-                    problemId = 2,
-                    title = "최빈값 구하기",
-                    difficulty = Difficulty.MEDIUM,
-                    bookmarkCount = 85,
-                    isBookmarked = false
-                ),
-                AllProblemItem(
-                    problemId = 3,
-                    title = "문자열 뒤집기",
-                    difficulty = Difficulty.EASY,
-                    bookmarkCount = 210,
-                    isBookmarked = true
-                ),
-                AllProblemItem(
-                    problemId = 4,
-                    title = "특정 문자 제거하기",
-                    difficulty = Difficulty.HARD,
-                    bookmarkCount = 45,
-                    isBookmarked = false
-                ),
-                AllProblemItem(
-                    problemId = 5,
-                    title = "다음에 올 숫자",
-                    difficulty = Difficulty.HARD,
-                    bookmarkCount = 310,
-                    isBookmarked = true
-                )
+                AllProblemItem(1, "배열 두 배 만들기", Difficulty.EASY, 120, false),
+                AllProblemItem(2, "최빈값 구하기", Difficulty.MEDIUM, 85, false),
+                AllProblemItem(3, "문자열 뒤집기", Difficulty.EASY, 210, true),
+                AllProblemItem(4, "특정 문자 제거하기", Difficulty.HARD, 45, false),
+                AllProblemItem(5, "다음에 올 숫자", Difficulty.HARD, 310, true)
             )
         )
     }

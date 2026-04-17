@@ -18,6 +18,7 @@ object Routes {
     //Mypage
     const val EDIT_PROFILE = "edit_profile"
     const val LANGUAGE_SETTING = "language_setting"
+    const val FAVORITE_PROBLEMS = "favorite_problems"
 
     // Args
     const val PROBLEM_ID = "problemId"

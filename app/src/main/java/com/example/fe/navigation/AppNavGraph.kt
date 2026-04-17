@@ -52,6 +52,8 @@ import com.example.fe.feature.profile.ui.MyPageScreen
 import com.example.fe.feature.profile.ui.EditProfileScreen
 import com.example.fe.feature.profile.ui.LanguageSettingScreen
 
+import com.example.fe.feature.profile.ui.FavoriteProblemsScreen
+
 import com.example.fe.feature.list.ProblemListViewModel
 import com.example.fe.feature.list.ProblemListViewModelFactory
 import com.example.fe.feature.list.ProblemUiState
@@ -250,7 +252,9 @@ fun AppNavGraph() {
                 onLanguageClick = {
                     navController.navigate(Routes.LANGUAGE_SETTING)
                 },
-                onFavoriteClick = {},
+                onFavoriteClick = {
+                    navController.navigate(Routes.FAVORITE_PROBLEMS)
+                },
                 onSubmissionClick = {},
                 onLogoutClick = {
                     com.example.fe.common.TokenManager.clearAccessToken()
@@ -303,6 +307,16 @@ fun AppNavGraph() {
                 }
             )
         }
+        composable(Routes.FAVORITE_PROBLEMS) {
+            FavoriteProblemsScreen(
+                onBackClick = { navController.popBackStack() },
+                onProblemClick = { problemId ->
+                    navController.navigate(Routes.solve(problemId))
+                }
+            )
+        }
+
+
 
         composable(route = Routes.TOPIC) {
             TopicListScreen(

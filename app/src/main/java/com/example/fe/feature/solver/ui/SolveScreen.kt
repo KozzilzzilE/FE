@@ -45,6 +45,7 @@ import com.example.fe.feature.solver.component.SmartKeyboardPanel
 import com.example.fe.feature.solver.component.SubmitTabContent
 import com.example.fe.feature.solver.model.ProblemDetail
 import com.example.fe.feature.solver.model.TestCase
+import com.example.fe.common.TopBar
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -116,48 +117,13 @@ fun SolveScreen(
         Scaffold(
             contentWindowInsets = WindowInsets(0),
             topBar = {
-                TopAppBar(
-                    title = {
-                        Column(
-                            modifier = Modifier.padding(start = 4.dp)
-                        ) {
-                            Text(
-                                text = "문제 풀이",
-                                style = MaterialTheme.typography.titleLarge,
-                                maxLines = 1
-                            )
-                            if (titleToShow.isNotBlank()) {
-                                Text(
-                                    text = titleToShow,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = Color(0xFF8A94A6),
-                                    maxLines = 1
-                                )
-                            }
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = onHome) {
-                            Icon(
-                                imageVector = Icons.Filled.Home,
-                                contentDescription = "Home"
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White,
-                        titleContentColor = Color.Black,
-                        navigationIconContentColor = Color.Black,
-                        actionIconContentColor = Color.Black
-                    )
+                TopBar(
+                    title = "문제 풀이",
+                    subtitle = titleToShow,
+                    showBackIcon = true,
+                    showHomeIcon = true,
+                    onBackClick = onBack,
+                    onHomeClick = onHome
                 )
             },
             bottomBar = {

@@ -1,4 +1,4 @@
-package com.example.fe.feature.list.component
+package com.example.fe.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,7 +32,7 @@ import com.example.fe.feature.list.model.Difficulty
 import com.example.fe.feature.list.ui.AllProblemItem
 
 @Composable
-fun AllProblemCard(
+fun ProblemListCard(
     problem: AllProblemItem,
     onClick: () -> Unit,
     onBookmarkClick: () -> Unit
@@ -52,7 +52,7 @@ fun AllProblemCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                DifficultyBadge(difficulty = problem.difficulty)
+                ProblemDifficultyBadge(difficulty = problem.difficulty)
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -91,7 +91,7 @@ fun AllProblemCard(
 }
 
 @Composable
-private fun DifficultyBadge(
+private fun ProblemDifficultyBadge(
     difficulty: Difficulty
 ) {
     val backgroundColor = when (difficulty) {
@@ -106,6 +106,12 @@ private fun DifficultyBadge(
         Difficulty.HARD -> Color(0xFFF26464)
     }
 
+    val label = when (difficulty) {
+        Difficulty.EASY -> "쉬움"
+        Difficulty.MEDIUM -> "보통"
+        Difficulty.HARD -> "어려움"
+    }
+
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
@@ -113,7 +119,7 @@ private fun DifficultyBadge(
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
-            text = difficulty.label,
+            text = label,
             color = textColor,
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold
@@ -123,13 +129,13 @@ private fun DifficultyBadge(
 
 @Preview(showBackground = true)
 @Composable
-private fun AllProblemCardPreview() {
+private fun ProblemListCardPreview() {
     Column(
         modifier = Modifier
             .background(Color(0xFFF7F9FB))
             .padding(16.dp)
     ) {
-        AllProblemCard(
+        ProblemListCard(
             problem = AllProblemItem(
                 problemId = 1L,
                 title = "배열 두 배 만들기",

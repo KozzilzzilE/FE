@@ -33,7 +33,6 @@ import com.example.fe.feature.list.component.DifficultyChip
 import com.example.fe.feature.list.component.PaginationBar
 import com.example.fe.feature.list.model.Difficulty
 
-// -------------------- enum / data --------------------
 
 enum class AllProblemDifficultyFilter {
     ALL, EASY, MEDIUM, HARD
@@ -47,7 +46,6 @@ data class AllProblemItem(
     val isBookmarked: Boolean = false
 )
 
-// -------------------- Screen --------------------
 
 @Composable
 fun AllProblemListScreen(
@@ -100,16 +98,17 @@ fun AllProblemListScreen(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
 
-            // 문제 리스트 영역 (연회색 배경)
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .background(Color(0xFFF7F9FB))
+                    .padding(top = 12.dp)   // 여기 추가
             ) {
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     contentPadding = PaddingValues(bottom = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -122,21 +121,17 @@ fun AllProblemListScreen(
                         )
                     }
                 }
+
+                PaginationBar(
+                    currentPage = currentPage,
+                    totalPages = totalPages,
+                    onPageChange = onPageChange
+                )
+                Spacer(modifier = Modifier.height(12.dp))
             }
-
-            // 페이지네이션
-            PaginationBar(
-                currentPage = currentPage,
-                totalPages = totalPages,
-                onPageChange = onPageChange
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
-
-// -------------------- Filter Row --------------------
 
 @Composable
 private fun DifficultyFilterRow(
@@ -171,7 +166,6 @@ private fun DifficultyFilterRow(
     }
 }
 
-// -------------------- Preview --------------------
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

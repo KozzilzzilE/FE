@@ -11,29 +11,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun HomeTopBar(
-    userName: String,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 35.dp, bottom = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -41,8 +41,8 @@ fun HomeTopBar(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
+                    .size(35.dp)
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color(0xFF4A90E2)),
                 contentAlignment = Alignment.Center
             ) {
@@ -53,32 +53,28 @@ fun HomeTopBar(
                     fontSize = 16.sp
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = "PocketCo",
-                fontSize = 20.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF222222)
+                color = Color(0xFF1F2937)
             )
         }
 
-        // 우측 유저 환영 메시지 영역
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = Color(0xFF4A90E2), fontWeight = FontWeight.Bold)) {
-                        append(userName)
-                    }
-                    withStyle(style = SpanStyle(color = Color(0xFF666666))) {
-                        append("님")
-                    }
-                },
-                fontSize = 16.sp
-            )
-            Text(
-                text = "환영합니다",
-                color = Color(0xFF888888),
-                fontSize = 12.sp
+        // 우측 프로필 아이콘 영역
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFF3F4F6)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Profile",
+                tint = Color(0xFF9CA3AF),
+                modifier = Modifier.size(24.dp)
             )
         }
     }
@@ -87,5 +83,5 @@ fun HomeTopBar(
 @Preview(showBackground = true)
 @Composable
 fun HomeTopBarPreview() {
-    HomeTopBar(userName = "홍길동")
+    HomeTopBar()
 }

@@ -1,81 +1,62 @@
 package com.example.fe.feature.home.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.LocalDate
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fe.api.RetrofitClient
-import com.example.fe.common.AppConstants
-import com.example.fe.feature.home.data.HomeRepository
-import com.example.fe.common.BottomNavigationBar
-import com.example.fe.feature.home.component.HomeTopBar
-import com.example.fe.feature.home.component.LanguageDropdown
-import com.example.fe.common.bottomNavItems
 import com.example.fe.feature.home.HomeUiState
 import com.example.fe.feature.home.HomeViewModel
 import com.example.fe.feature.home.HomeViewModelFactory
+import com.example.fe.feature.home.component.*
+import com.example.fe.feature.home.data.HomeRepository
+import com.example.fe.common.BottomNavigationBar
+import com.example.fe.common.bottomNavItems
+import java.time.LocalDate
 
 @Composable
 fun HomeScreen(
-    // 팩토리를 통해 Repository 주입
     viewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(HomeRepository(RetrofitClient.instance))
     ),
     onNavigate: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedLanguage by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
 
-    // uiState가 Success이고 서버에서 정보를 가져오면 초기 선택 언어를 맞춥니다.
-    LaunchedEffect(uiState) {
-        if (uiState is HomeUiState.Success && selectedLanguage.isEmpty()) {
-            val serverLang = (uiState as HomeUiState.Success).languageName
-            // "JAVA" 등 서버 대문자 응답 처리를 위해 우리 상수 목록에서 매칭
-            val matchedLang = AppConstants.SUPPORTED_LANGUAGES.find { 
-                it.equals(serverLang, ignoreCase = true) 
-            } ?: "Java" // 기본 폴백
-            
-            selectedLanguage = matchedLang
-        }
+    // UI 상태에 따른 유저 정보
+    val displayUserName = when (uiState) {
+        is HomeUiState.Success -> (uiState as HomeUiState.Success).name
+        else -> "사용자"
     }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = Color(0xFFF7F9FC), // 전체 배경색 고정
         topBar = {
-            Column(modifier = Modifier.padding(top = 24.dp)) {
-                // UI 상태에 따라 적절한 유저명을 뽑아내서 전달 (로딩 중이거 에러면 빈스트링이나 '테스터' 표시)
-                val displayUserName = when (uiState) {
-                    is HomeUiState.Success -> (uiState as HomeUiState.Success).name
-                    else -> "사용자"
-                }
-
-                HomeTopBar(userName = displayUserName)
-                LanguageDropdown(
-                    selectedLanguage = selectedLanguage,
-                    onLanguageSelected = { selectedLanguage = it }
-                )
-            }
+            HomeTopBar()
         },
         bottomBar = {
             BottomNavigationBar(
@@ -89,53 +70,74 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color.White)
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+                .verticalScroll(scrollState)
         ) {
-            // 중앙 콘텐츠 박스 위에서 UI State별 분기 처리
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        color = Color(0xFFE8F1FA),
-                        shape = RoundedCornerShape(16.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                // 상태별 화면 렌더링
-                when (uiState) {
-                    is HomeUiState.Loading -> {
-                        CircularProgressIndicator(color = Color(0xFF4A90E2))
-                    }
-                    is HomeUiState.Error -> {
-                        // 사용자 요청에 따라 UI에는 아무런 에러 메시지도 표시하지 않습니다.
-                    }
-                    is HomeUiState.Success -> {
-                        val name = (uiState as HomeUiState.Success).name
-                        
-                        // [DUMMY] 실제 서버 연동 전까지 가짜 데이터 생성
-                        val dummyContributions = remember {
-                            val map = mutableMapOf<LocalDate, Int>()
-                            val today = LocalDate.now()
-                            // 최근 100일 중 랜덤으로 데이터 생성
-                            for (i in 0..150) {
-                                val date = today.minusDays(i.toLong())
-                                if (i % 3 == 0) map[date] = (0..20).random()
-                            }
-                            map
-                        }
+            // 1. 환영 문구 섹션
+            WelcomeSection(userName = "${displayUserName}님")
 
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            com.example.fe.feature.home.component.ContributionGraph(
-                                contributions = dummyContributions
-                            )
-                        }
-                    }
+            // 2. 메인 액션 카드 섹션 (찜한 문제 + CS 퀴즈)
+            MainActionsRow()
+
+            // 3. 오늘의 명언 섹션
+            QuoteCard()
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 4. 나의 학습 기록 섹션 타이틀
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "나의 학습 기록",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1F2937)
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "전체보기",
+                        fontSize = 14.sp,
+                        color = Color(0xFF9CA3AF)
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = Color(0xFF9CA3AF),
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 6. 잔디 그래프 (Contribution Graph)
+            // [DUMMY DATA]
+            val dummyContributions = remember {
+                val map = mutableMapOf<LocalDate, Int>()
+                val today = LocalDate.now()
+                // 1. 최근 14일은 무조건 연속 스트릭이 생기도록 데이터 생성
+                for (i in 0..13) {
+                    val date = today.minusDays(i.toLong())
+                    map[date] = (5..15).random()
+                }
+                // 2. 그 이전 데이터는 랜덤하게 생성 (잔디용)
+                for (i in 14..150) {
+                    val date = today.minusDays(i.toLong())
+                    if (i % 2 == 0) map[date] = (0..20).random()
+                }
+                map
+            }
+
+            ContributionGraph(
+                contributions = dummyContributions,
+                modifier = Modifier.padding(horizontal = 8.dp) // 내부 패딩 고려
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

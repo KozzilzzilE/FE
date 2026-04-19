@@ -16,6 +16,13 @@ import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material3.Icon
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 
 /**
  * [동기부여 잔디] 깃허브 스타일의 활동 기록 그래프 컴포넌트
@@ -46,8 +53,13 @@ fun ContributionGraph(
     val streakCount = androidx.compose.runtime.remember(contributions) {
         var count = 0
         var checkDate = today
-        // 오늘부터 하루씩 빼가며 0보다 큰 기록이 있을 때까지 카운트
-        while (contributions[checkDate] != null && contributions[checkDate]!! > 0) {
+        
+        // 만약 오늘 아직 한 문제가 없다면 어제부터 체크 시작 (스트릭 유지)
+        if ((contributions[today] ?: 0) == 0) {
+            checkDate = today.minusDays(1)
+        }
+        
+        while ((contributions[checkDate] ?: 0) > 0) {
             count++
             checkDate = checkDate.minusDays(1)
         }
@@ -55,13 +67,52 @@ fun ContributionGraph(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "${streakCount}일째 연속 학습 중 🔥",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF1F2937),
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        // 스트릭 정보 (HomeScreen에서 통합된 디자인)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(start = 14.dp) // 왼쪽에서 24dp 밀어냄
+                    .size(40.dp)
+                    .background(Color(0xFFEAF1FF), shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = null,
+                    tint = Color(0xFF4A90E2),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column {
+                Text(
+                    text = "이번 달 학습일",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF6B7280)
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontSize = 21.sp, fontWeight = FontWeight.Black)) {
+                            append("${streakCount}일 ")
+                        }
+                        withStyle(style = SpanStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF6B6B))) {
+                            append("연속")
+                        }
+                        withStyle(style = SpanStyle(fontSize = 16.sp)) {
+                            append(" 🔥")
+                        }
+                    },
+                    color = Color(0xFF1F2937),
+                    lineHeight = 32.sp
+                )
+            }
+        }
 
         Box(
             modifier = Modifier

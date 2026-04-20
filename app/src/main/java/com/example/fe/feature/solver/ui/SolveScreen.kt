@@ -14,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -63,6 +65,7 @@ fun SolveScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by rememberSaveable { mutableStateOf(SolveTab.PROBLEM) }
+    var isBookmarked by remember { mutableStateOf(false) }
 
     val codeFromVm = uiState.code
     var tfv by remember {
@@ -122,7 +125,16 @@ fun SolveScreen(
                     showBackIcon = true,
                     showHomeIcon = true,
                     onBackClick = onBack,
-                    onHomeClick = onHome
+                    onHomeClick = onHome,
+                    rightContent = {
+                        IconButton(onClick = { isBookmarked = !isBookmarked }) {
+                            Icon(
+                                imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                contentDescription = "즐겨찾기",
+                                tint = if (isBookmarked) Color(0xFFFFC107) else Color(0xFF94A3B8)
+                            )
+                        }
+                    }
                 )
             },
             bottomBar = {

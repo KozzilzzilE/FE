@@ -52,8 +52,8 @@ fun FavoriteProblemsScreen(
     ) {
         TopBar(
             title = "내가 찜한 문제",
-            showBackIcon = false,
-            onBackClick = {}
+            showBackIcon = true,
+            onBackClick = onBackClick
         )
 
         Spacer(modifier = Modifier.height(8.dp))

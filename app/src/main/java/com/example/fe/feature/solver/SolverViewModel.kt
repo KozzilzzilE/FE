@@ -58,7 +58,10 @@ class SolverViewModel(
     /**
      * 문제 상세 조회
      */
-    fun loadProblemDetail(problemId: Long, language: String = _uiState.value.language) {
+    fun loadProblemDetail(problemId: Long, language: String = _uiState.value.language, difficultyLabel: String? = null) {
+        val oldState = _uiState.value
+        val preservedDifficulty = difficultyLabel ?: if (oldState.problemId == problemId) oldState.problemDetail?.difficultyLabel else null
+
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
@@ -72,7 +75,7 @@ class SolverViewModel(
                 val token = TokenManager.getAccessToken()
                     ?: throw Exception("로그인 토큰이 없습니다.")
 
-                val detail = repository.loadProblemDetail(token, problemId, language)
+                val detail = repository.loadProblemDetail(token, problemId, language, preservedDifficulty)
 
                 _uiState.update { state ->
                     state.copy(

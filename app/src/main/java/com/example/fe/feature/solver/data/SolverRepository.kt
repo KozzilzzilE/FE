@@ -37,7 +37,8 @@ public class Solution {
     suspend fun loadProblemDetail(
         token: String,
         problemId: Long,
-        language: String
+        language: String,
+        difficultyLabel: String? = null
     ): ProblemDetail {
         val response = apiService.getProblemDetail("Bearer $token", problemId, language)
 
@@ -65,7 +66,7 @@ public class Solution {
         return ProblemDetail(
             problemId = result.exerciseId,
             title = result.title,
-            difficultyLabel = "-",
+            difficultyLabel = difficultyLabel ?: "-",
             description = result.description,
             exampleInput = firstTest?.input ?: "-",
             exampleOutput = firstTest?.expectedOutput ?: "-",

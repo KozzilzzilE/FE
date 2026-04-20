@@ -215,7 +215,7 @@ fun AppNavGraph() {
                 totalPages = totalPages,
                 onDifficultySelected = { selectedDifficulty = it },
                 onProblemClick = { problem ->
-                    navController.navigate(Routes.solve(problem.problemId))
+                    navController.navigate(Routes.solve(problem.problemId, problem.difficulty.name))
                 },
                 onBookmarkClick = { problemId ->
                     sampleProblems = sampleProblems.map { problem ->
@@ -533,7 +533,7 @@ fun AppNavGraph() {
                             screenTitle = "문제학습",
                             items = problems,
                             onItemClick = { item ->
-                                navController.navigate(Routes.solve(item.id))
+                                navController.navigate(Routes.solve(item.id, item.difficulty.name))
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
@@ -639,16 +639,22 @@ fun AppNavGraph() {
         composable(
             route = Routes.SOLVE_ROUTE,
             arguments = listOf(
-                navArgument(Routes.PROBLEM_ID) { type = NavType.LongType }
+                navArgument(Routes.PROBLEM_ID) { type = NavType.LongType },
+                navArgument("difficulty") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
             )
         ) { backStackEntry ->
             val problemId = backStackEntry.arguments?.getLong(Routes.PROBLEM_ID) ?: 0L
+            val difficulty = backStackEntry.arguments?.getString("difficulty")
             val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
                 .getLanguage(context)
                 .ifBlank { "JAVA" }
 
-            LaunchedEffect(problemId, preferredLanguage) {
-                solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+            LaunchedEffect(problemId, preferredLanguage, difficulty) {
+                solverViewModel.loadProblemDetail(problemId, preferredLanguage, difficulty)
             }
 
             SolveScreen(

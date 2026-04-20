@@ -30,7 +30,7 @@ object Routes {
     // Patterns
     const val STEP_ROUTE = "step/{$TOPIC_ID}/{$TOPIC_NAME}"
     const val DETAIL_LIST_ROUTE = "detail/{$TOPIC_ID}/{$TOPIC_NAME}/{$STEP_TYPE}"
-    const val SOLVE_ROUTE = "solve/{$PROBLEM_ID}"
+    const val SOLVE_ROUTE = "solve/{$PROBLEM_ID}?difficulty={difficulty}"
     const val EDITOR_ROUTE = "editor/{$PROBLEM_ID}"
     const val EDITOR_FULL_ROUTE = "editor_full/{$PROBLEM_ID}"
     const val CONCEPT_ROUTE = "concept/{$TOPIC_ID}/{$INITIAL_INDEX}"
@@ -41,7 +41,8 @@ object Routes {
     // Builders
     fun step(topicId: Long, topicName: String) = "step/$topicId/${Uri.encode(topicName)}"
     fun detailList(topicId: Long, topicName: String, stepType: String) = "detail/$topicId/${Uri.encode(topicName)}/$stepType"
-    fun solve(problemId: Long) = "solve/$problemId"
+    fun solve(problemId: Long, difficulty: String? = null) = 
+        if (difficulty != null) "solve/$problemId?difficulty=$difficulty" else "solve/$problemId"
     fun editor(problemId: Long) = "editor/$problemId"
     fun editorFull(problemId: Long) = "editor_full/$problemId"
     fun concept(topicId: Long, initialIndex: Int) = "concept/$topicId/$initialIndex"

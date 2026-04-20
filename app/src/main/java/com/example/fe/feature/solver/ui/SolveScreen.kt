@@ -58,7 +58,6 @@ fun SolveScreen(
     onOpenEditorFull: (Long) -> Unit = {}
 ) {
     LaunchedEffect(problemId) {
-        viewModel.loadProblemDetail(problemId)
         viewModel.loadDraft(problemId)
     }
 
@@ -536,7 +535,21 @@ private fun ProblemTab(
             .verticalScroll(scroll)
             .padding(16.dp)
     ) {
-        if (!detail.difficultyLabel.isNullOrBlank()) {
+        if (!detail.difficultyLabel.isNullOrBlank() && detail.difficultyLabel != "-") {
+            val diffLabelUpper = detail.difficultyLabel.uppercase()
+            val diffText = when (diffLabelUpper) {
+                "EASY" -> "쉬움"
+                "MEDIUM", "NORMAL" -> "보통"
+                "HARD" -> "어려움"
+                else -> detail.difficultyLabel
+            }
+            val diffColor = when (diffLabelUpper) {
+                "EASY", "쉬움" -> Color(0xFF10B981)
+                "MEDIUM", "NORMAL", "보통" -> Color(0xFFF59E0B)
+                "HARD", "어려움" -> Color(0xFFEF4444)
+                else -> Color(0xFFF04438)
+            }
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "난이도: ",
@@ -544,8 +557,8 @@ private fun ProblemTab(
                     fontSize = 14.sp
                 )
                 Text(
-                    text = detail.difficultyLabel,
-                    color = Color(0xFFF04438),
+                    text = diffText,
+                    color = diffColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )

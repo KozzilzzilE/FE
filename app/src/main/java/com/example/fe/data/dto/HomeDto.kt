@@ -15,7 +15,7 @@ data class HomeResponse(
 )
 
 data class HomeResult(
-    @SerializedName("name") val name: String,
+    @SerializedName("nickname") val name: String,
     @SerializedName("languageId") val languageId: Int,
     @SerializedName("languageName") val languageName: String
 )

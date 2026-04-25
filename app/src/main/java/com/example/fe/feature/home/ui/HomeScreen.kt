@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.time.LocalDate
 import com.example.fe.api.RetrofitClient
 import com.example.fe.common.AppConstants
 import com.example.fe.feature.home.data.HomeRepository
@@ -110,9 +112,26 @@ fun HomeScreen(
                     }
                     is HomeUiState.Success -> {
                         val name = (uiState as HomeUiState.Success).name
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "환영합니다, ${name}님!", fontWeight = FontWeight.Bold, color = Color.DarkGray)
-                            // 추가 확장 기능 들어갈 자리
+                        
+                        // [DUMMY] 실제 서버 연동 전까지 가짜 데이터 생성
+                        val dummyContributions = remember {
+                            val map = mutableMapOf<LocalDate, Int>()
+                            val today = LocalDate.now()
+                            // 최근 100일 중 랜덤으로 데이터 생성
+                            for (i in 0..150) {
+                                val date = today.minusDays(i.toLong())
+                                if (i % 3 == 0) map[date] = (0..20).random()
+                            }
+                            map
+                        }
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            com.example.fe.feature.home.component.ContributionGraph(
+                                contributions = dummyContributions
+                            )
                         }
                     }
                 }

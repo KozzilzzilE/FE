@@ -35,7 +35,7 @@ fun BottomNavigationBar(
             NavigationBarItem(
                 selected = currentRoute == item.route,
                 onClick = {
-                    if (item.title == "문제" || item.title == "MY") {
+                    if (item.title == "") {
                         android.widget.Toast.makeText(context, "기능 미 구현", android.widget.Toast.LENGTH_SHORT).show()
                     } else {
                         onNavigate(item.route)

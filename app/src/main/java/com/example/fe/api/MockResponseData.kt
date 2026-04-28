@@ -16,17 +16,23 @@ package com.example.fe.api
 object MockResponseData {
 
     // ─────────────────────────────────────────────
+    // [MOCK 상태값] 이름/언어 변경 시 메모리에 유지되는 값
+    // ─────────────────────────────────────────────
+    var currentNickname: String = "이성규"
+    var currentLanguage: String = "JAVA"
+
+    // ─────────────────────────────────────────────
     // [인증] POST /api/v1/auths/login
     // ─────────────────────────────────────────────
-    val LOGIN = """
+    fun getLogin(): String = """
     {
         "isSuccess": true,
         "code": "COMMON200",
         "message": "성공입니다.",
         "result": {
             "accessToken": "mock_access_token_PocketCo_2026",
-            "nickname": "이성규",
-            "language": "JAVA"
+            "nickname": "$currentNickname",
+            "language": "$currentLanguage"
         }
     }
     """.trimIndent()
@@ -51,22 +57,37 @@ object MockResponseData {
     // ─────────────────────────────────────────────
     // [메인 홈] GET /api/v1/users/main
     // ─────────────────────────────────────────────
-    val HOME = """
+    fun getHome(): String = """
     {
         "isSuccess": true,
         "code": "COMMON200",
         "message": "성공입니다.",
         "result": {
-            "name": "이성규",
+            "name": "$currentNickname",
             "languageId": 1,
-            "languageName": "JAVA"
+            "languageName": "$currentLanguage"
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [마이페이지 조회] GET /api/v1/users/main
+    // ─────────────────────────────────────────────
+    fun getMyPage(): String = """
+    {
+        "isSuccess": true,
+        "code": "USER_200",
+        "message": "메인 화면 정보 조회 성공했습니다.",
+        "result": {
+            "nickname": "$currentNickname",
+            "languageId": 1,
+            "languageName": "$currentLanguage"
         }
     }
     """.trimIndent()
 
     // ─────────────────────────────────────────────
     // [주제 목록] GET /api/v1/topics
-    // 10개 이상의 알고리즘 주제 데이터
     // ─────────────────────────────────────────────
     val TOPICS = """
     {
@@ -95,7 +116,6 @@ object MockResponseData {
 
     // ─────────────────────────────────────────────
     // [개념 학습] GET /api/v1/learnings/{topicId}/notions
-    // 10개 이상의 개념 학습 페이지 데이터 (해시 기준 샘플)
     // ─────────────────────────────────────────────
     val NOTIONS = """
     {
@@ -266,6 +286,46 @@ object MockResponseData {
     """.trimIndent()
 
     // ─────────────────────────────────────────────
+    // [사용자 메인 언어 변경] PATCH /api/v1/users/me/languages
+    // ─────────────────────────────────────────────
+    fun updateLanguage(language: String): String {
+        currentLanguage = language
+        return """
+        {
+            "isSuccess": true,
+            "code": "USER_201",
+            "message": "메인 언어가 성공적으로 변경되었습니다.",
+            "result": {
+                "userId": 1,
+                "email": "mock@test.com",
+                "nickname": "$currentNickname",
+                "language": "$currentLanguage"
+            }
+        }
+        """.trimIndent()
+    }
+
+    // ─────────────────────────────────────────────
+    // [사용자 이름 변경] PATCH /api/v1/users/me/names
+    // ─────────────────────────────────────────────
+    fun updateNickname(nickname: String): String {
+        currentNickname = nickname
+        return """
+        {
+            "isSuccess": true,
+            "code": "USER_201",
+            "message": "사용자 정보 변경이 완료되었습니다.",
+            "result": {
+                "userId": 1,
+                "email": "mock@test.com",
+                "nickname": "$currentNickname",
+                "language": "$currentLanguage"
+            }
+        }
+        """.trimIndent()
+    }
+
+    // ─────────────────────────────────────────────
     // [응용 학습 목록] GET /api/v1/learnings/{topicId}/applications
     // ─────────────────────────────────────────────
     val PRACTICE_QUIZZES = """
@@ -428,8 +488,79 @@ object MockResponseData {
         "code": "COMMON200",
         "message": "성공입니다.",
         "result": {
-            "submissionId": 999
+            "historyId": 101,
+            "submissionId": "mock_submission_token_101"
         }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [코드 실행 결과 조회] GET /api/v1/problems/runs/{token}/results
+    // ─────────────────────────────────────────────
+    val PROBLEM_RUN_RESULT = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "statusId": 3,
+            "status": "Accepted",
+            "input": "nums = [2, 7, 11, 15], target = 9",
+            "output": "[0, 1]"
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [코드 채점 결과 조회] GET /api/v1/problems/submissions/{historyId}/results
+    // ─────────────────────────────────────────────
+    val PROBLEM_SUBMISSION_RESULT = """
+    {
+        "isSuccess": true,
+        "code": "PROBLEM_205",
+        "message": "문제 코드 채점 결과 조회 성공",
+        "result": {
+            "success": true,
+            "status": "ACCEPTED",
+            "message": "채점이 완료되었습니다."
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [문제별 사용자 제출 기록 조회] GET /api/v1/problems/{problemId}/histories
+    // ─────────────────────────────────────────────
+    val PROBLEM_HISTORIES = """
+    {
+        "isSuccess": true,
+        "code": "PROBLEM_206",
+        "message": "사용자 문제 제출 기록 조회 성공",
+        "result": [
+            {
+                "sourceCode": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> map = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            int complement = target - nums[i];\n            if (map.containsKey(complement)) {\n                return new int[]{map.get(complement), i};\n            }\n            map.put(nums[i], i);\n        }\n        return new int[]{};\n    }\n}",
+                "status": "ACCEPTED",
+                "language": "JAVA",
+                "createdAt": "2026-04-10 10:25:46"
+            },
+            {
+                "sourceCode": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[]{0, 0};\n    }\n}",
+                "status": "WRONG_ANSWER",
+                "language": "JAVA",
+                "createdAt": "2026-04-10 10:20:12"
+            },
+            {
+                "sourceCode": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        int error = 10 / 0;\n        return new int[]{};\n    }\n}",
+                "status": "RUNTIME_ERROR",
+                "language": "JAVA",
+                "createdAt": "2026-04-10 10:18:01"
+            },
+            {
+                "sourceCode": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[]{}\n    }\n}",
+                "status": "COMPILATION_ERROR",
+                "language": "JAVA",
+                "createdAt": "2026-04-10 10:15:33"
+            }
+        ]
     }
     """.trimIndent()
 
@@ -459,6 +590,396 @@ object MockResponseData {
         "isSuccess": true,
         "code": "COMMON200",
         "message": "Mock 기본 응답입니다."
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [개념 학습 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val NOTIONS_PYTHON = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "topicId": 1,
+            "count": 2,
+            "notions": [
+                {
+                    "notionId": 1,
+                    "pageNo": 1,
+                    "title": "[PYTHON] dictionary란?",
+                    "point": "Python의 dict는 key-value 구조입니다.",
+                    "detail": "### 🐍 Python dictionary\n\nPython에서는 `dict`를 사용해 key-value 데이터를 저장합니다.\n\n- 평균 조회 속도: O(1)\n- 빈도수 세기, 빠른 탐색에 자주 사용됩니다.",
+                    "imgUrl": null,
+                    "exampleCode": {
+                        "language": "PYTHON",
+                        "content": "freq = {}\nfor ch in text:\n    freq[ch] = freq.get(ch, 0) + 1\nprint(freq)"
+                    },
+                    "notionCompleted": false
+                },
+                {
+                    "notionId": 2,
+                    "pageNo": 2,
+                    "title": "[PYTHON] dict 주요 메서드",
+                    "point": "get(), keys(), values() 등을 자주 사용합니다.",
+                    "detail": "### 🐍 Python dict 메서드\n\n- `get(key, default)` : 키가 없을 때 기본값 반환\n- `keys()` : 모든 키 조회\n- `values()` : 모든 값 조회",
+                    "imgUrl": null,
+                    "exampleCode": {
+                        "language": "PYTHON",
+                        "content": "scores = {'math': 95, 'eng': 88}\nprint(scores.get('math'))\nprint(scores.keys())"
+                    },
+                    "notionCompleted": false
+                }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [응용 학습 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_PYTHON = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "count": 1,
+            "appliedExercises": [
+                {
+                    "exerciseId": 1,
+                    "title": "[PYTHON] 딕셔너리 빈도 세기",
+                    "description": "문자열에서 각 문자의 개수를 세는 Python 코드입니다.",
+                    "codeTemplate": "freq = {}\nfor ch in text:\n    freq[ch] = freq.get(ch, 0) + 1\nprint(freq)",
+                    "appliedCompleted": false,
+                    "totalBlanks": 1,
+                    "blanks": [
+                        { "content": "freq.get(ch, 0)", "answer": 1 }
+                    ]
+                }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [문제 상세 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_PYTHON = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "title": "[PYTHON] 두 수의 합",
+            "description": "Python으로 두 수의 합 문제를 해결해보세요.",
+            "constraint": "2 ≤ len(nums) ≤ 10⁴",
+            "testCases": [
+                { "input": "nums = [2, 7, 11, 15], target = 9", "output": "[0, 1]" },
+                { "input": "nums = [3, 2, 4], target = 6", "output": "[1, 2]" }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_PYTHON = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "languageId": 2,
+            "solutionCode": "def two_sum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        need = target - num\n        if need in seen:\n            return [seen[need], i]\n        seen[num] = i\n    return []",
+            "solutionText": "dict를 사용하면 필요한 값이 이미 나왔는지 O(1)에 확인할 수 있습니다.",
+            "lineSolution": "2-7 라인을 참고하세요."
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [개념 학습 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val NOTIONS_CPP = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "topicId": 1,
+            "count": 2,
+            "notions": [
+                {
+                    "notionId": 1,
+                    "pageNo": 1,
+                    "title": "[C++] unordered_map이란?",
+                    "point": "C++에서는 unordered_map을 사용해 해시 기반 key-value를 다룹니다.",
+                    "detail": "### 💠 C++ unordered_map\n\n`unordered_map`은 평균 O(1)로 삽입/탐색이 가능합니다.",
+                    "imgUrl": null,
+                    "exampleCode": {
+                        "language": "C++",
+                        "content": "#include <unordered_map>\n#include <string>\nusing namespace std;\n\nunordered_map<string, int> mp;\nmp[\"apple\"] = 1;"
+                    },
+                    "notionCompleted": false
+                },
+                {
+                    "notionId": 2,
+                    "pageNo": 2,
+                    "title": "[C++] find 사용법",
+                    "point": "find()로 키 존재 여부를 확인합니다.",
+                    "detail": "### 💠 C++ find\n\n`mp.find(key) != mp.end()` 형태로 키 존재 여부를 확인합니다.",
+                    "imgUrl": null,
+                    "exampleCode": {
+                        "language": "C++",
+                        "content": "if (mp.find(\"apple\") != mp.end()) {\n    // exists\n}"
+                    },
+                    "notionCompleted": false
+                }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [개념 학습 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val NOTIONS_JAVASCRIPT = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "topicId": 1,
+            "count": 2,
+            "notions": [
+                {
+                    "notionId": 1,
+                    "pageNo": 1,
+                    "title": "[JS] Object / Map",
+                    "point": "JavaScript에서는 Object 또는 Map으로 key-value를 저장합니다.",
+                    "detail": "### 🌐 JavaScript Object / Map\n\nObject와 Map을 사용해 해시처럼 데이터를 다룰 수 있습니다.",
+                    "imgUrl": null,
+                    "exampleCode": {
+                        "language": "JAVASCRIPT",
+                        "content": "const map = new Map();\nmap.set('apple', 1);\nconsole.log(map.get('apple'));"
+                    },
+                    "notionCompleted": false
+                },
+                {
+                    "notionId": 2,
+                    "pageNo": 2,
+                    "title": "[JS] 빈도수 세기",
+                    "point": "객체나 Map으로 문자 개수를 셀 수 있습니다.",
+                    "detail": "### 🌐 JavaScript frequency count\n\n문자열 순회와 객체를 조합하면 빠르게 빈도수를 셀 수 있습니다.",
+                    "imgUrl": null,
+                    "exampleCode": {
+                        "language": "JAVASCRIPT",
+                        "content": "const freq = {};\nfor (const ch of text) {\n  freq[ch] = (freq[ch] || 0) + 1;\n}"
+                    },
+                    "notionCompleted": false
+                }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [응용 학습 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_CPP = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "count": 1,
+            "appliedExercises": [
+                {
+                    "exerciseId": 1,
+                    "title": "[C++] unordered_map 사용",
+                    "description": "unordered_map으로 문자 빈도수를 세는 C++ 코드입니다.",
+                    "codeTemplate": "unordered_map<char, int> freq;\nfor (char ch : text) {\n    freq[ch]++;\n}",
+                    "appliedCompleted": false,
+                    "totalBlanks": 1,
+                    "blanks": [
+                        { "content": "freq[ch]++", "answer": 1 }
+                    ]
+                }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [응용 학습 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val PRACTICE_QUIZZES_JAVASCRIPT = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "count": 1,
+            "appliedExercises": [
+                {
+                    "exerciseId": 1,
+                    "title": "[JS] 객체로 빈도 세기",
+                    "description": "JavaScript 객체로 문자 개수를 세는 코드입니다.",
+                    "codeTemplate": "const freq = {};\nfor (const ch of text) {\n    freq[ch] = (freq[ch] || 0) + 1;\n}",
+                    "appliedCompleted": false,
+                    "totalBlanks": 1,
+                    "blanks": [
+                        { "content": "(freq[ch] || 0) + 1", "answer": 1 }
+                    ]
+                }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [문제 상세 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_CPP = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "title": "[C++] 두 수의 합",
+            "description": "C++로 두 수의 합 문제를 해결해보세요.",
+            "constraint": "2 ≤ nums.size() ≤ 10⁴",
+            "testCases": [
+                { "input": "nums = [2, 7, 11, 15], target = 9", "output": "[0, 1]" },
+                { "input": "nums = [3, 2, 4], target = 6", "output": "[1, 2]" }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [문제 상세 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_1_JAVASCRIPT = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "title": "[JS] 두 수의 합",
+            "description": "JavaScript로 두 수의 합 문제를 해결해보세요.",
+            "constraint": "2 ≤ nums.length ≤ 10⁴",
+            "testCases": [
+                { "input": "nums = [2, 7, 11, 15], target = 9", "output": "[0, 1]" },
+                { "input": "nums = [3, 2, 4], target = 6", "output": "[1, 2]" }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [기본 문제 상세 - PYTHON 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_PYTHON = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 2,
+            "title": "[PYTHON] 올바른 괄호",
+            "description": "Python으로 올바른 괄호 문제를 해결해보세요.",
+            "constraint": "0 < len(s) ≤ 100000",
+            "testCases": [
+                { "input": "s = '(())()'", "output": "true" },
+                { "input": "s = ')()('", "output": "false" }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [기본 문제 상세 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_CPP = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 2,
+            "title": "[C++] 올바른 괄호",
+            "description": "C++로 올바른 괄호 문제를 해결해보세요.",
+            "constraint": "0 < s.length() ≤ 100000",
+            "testCases": [
+                { "input": "s = \"(())()\"", "output": "true" },
+                { "input": "s = \")()(\"", "output": "false" }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [기본 문제 상세 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_DETAIL_DEFAULT_JAVASCRIPT = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 2,
+            "title": "[JS] 올바른 괄호",
+            "description": "JavaScript로 올바른 괄호 문제를 해결해보세요.",
+            "constraint": "0 < s.length ≤ 100000",
+            "testCases": [
+                { "input": "s = '(())()'", "output": "true" },
+                { "input": "s = ')()('", "output": "false" }
+            ]
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - C++ 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_CPP = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "languageId": 3,
+            "solutionCode": "#include <unordered_map>\n#include <vector>\nusing namespace std;\n\nvector<int> twoSum(vector<int>& nums, int target) {\n    unordered_map<int, int> seen;\n    for (int i = 0; i < nums.size(); i++) {\n        int need = target - nums[i];\n        if (seen.find(need) != seen.end()) return {seen[need], i};\n        seen[nums[i]] = i;\n    }\n    return {};\n}",
+            "solutionText": "unordered_map을 사용해 필요한 수가 이미 등장했는지 O(1)에 확인합니다.",
+            "lineSolution": "5-11 라인을 참고하세요."
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [모범 답안 - JAVASCRIPT 버전]
+    // ─────────────────────────────────────────────
+    val PROBLEM_SOLUTION_JAVASCRIPT = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": {
+            "exerciseId": 1,
+            "languageId": 4,
+            "solutionCode": "function twoSum(nums, target) {\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const need = target - nums[i];\n    if (seen.has(need)) return [seen.get(need), i];\n    seen.set(nums[i], i);\n  }\n  return [];\n}",
+            "solutionText": "Map을 사용하면 필요한 숫자의 존재 여부를 빠르게 확인할 수 있습니다.",
+            "lineSolution": "2-7 라인을 참고하세요."
+        }
     }
     """.trimIndent()
 }

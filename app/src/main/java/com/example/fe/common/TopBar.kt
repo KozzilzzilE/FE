@@ -30,6 +30,7 @@ fun TopBar(
     title: String,
     subtitle: String? = null,
     leftContent: @Composable (() -> Unit)? = null, // 화살표 옆 커스텀 아이콘 등을 위한 슬롯
+    rightContent: @Composable (() -> Unit)? = null, // 우측 액션 아이콘(홈 등) 옆을 위한 슬롯
     showBackIcon: Boolean = true, // 뒤로 가기 화살표 렌더링 여부 속성 (기본 활성화)
     showHomeIcon: Boolean = false, // 홈 아이콘 렌더링 여부 속성
     onBackClick: () -> Unit,
@@ -52,7 +53,7 @@ fun TopBar(
                     Text(
                         text = subtitle, 
                         fontSize = 14.sp,
-                        color = Color(0xFF7A828A),
+                        color = Color(0xFF38B2AC),
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
@@ -77,6 +78,9 @@ fun TopBar(
             }
         },
         actions = {
+            if (rightContent != null) {
+                rightContent()
+            }
             if (showHomeIcon) {
                 IconButton(onClick = onHomeClick) {
                     Icon(

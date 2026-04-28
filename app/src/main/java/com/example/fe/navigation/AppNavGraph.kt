@@ -25,6 +25,9 @@ import com.example.fe.feature.auth.model.AuthState
 import com.example.fe.feature.auth.ui.LoginScreen
 import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.list.ui.DetailListScreen
+import com.example.fe.feature.list.ui.AllProblemListScreen
+import com.example.fe.feature.list.ui.AllProblemDifficultyFilter
+import com.example.fe.feature.list.ui.AllProblemItem
 import com.example.fe.feature.step.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.ui.HomeScreen
@@ -37,32 +40,57 @@ import com.example.fe.feature.solver.ui.SolveScreen
 import com.example.fe.feature.concept.ConceptViewModel
 import com.example.fe.feature.concept.ConceptViewModelFactory
 import com.example.fe.feature.concept.ui.ConceptDetailScreen
+import com.example.fe.feature.practice.ui.PracticeScreen
 import com.example.fe.feature.practice.PracticeViewModel
 import com.example.fe.feature.practice.PracticeViewModelFactory
 import com.example.fe.feature.practice.data.PracticeRepository
+
+import com.example.fe.feature.profile.MyPageViewModel
+import com.example.fe.feature.profile.MyPageViewModelFactory
+import com.example.fe.feature.profile.data.ProfileRepository
+import com.example.fe.feature.profile.ui.MyPageScreen
+import com.example.fe.feature.profile.ui.EditProfileScreen
+import com.example.fe.feature.profile.ui.LanguageSettingScreen
+
+import com.example.fe.feature.profile.ui.FavoriteProblemsScreen
+
 import com.example.fe.feature.list.ProblemListViewModel
 import com.example.fe.feature.list.ProblemListViewModelFactory
 import com.example.fe.feature.list.ProblemUiState
 import com.example.fe.feature.list.data.ProblemRepository
+import com.example.fe.feature.solver.data.SolverDraftDataStore
 import com.example.fe.api.RetrofitClient
 
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    val application = context.applicationContext as android.app.Application
+
     val authRepository = remember { AuthRepository(RetrofitClient.instance) }
     val authViewModelFactory = remember(authRepository) { AuthViewModelFactory(authRepository) }
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     val authState by authViewModel.authState.collectAsState()
-    val context = LocalContext.current
+
     val solverRepository = remember { SolverRepository(RetrofitClient.instance) }
-    val solverViewModelFactory = remember(solverRepository) { SolverViewModelFactory(solverRepository) }
+    val solverDraftDataStore = remember(context) { SolverDraftDataStore(context) }
+    val solverViewModelFactory = remember(solverRepository, solverDraftDataStore) {
+        SolverViewModelFactory(solverRepository, solverDraftDataStore)
+    }
     val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
 
-    // 인증 상태 모니터링 및 화면 전환
+    // 마이페이지 ViewModel은 여기서 1번만 생성해서 공유
+    val profileRepository = remember { ProfileRepository(RetrofitClient.instance) }
+    val profileViewModelFactory = remember(profileRepository) {
+        MyPageViewModelFactory(application, profileRepository)
+    }
+    val profileViewModel: MyPageViewModel = viewModel(factory = profileViewModelFactory)
+    val profileUiState by profileViewModel.uiState.collectAsState()
+
     LaunchedEffect(authState) {
         when (val state = authState) {
             is AuthState.Success -> {
-                navController.navigate(Routes.HOME) { // 로그인 성공 시 HOME으로 이동
+                navController.navigate(Routes.HOME) {
                     popUpTo(Routes.LOGIN) { inclusive = true }
                 }
             }
@@ -83,10 +111,9 @@ fun AppNavGraph() {
     }
 
     NavHost(
-        navController = navController, 
+        navController = navController,
         startDestination = Routes.LOGIN
     ) {
-        // 1. 로그인 화면
         composable(Routes.LOGIN) {
             LoginScreen(
                 onLoginClick = { email, password ->
@@ -102,8 +129,6 @@ fun AppNavGraph() {
                     authViewModel.signInWithGithubLogin(activity)
                 },
                 onSkipLoginClick = {
-                    // 개발용: 로그인 절차 없이 바로 홈 화면으로 직행
-                    // [MOCK] 건너뛰기 시에도 가짜 토큰을 넣어서 Home API 실패 안 하게 방어
                     com.example.fe.common.TokenManager.saveAccessToken("mock_access_token_PocketCo_2026")
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
@@ -112,12 +137,11 @@ fun AppNavGraph() {
             )
         }
 
-        // 2. 회원가입 화면
         composable(Routes.SIGNUP) {
             SignUpScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onSignUpComplete = { name, email, password, language ->
-                    authViewModel.signUp(name, email, password, language) 
+                    authViewModel.signUp(name, email, password, language)
                 },
                 onGoogleSignUpClick = { idToken ->
                     authViewModel.signInWithGoogleSignUp(idToken)
@@ -128,12 +152,11 @@ fun AppNavGraph() {
             )
         }
 
-        // 3. 소셜 회원가입 시 추가 정보 입력 화면
         composable(Routes.SOCIAL_SIGNUP) {
             val currentState = authState
             val initialName = if (currentState is AuthState.NeedsExtraInfo) currentState.name else ""
             val initialEmail = if (currentState is AuthState.NeedsExtraInfo) currentState.email else ""
-            
+
             com.example.fe.feature.auth.ui.SocialSignUpScreen(
                 initialName = initialName,
                 initialEmail = initialEmail,
@@ -144,10 +167,9 @@ fun AppNavGraph() {
             )
         }
 
-        // 4. 메인 홈 화면
         composable(Routes.HOME) {
             HomeScreen(
-                onNavigate = { route -> 
+                onNavigate = { route ->
                     navController.navigate(route) {
                         popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
@@ -157,7 +179,145 @@ fun AppNavGraph() {
             )
         }
 
-        // 5. 메인 알고리즘 주제 목록 화면 (학습 탭 누를 시)
+        composable("problem") {
+            var searchQuery by remember { mutableStateOf("") }
+            var selectedDifficulty by remember { mutableStateOf(AllProblemDifficultyFilter.ALL) }
+            var currentPage by remember { mutableIntStateOf(1) }
+            val totalPages = 3
+
+            var sampleProblems by remember {
+                mutableStateOf(
+                    listOf(
+                        AllProblemItem(1, "배열 두 배 만들기", Difficulty.EASY, 120, false),
+                        AllProblemItem(2, "최빈값 구하기", Difficulty.MEDIUM, 85, false),
+                        AllProblemItem(3, "문자열 뒤집기", Difficulty.EASY, 210, true),
+                        AllProblemItem(4, "특정 문자 제거하기", Difficulty.HARD, 45, false),
+                        AllProblemItem(5, "다음에 올 숫자", Difficulty.HARD, 310, true)
+                    )
+                )
+            }
+
+            val filteredProblems = sampleProblems.filter { problem ->
+                val matchesSearch = problem.title.contains(searchQuery, ignoreCase = true)
+                val matchesDifficulty = when (selectedDifficulty) {
+                    AllProblemDifficultyFilter.ALL -> true
+                    AllProblemDifficultyFilter.EASY -> problem.difficulty == Difficulty.EASY
+                    AllProblemDifficultyFilter.MEDIUM -> problem.difficulty == Difficulty.MEDIUM
+                    AllProblemDifficultyFilter.HARD -> problem.difficulty == Difficulty.HARD
+                }
+                matchesSearch && matchesDifficulty
+            }
+
+            AllProblemListScreen(
+                problems = filteredProblems,
+                selectedDifficulty = selectedDifficulty,
+                currentPage = currentPage,
+                totalPages = totalPages,
+                onDifficultySelected = { selectedDifficulty = it },
+                onProblemClick = { problem ->
+                    navController.navigate(Routes.solve(problem.problemId, problem.difficulty.name))
+                },
+                onBookmarkClick = { problemId ->
+                    sampleProblems = sampleProblems.map { problem ->
+                        if (problem.problemId == problemId) {
+                            problem.copy(isBookmarked = !problem.isBookmarked)
+                        } else {
+                            problem
+                        }
+                    }
+                },
+                onPageChange = { currentPage = it },
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+
+        // 마이페이지
+        composable(Routes.MY) {
+            MyPageScreen(
+                viewModel = profileViewModel,
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onEditProfileClick = {
+                    navController.navigate(Routes.EDIT_PROFILE)
+                },
+                onLanguageClick = {
+                    navController.navigate(Routes.LANGUAGE_SETTING)
+                },
+                onFavoriteClick = {
+                    navController.navigate(Routes.FAVORITE_PROBLEMS)
+                },
+                onSubmissionClick = {},
+                onLogoutClick = {
+                    com.example.fe.common.TokenManager.clearAccessToken()
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onSettingsClick = {}
+            )
+        }
+
+        // 개인정보 수정
+        composable(Routes.EDIT_PROFILE) {
+            LaunchedEffect(profileUiState.error) {
+                profileUiState.error?.let {
+                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            EditProfileScreen(
+                initialName = profileUiState.userName,
+                isSaving = profileUiState.isSaving,
+                onBackClick = { navController.popBackStack() },
+                onSaveClick = { name ->
+                    profileViewModel.updateProfile(name) {
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
+
+        // 선호 언어 수정
+        composable(Routes.LANGUAGE_SETTING) {
+            LaunchedEffect(profileUiState.error) {
+                profileUiState.error?.let {
+                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            LanguageSettingScreen(
+                initialLanguage = if (profileUiState.languageName.isBlank()) "JAVA" else profileUiState.languageName,
+                languages = profileUiState.languageOptions,
+                isSaving = profileUiState.isSaving,
+                onBackClick = { navController.popBackStack() },
+                onSaveClick = { language ->
+                    profileViewModel.updatePreferredLanguage(language) {
+                        navController.popBackStack()
+                    }
+                }
+            )
+        }
+        composable(Routes.FAVORITE_PROBLEMS) {
+            FavoriteProblemsScreen(
+                onBackClick = { navController.popBackStack() },
+                onProblemClick = { problemId ->
+                    navController.navigate(Routes.solve(problemId))
+                }
+            )
+        }
+
+
+
         composable(route = Routes.TOPIC) {
             TopicListScreen(
                 onNavigate = { route ->
@@ -169,7 +329,6 @@ fun AppNavGraph() {
             )
         }
 
-        // 5-1. 학습 단계 선택 화면 (주제 선택 시 진입)
         composable(
             route = Routes.STEP_ROUTE,
             arguments = listOf(
@@ -193,7 +352,6 @@ fun AppNavGraph() {
             )
         }
 
-        // 6. 알고리즘 분류 내 세부 목록 화면 (개념/응용/문제)
         composable(
             route = Routes.DETAIL_LIST_ROUTE,
             arguments = listOf(
@@ -208,21 +366,26 @@ fun AppNavGraph() {
 
             when (stepType) {
                 "concept" -> {
-                    val factory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
+                    val factory = remember { ConceptViewModelFactory() }
                     val conceptViewModel: ConceptViewModel = viewModel(factory = factory)
                     val uiState by conceptViewModel.uiState.collectAsState()
 
-                    // 화면 진입 시 초기 데이터 로드
-                    androidx.compose.runtime.LaunchedEffect(topicId) {
-                        conceptViewModel.loadConcepts(topicId)
+                    val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                        .getLanguage(context)
+                        .ifBlank { "JAVA" }
+
+                    LaunchedEffect(topicId, preferredLanguage) {
+                        conceptViewModel.loadConcepts(topicId, preferredLanguage)
                     }
 
-                    // 화면 복귀 시 데이터 리로드 (완료 상태 갱신)
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(topicId, lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
                             if (event == Lifecycle.Event.ON_RESUME) {
-                                conceptViewModel.loadConcepts(topicId)
+                                val language = com.example.fe.common.LanguagePreferenceManager
+                                    .getLanguage(context)
+                                    .ifBlank { "JAVA" }
+                                conceptViewModel.loadConcepts(topicId, language)
                             }
                         }
                         lifecycleOwner.lifecycle.addObserver(observer)
@@ -231,12 +394,11 @@ fun AppNavGraph() {
                         }
                     }
 
-                    // NotionDto -> Concept(DetailItem) 변환
                     val conceptItems = uiState.concepts.map { notion ->
                         Concept(
                             id = notion.notionId,
                             title = notion.title,
-                            difficulty = Difficulty.EASY, // 개념 학습은 난이도 없음
+                            difficulty = Difficulty.EASY,
                             isCompleted = notion.notionCompleted
                         )
                     }
@@ -270,23 +432,28 @@ fun AppNavGraph() {
                 }
 
                 "application" -> {
-                    val factory = androidx.compose.runtime.remember {
+                    val factory = remember {
                         PracticeViewModelFactory(PracticeRepository(RetrofitClient.instance))
                     }
                     val practiceViewModel: PracticeViewModel = viewModel(factory = factory)
                     val uiState by practiceViewModel.uiState.collectAsState()
 
-                    // 화면 진입 시 초기 데이터 로드
-                    androidx.compose.runtime.LaunchedEffect(topicId) {
-                        practiceViewModel.loadQuizzes(topicId)
+                    val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                        .getLanguage(context)
+                        .ifBlank { "JAVA" }
+
+                    LaunchedEffect(topicId, preferredLanguage) {
+                        practiceViewModel.loadQuizzes(topicId, preferredLanguage)
                     }
 
-                    // 화면 복귀 시 데이터 리로드 (완료 상태 갱신)
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(topicId, lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
                             if (event == Lifecycle.Event.ON_RESUME) {
-                                practiceViewModel.loadQuizzes(topicId)
+                                val language = com.example.fe.common.LanguagePreferenceManager
+                                    .getLanguage(context)
+                                    .ifBlank { "JAVA" }
+                                practiceViewModel.loadQuizzes(topicId, language)
                             }
                         }
                         lifecycleOwner.lifecycle.addObserver(observer)
@@ -295,7 +462,6 @@ fun AppNavGraph() {
                         }
                     }
 
-                    // QuizItemDto -> Application(DetailItem) 변환
                     val applicationItems = uiState.quizzes.map { quiz ->
                         Application(
                             id = quiz.exerciseId,
@@ -334,15 +500,13 @@ fun AppNavGraph() {
                 }
 
                 else -> {
-                    // 문제 풀이 (서버 API 연동)
-                    val factory = androidx.compose.runtime.remember {
+                    val factory = remember {
                         ProblemListViewModelFactory(ProblemRepository(RetrofitClient.instance))
                     }
                     val problemViewModel: ProblemListViewModel = viewModel(factory = factory)
                     val uiState by problemViewModel.uiState.collectAsState()
 
-                    // 화면 진입 시 API 호출
-                    androidx.compose.runtime.LaunchedEffect(topicId) {
+                    LaunchedEffect(topicId) {
                         problemViewModel.loadProblems(topicId)
                     }
 
@@ -361,14 +525,15 @@ fun AppNavGraph() {
                                     "HARD" -> Difficulty.HARD
                                     else -> Difficulty.EASY
                                 },
-                                isCompleted = false // 서버 명세에 완료 여부 필드 추가 필요할 수 있음
+                                isCompleted = false
                             )
                         }
+
                         DetailListScreen(
                             screenTitle = "문제학습",
                             items = problems,
                             onItemClick = { item ->
-                                navController.navigate(Routes.solve(item.id))
+                                navController.navigate(Routes.solve(item.id, item.difficulty.name))
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
@@ -379,7 +544,6 @@ fun AppNavGraph() {
                             onBackClick = { navController.popBackStack() }
                         )
                     } else {
-                        // Error State
                         androidx.compose.material3.Text(
                             text = (uiState as? ProblemUiState.Error)?.message ?: "오류 발생",
                             modifier = androidx.compose.ui.Modifier.fillMaxSize()
@@ -389,7 +553,6 @@ fun AppNavGraph() {
             }
         }
 
-        // ConceptDetailScreen: concept/{topicId}
         composable(
             route = Routes.CONCEPT_ROUTE,
             arguments = listOf(
@@ -399,22 +562,28 @@ fun AppNavGraph() {
         ) { backStackEntry ->
             val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
             val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0
-            val conceptViewModelFactory = androidx.compose.runtime.remember { ConceptViewModelFactory() }
+            val conceptViewModelFactory = remember { ConceptViewModelFactory() }
             val conceptViewModel: ConceptViewModel = viewModel(factory = conceptViewModelFactory)
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
+
+            LaunchedEffect(topicId, preferredLanguage) {
+                conceptViewModel.loadConcepts(topicId, preferredLanguage, initialIndex)
+            }
 
             ConceptDetailScreen(
                 topicId = topicId,
-                initialIndex = initialIndex.toInt(),
+                initialIndex = initialIndex,
                 viewModel = conceptViewModel,
                 onBack = { navController.popBackStack() },
-                onHome = { 
+                onHome = {
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.HOME) { inclusive = false }
                         launchSingleTop = true
                     }
                 },
                 onNextStepClick = {
-                    // 이전 화면(DetailList)의 TOPIC_NAME 인자 가져오기 시도, 없으면 "주제"
                     val fallbackName = navController.previousBackStackEntry?.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
                     navController.navigate(Routes.detailList(topicId, fallbackName, "application")) {
                         popUpTo(Routes.STEP_ROUTE) { inclusive = false }
@@ -424,7 +593,6 @@ fun AppNavGraph() {
             )
         }
 
-        // PracticeScreen: practice/{topicId}/{initialIndex}
         composable(
             route = Routes.PRACTICE_ROUTE,
             arguments = listOf(
@@ -434,18 +602,25 @@ fun AppNavGraph() {
         ) { backStackEntry ->
             val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
             val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0
-            
-            val factory = androidx.compose.runtime.remember {
+
+            val factory = remember {
                 PracticeViewModelFactory(PracticeRepository(RetrofitClient.instance))
             }
             val practiceViewModel: PracticeViewModel = viewModel(factory = factory)
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
 
-            com.example.fe.feature.practice.ui.PracticeScreen(
+            LaunchedEffect(topicId, preferredLanguage) {
+                practiceViewModel.loadQuizzes(topicId, preferredLanguage)
+            }
+
+            PracticeScreen(
                 topicId = topicId,
                 initialIndex = initialIndex,
                 viewModel = practiceViewModel,
                 onBack = { navController.popBackStack() },
-                onHome = { 
+                onHome = {
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.HOME) { inclusive = false }
                         launchSingleTop = true
@@ -461,32 +636,43 @@ fun AppNavGraph() {
             )
         }
 
-        // SolveScreen: solve/{problemId}
         composable(
             route = Routes.SOLVE_ROUTE,
             arguments = listOf(
-                navArgument(Routes.PROBLEM_ID) { type = NavType.LongType }
+                navArgument(Routes.PROBLEM_ID) { type = NavType.LongType },
+                navArgument("difficulty") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
             )
         ) { backStackEntry ->
             val problemId = backStackEntry.arguments?.getLong(Routes.PROBLEM_ID) ?: 0L
+            val difficulty = backStackEntry.arguments?.getString("difficulty")
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
+
+            LaunchedEffect(problemId, preferredLanguage, difficulty) {
+                solverViewModel.loadProblemDetail(problemId, preferredLanguage, difficulty)
+            }
 
             SolveScreen(
                 problemId = problemId,
                 viewModel = solverViewModel,
                 onBack = { navController.popBackStack() },
                 onHome = {
-            navController.navigate(Routes.HOME) {
-                popUpTo(Routes.HOME) { inclusive = false }
-                launchSingleTop = true
-            }
-        },
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
                 onOpenEditorFull = { id ->
                     navController.navigate(Routes.editorFull(id))
                 }
             )
         }
 
-        // EditorScreen: editor/{problemId}
         composable(
             route = Routes.EDITOR_ROUTE,
             arguments = listOf(
@@ -494,6 +680,13 @@ fun AppNavGraph() {
             )
         ) { backStackEntry ->
             val problemId = backStackEntry.arguments?.getLong(Routes.PROBLEM_ID) ?: 0L
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
+
+            LaunchedEffect(problemId, preferredLanguage) {
+                solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+            }
 
             EditorScreen(
                 problemId = problemId,
@@ -506,13 +699,11 @@ fun AppNavGraph() {
                     }
                 },
                 onGoProblem = {
-                    // 에디터에서 "문제" 탭 누르면 SolveScreen으로 (PROBLEM 탭이 보이게 할 거면 SolveScreen에서 탭 상태 처리)
                     navController.navigate(Routes.solve(problemId)) {
                         launchSingleTop = true
                     }
                 },
                 onGoSubmit = {
-                    // 제출 탭도 SolveScreen에서 처리하는 구조라면 SolveScreen으로 보내고 SUBMIT 탭 선택은 SolveScreen 쪽에서 제어
                     navController.navigate(Routes.solve(problemId)) {
                         launchSingleTop = true
                     }
@@ -523,7 +714,6 @@ fun AppNavGraph() {
             )
         }
 
-        // EditorFullScreen: editor_full/{problemId}
         composable(
             route = Routes.EDITOR_FULL_ROUTE,
             arguments = listOf(
@@ -531,6 +721,13 @@ fun AppNavGraph() {
             )
         ) { backStackEntry ->
             val problemId = backStackEntry.arguments?.getLong(Routes.PROBLEM_ID) ?: 0L
+            val preferredLanguage = com.example.fe.common.LanguagePreferenceManager
+                .getLanguage(context)
+                .ifBlank { "JAVA" }
+
+            LaunchedEffect(problemId, preferredLanguage) {
+                solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+            }
 
             EditorFullScreen(
                 problemId = problemId,

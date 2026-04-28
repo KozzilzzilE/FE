@@ -74,4 +74,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.foundation:foundation")
+
+    //추가 (임시 저장)
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
 }

@@ -51,14 +51,16 @@ import com.example.fe.feature.profile.data.ProfileRepository
 import com.example.fe.feature.profile.ui.MyPageScreen
 import com.example.fe.feature.profile.ui.EditProfileScreen
 import com.example.fe.feature.profile.ui.LanguageSettingScreen
-
-import com.example.fe.feature.profile.ui.FavoriteProblemsScreen
+import com.example.fe.feature.profile.ui.BookmarkScreen
 
 import com.example.fe.feature.list.ProblemListViewModel
 import com.example.fe.feature.list.ProblemListViewModelFactory
 import com.example.fe.feature.list.ProblemUiState
 import com.example.fe.feature.list.data.ProblemRepository
 import com.example.fe.feature.solver.data.SolverDraftDataStore
+import com.example.fe.feature.profile.BookmarkViewModel
+import com.example.fe.feature.profile.BookmarkViewModelFactory
+import com.example.fe.feature.profile.data.BookmarkRepository
 import com.example.fe.api.RetrofitClient
 
 @Composable
@@ -308,7 +310,10 @@ fun AppNavGraph() {
             )
         }
         composable(Routes.FAVORITE_PROBLEMS) {
-            FavoriteProblemsScreen(
+            val factory = remember { BookmarkViewModelFactory(BookmarkRepository(RetrofitClient.instance)) }
+            val bookmarkViewModel: BookmarkViewModel = viewModel(factory = factory)
+            BookmarkScreen(
+                viewModel = bookmarkViewModel,
                 onBackClick = { navController.popBackStack() },
                 onProblemClick = { problemId ->
                     navController.navigate(Routes.solve(problemId))
@@ -506,8 +511,17 @@ fun AppNavGraph() {
                     val problemViewModel: ProblemListViewModel = viewModel(factory = factory)
                     val uiState by problemViewModel.uiState.collectAsState()
 
-                    LaunchedEffect(topicId) {
-                        problemViewModel.loadProblems(topicId)
+                    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+                    androidx.compose.runtime.DisposableEffect(lifecycleOwner, topicId) {
+                        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+                            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                                problemViewModel.loadProblems(topicId)
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                            lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
                     }
 
                     if (uiState is ProblemUiState.Loading) {
@@ -525,7 +539,9 @@ fun AppNavGraph() {
                                     "HARD" -> Difficulty.HARD
                                     else -> Difficulty.EASY
                                 },
-                                isCompleted = false
+                                isCompleted = false,
+                                bookmarkCount = res.bookmarkCount ?: 0,
+                                isBookmarked = res.isBookmark ?: false
                             )
                         }
 
@@ -534,6 +550,11 @@ fun AppNavGraph() {
                             items = problems,
                             onItemClick = { item ->
                                 navController.navigate(Routes.solve(item.id, item.difficulty.name))
+                            },
+                            onBookmarkClick = { item ->
+                                if (item is Problem) {
+                                    problemViewModel.toggleBookmark(item.id, item.isBookmarked)
+                                }
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {

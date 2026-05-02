@@ -24,7 +24,9 @@ data class ProblemResult(
     @SerializedName("problemId") val problemId: Long,
     @SerializedName("title") val title: String,
     @SerializedName("difficulty") val difficulty: String,
-    @SerializedName("difficultyDisplayName") val difficultyDisplayName: String
+    @SerializedName("difficultyDisplayName") val difficultyDisplayName: String,
+    @SerializedName("bookmarkCount") val bookmarkCount: Int?,
+    @SerializedName("isBookmark") val isBookmark: Boolean?
 )
 
 /**
@@ -45,7 +47,9 @@ data class ProblemDetailResult(
     @SerializedName("description") val description: String,
     @SerializedName("constraint") val constraint: String,
     @SerializedName("testCases") val testCases: List<TestCaseDto>,
-    @SerializedName("isCompleted") val isCompleted: Boolean
+    @SerializedName("isCompleted") val isCompleted: Boolean,
+    @SerializedName("bookmarkCount") val bookmarkCount: Int?,
+    @SerializedName("isBookmark") val isBookmark: Boolean?
 )
 
 data class TestCaseDto(

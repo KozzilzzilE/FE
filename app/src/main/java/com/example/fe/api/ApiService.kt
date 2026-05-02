@@ -27,6 +27,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Header
 import retrofit2.http.PATCH
+import retrofit2.http.DELETE
 
 interface ApiService {
     // --- [인증] ---
@@ -181,6 +182,28 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: UpdateNicknameRequest
     ): Response<UpdateNicknameResponse>
+
+    // --- [찜(북마크)] ---
+
+    // 찜 목록 조회
+    @GET("api/v1/bookmarks/problems")
+    suspend fun getBookmarks(
+        @Header("Authorization") token: String
+    ): Response<com.example.fe.data.dto.BookmarkListResponse>
+
+    // 찜 추가
+    @POST("api/v1/bookmarks/problems/{problemId}")
+    suspend fun addBookmark(
+        @Header("Authorization") token: String,
+        @Path("problemId") problemId: Long
+    ): Response<com.example.fe.data.dto.BookmarkResponse>
+
+    // 찜 삭제
+    @DELETE("api/v1/bookmarks/problems/{problemId}")
+    suspend fun deleteBookmark(
+        @Header("Authorization") token: String,
+        @Path("problemId") problemId: Long
+    ): Response<com.example.fe.data.dto.BookmarkResponse>
 }
 
 

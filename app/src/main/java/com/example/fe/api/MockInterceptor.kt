@@ -217,6 +217,18 @@ class MockInterceptor : Interceptor {
             path.contains("/languages") && method == "GET" ->
                 Pair(MockResponseData.LANGUAGES, "언어 목록 (4개)")
 
+            // ── 찜(북마크) 목록 ──
+            path.contains("/bookmarks/problems") && method == "GET" ->
+                Pair(MockResponseData.BOOKMARK_LIST, "찜(북마크) 목록 조회")
+
+            // ── 찜(북마크) 추가 ──
+            path.contains("/bookmarks/problems") && method == "POST" ->
+                Pair(MockResponseData.BOOKMARK_ADD_SUCCESS, "찜(북마크) 추가")
+
+            // ── 찜(북마크) 삭제 ──
+            path.contains("/bookmarks/problems") && method == "DELETE" ->
+                Pair(MockResponseData.BOOKMARK_DELETE_SUCCESS, "찜(북마크) 삭제")
+
             else -> {
                 Log.w(TAG, "⚠️ [MOCK] 매칭되는 Mock 데이터가 없습니다: $method $path")
                 Pair(MockResponseData.DEFAULT_SUCCESS, "기본 응답 (매칭 없음)")

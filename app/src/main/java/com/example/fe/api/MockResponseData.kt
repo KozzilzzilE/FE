@@ -982,4 +982,61 @@ object MockResponseData {
         }
     }
     """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [찜(북마크) 목록] GET /api/v1/bookmarks/problems
+    // ─────────────────────────────────────────────
+    val BOOKMARK_LIST = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "성공입니다.",
+        "result": [
+            {
+                "problemId": 1,
+                "title": "두 수의 합",
+                "difficulty": "EASY",
+                "difficultyDisplayName": "쉬움",
+                "bookmarkCount": 10
+            },
+            {
+                "problemId": 3,
+                "title": "프로세스",
+                "difficulty": "HARD",
+                "difficultyDisplayName": "어려움",
+                "bookmarkCount": 5
+            }
+        ]
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [찜 추가] POST /api/v1/bookmarks/problems/{problemId}
+    // ─────────────────────────────────────────────
+    val BOOKMARK_ADD_SUCCESS = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "찜 추가에 성공했습니다.",
+        "result": {
+            "problemId": 1,
+            "bookmarked": true
+        }
+    }
+    """.trimIndent()
+
+    // ─────────────────────────────────────────────
+    // [찜 삭제] DELETE /api/v1/bookmarks/problems/{problemId}
+    // ─────────────────────────────────────────────
+    val BOOKMARK_DELETE_SUCCESS = """
+    {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "찜 삭제에 성공했습니다.",
+        "result": {
+            "problemId": 1,
+            "bookmarked": false
+        }
+    }
+    """.trimIndent()
 }

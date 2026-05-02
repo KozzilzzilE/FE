@@ -30,6 +30,22 @@ data class ProblemResult(
 )
 
 /**
+ * [전체 문제 목록 조회 API]
+ * GET /api/v1/problems
+ */
+data class AllProblemListResponse(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: AllProblemListResult?
+)
+
+data class AllProblemListResult(
+    @SerializedName("count") val count: Int,
+    @SerializedName("problems") val problems: List<ProblemResult>
+)
+
+/**
  * [문제 상세 조회 API]
  * GET /api/v1/problems/{problemId}
  */

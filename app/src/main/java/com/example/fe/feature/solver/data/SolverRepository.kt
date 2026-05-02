@@ -74,8 +74,31 @@ public class Solution {
                 .split("\n")
                 .filter { it.isNotBlank() },
             initialCode = DEFAULT_JAVA_TEMPLATE,
-            testCases = mappedTestCases
+            testCases = mappedTestCases,
+            isBookmarked = result.isBookmark ?: false
         )
+    }
+
+    /**
+     * 북마크 토글
+     */
+    suspend fun toggleBookmark(token: String, problemId: Long, isCurrentlyBookmarked: Boolean): Boolean {
+        val response = if (isCurrentlyBookmarked) {
+            apiService.deleteBookmark("Bearer $token", problemId)
+        } else {
+            apiService.addBookmark("Bearer $token", problemId)
+        }
+
+        if (!response.isSuccessful) {
+            throw Exception("북마크 변경 실패: ${response.code()}")
+        }
+
+        val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+        if (!body.isSuccess) {
+            throw Exception(body.message)
+        }
+
+        return body.result?.bookmarked ?: !isCurrentlyBookmarked
     }
 
     /**

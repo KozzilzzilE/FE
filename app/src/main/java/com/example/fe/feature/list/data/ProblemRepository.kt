@@ -11,4 +11,23 @@ class ProblemRepository(private val apiService: ApiService) {
         // 모든 요청은 ApiService를 통해 나가고, MockInterceptor가 가로챕니다.
         return apiService.getTopicProblems("Bearer $token", topicId)
     }
+
+    suspend fun toggleBookmark(token: String, problemId: Long, isCurrentlyBookmarked: Boolean): Boolean {
+        val response = if (isCurrentlyBookmarked) {
+            apiService.deleteBookmark("Bearer $token", problemId)
+        } else {
+            apiService.addBookmark("Bearer $token", problemId)
+        }
+
+        if (!response.isSuccessful) {
+            throw Exception("북마크 변경 실패: ${response.code()}")
+        }
+
+        val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+        if (!body.isSuccess) {
+            throw Exception(body.message)
+        }
+
+        return body.result?.bookmarked ?: !isCurrentlyBookmarked
+    }
 }

@@ -15,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -38,6 +40,7 @@ import com.example.fe.feature.list.model.DetailItem
 fun DetailCard(
     item: DetailItem,
     onClick: () -> Unit,
+    onBookmarkClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -88,6 +91,28 @@ fun DetailCard(
                 Spacer(modifier = Modifier.size(4.dp))
                 
                 DifficultyBadge(difficulty = item.difficulty) // 난이도
+            }
+
+            if (item is Problem) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    androidx.compose.material3.IconButton(
+                        onClick = { onBookmarkClick?.invoke() },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (item.isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                            contentDescription = "북마크",
+                            tint = if (item.isBookmarked) Color(0xFFFFC107) else Color(0xFF94A3B8)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${item.bookmarkCount}",
+                        fontSize = 12.sp,
+                        color = Color(0xFF94A3B8)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
             }
 
             // 문제 해결 여부 아이콘

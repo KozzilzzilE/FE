@@ -2,6 +2,7 @@ package com.example.fe.feature.solver
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.example.fe.common.TokenManager
 import com.example.fe.feature.solver.data.SolverDraftDataStore
 import com.example.fe.feature.solver.data.SolverRepository
@@ -95,6 +96,44 @@ class SolverViewModel(
                         isLoadingProblem = false,
                         errorToast = "문제 로드 실패: ${e.message}"
                     )
+                }
+            }
+        }
+    }
+
+    /**
+     * 북마크(찜) 토글
+     */
+    fun toggleBookmark() {
+        val problemDetail = _uiState.value.problemDetail ?: return
+        val currentState = problemDetail.isBookmarked
+        
+        // 낙관적 UI 업데이트
+        _uiState.update { 
+            it.copy(
+                problemDetail = problemDetail.copy(isBookmarked = !currentState)
+            ) 
+        }
+
+        viewModelScope.launch {
+            try {
+                val token = TokenManager.getAccessToken() ?: ""
+                val resultBookmarked = repository.toggleBookmark(token, _uiState.value.problemId, currentState)
+                
+                // 실제 서버 결과로 보정
+                _uiState.update { 
+                    it.copy(
+                        problemDetail = it.problemDetail?.copy(isBookmarked = resultBookmarked)
+                    ) 
+                }
+            } catch (e: Exception) {
+                Log.e("SolverViewModel", "북마크 토글 실패", e)
+                // 실패 시 원래 상태로 롤백 및 에러 메시지
+                _uiState.update { 
+                    it.copy(
+                        problemDetail = it.problemDetail?.copy(isBookmarked = currentState),
+                        errorToast = "찜하기 변경에 실패했습니다."
+                    ) 
                 }
             }
         }

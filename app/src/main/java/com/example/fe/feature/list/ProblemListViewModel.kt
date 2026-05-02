@@ -53,4 +53,42 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
             }
         }
     }
+
+    fun toggleBookmark(problemId: Long, isCurrentlyBookmarked: Boolean) {
+        val currentState = _uiState.value
+        if (currentState !is ProblemUiState.Success) return
+
+        viewModelScope.launch {
+            try {
+                val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
+                
+                // 낙관적 업데이트
+                val optimisticProblems = currentState.problems.map {
+                    if (it.problemId == problemId) {
+                        it.copy(
+                            isBookmark = !isCurrentlyBookmarked,
+                            bookmarkCount = (it.bookmarkCount ?: 0) + (if (isCurrentlyBookmarked) -1 else 1)
+                        )
+                    } else it
+                }
+                _uiState.value = ProblemUiState.Success(optimisticProblems)
+
+                val resultBookmarked = repository.toggleBookmark(token, problemId, isCurrentlyBookmarked)
+                
+                // 결과 보정
+                val verifiedProblems = optimisticProblems.map {
+                    if (it.problemId == problemId) {
+                        it.copy(
+                            isBookmark = resultBookmarked,
+                            bookmarkCount = currentState.problems.find { p -> p.problemId == problemId }?.bookmarkCount?.plus(if (resultBookmarked) 1 else if (isCurrentlyBookmarked) -1 else 0) ?: 0
+                        )
+                    } else it
+                }
+                _uiState.value = ProblemUiState.Success(verifiedProblems)
+            } catch (e: Exception) {
+                // 실패 시 원래 상태로 복구
+                _uiState.value = currentState
+            }
+        }
+    }
 }

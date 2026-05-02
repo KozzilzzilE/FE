@@ -408,11 +408,7 @@ fun AppNavGraph() {
                         )
                     }
 
-                    if (uiState.isLoading) {
-                        androidx.compose.material3.CircularProgressIndicator(
-                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
-                        )
-                    } else if (uiState.error != null) {
+                    if (uiState.error != null) {
                         androidx.compose.material3.Text(
                             text = uiState.error ?: "오류 발생",
                             modifier = androidx.compose.ui.Modifier.fillMaxSize()
@@ -476,11 +472,7 @@ fun AppNavGraph() {
                         )
                     }
 
-                    if (uiState.isLoading) {
-                        androidx.compose.material3.CircularProgressIndicator(
-                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
-                        )
-                    } else if (uiState.error != null) {
+                    if (uiState.error != null) {
                         androidx.compose.material3.Text(
                             text = uiState.error ?: "오류 발생",
                             modifier = androidx.compose.ui.Modifier.fillMaxSize()
@@ -524,26 +516,29 @@ fun AppNavGraph() {
                         }
                     }
 
-                    if (uiState is ProblemUiState.Loading) {
-                        androidx.compose.material3.CircularProgressIndicator(
+                    if (uiState is ProblemUiState.Error) {
+                        androidx.compose.material3.Text(
+                            text = (uiState as ProblemUiState.Error).message,
                             modifier = androidx.compose.ui.Modifier.fillMaxSize()
                         )
-                    } else if (uiState is ProblemUiState.Success) {
-                        val problems = (uiState as ProblemUiState.Success).problems.map { res ->
-                            Problem(
-                                id = res.problemId,
-                                title = res.title,
-                                difficulty = when (res.difficulty) {
-                                    "EASY" -> Difficulty.EASY
-                                    "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
-                                    "HARD" -> Difficulty.HARD
-                                    else -> Difficulty.EASY
-                                },
-                                isCompleted = false,
-                                bookmarkCount = res.bookmarkCount ?: 0,
-                                isBookmarked = res.isBookmark ?: false
-                            )
-                        }
+                    } else {
+                        val problems = if (uiState is ProblemUiState.Success) {
+                            (uiState as ProblemUiState.Success).problems.map { res ->
+                                Problem(
+                                    id = res.problemId,
+                                    title = res.title,
+                                    difficulty = when (res.difficulty) {
+                                        "EASY" -> Difficulty.EASY
+                                        "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
+                                        "HARD" -> Difficulty.HARD
+                                        else -> Difficulty.EASY
+                                    },
+                                    isCompleted = false,
+                                    bookmarkCount = res.bookmarkCount ?: 0,
+                                    isBookmarked = res.isBookmark ?: false
+                                )
+                            }
+                        } else emptyList()
 
                         DetailListScreen(
                             screenTitle = "문제학습",
@@ -563,11 +558,6 @@ fun AppNavGraph() {
                                 }
                             },
                             onBackClick = { navController.popBackStack() }
-                        )
-                    } else {
-                        androidx.compose.material3.Text(
-                            text = (uiState as? ProblemUiState.Error)?.message ?: "오류 발생",
-                            modifier = androidx.compose.ui.Modifier.fillMaxSize()
                         )
                     }
                 }

@@ -23,7 +23,9 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
 
     fun loadProblems(topicId: Long) {
         viewModelScope.launch {
-            _uiState.value = ProblemUiState.Loading
+            if (_uiState.value !is ProblemUiState.Success) {
+                _uiState.value = ProblemUiState.Loading
+            }
             try {
                 // [MOCK] Interceptor를 사용하므로 더 이상 개별 Mock 플래그는 필요 없습니다.
                 // 토큰이 없더라도 MockInterceptor가 처리해 줄 것이므로 기본적인 토큰 획득 로직만 남깁니다.

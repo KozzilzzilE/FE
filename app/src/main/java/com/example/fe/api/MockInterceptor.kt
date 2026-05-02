@@ -33,6 +33,7 @@ class MockInterceptor : Interceptor {
         val path = request.url.encodedPath
         val method = request.method
         val language = request.url.queryParameter("language") ?: "JAVA"
+        val difficultyParam = request.url.queryParameter("difficulty") // 난이도 파라미터 추출
 
         val requestBodyString = request.body?.let { body ->
             val buffer = Buffer()
@@ -81,26 +82,38 @@ class MockInterceptor : Interceptor {
                 }.toString()
             } else if (path.contains("/problems") && method == "GET") {
                 val jsonObject = JSONObject(finalJson)
+                // 상세 페이지 ID 추출 (URL 기반이 가장 정확)
+                val pidFromUrl = path.substringAfter("/problems/").substringBefore("/").substringBefore("?").toLongOrNull()
+                
                 val result = jsonObject.optJSONObject("result")
                 val problems = result?.optJSONArray("problems")
-                if (problems != null) {
+                
+                if (problems != null) { // 1. 목록인 경우
+                    val filteredArray = JSONArray()
                     for (i in 0 until problems.length()) {
                         val p = problems.getJSONObject(i)
                         val pid = p.getLong("problemId")
-                        p.put("isBookmark", MockDataStore.bookmarkedProblems.contains(pid))
+                        val pDiff = p.optString("difficulty", "")
+                        if (difficultyParam == null || pDiff.uppercase() == difficultyParam.uppercase()) {
+                            p.put("isBookmark", MockDataStore.bookmarkedProblems.contains(pid))
+                            filteredArray.put(p)
+                        }
                     }
+                    result.put("problems", filteredArray)
                     finalJson = jsonObject.toString()
-                } else if (result != null) {
+                } else { // 2. 상세 페이지이거나 단일 문제 정보인 경우
+                    val target = result ?: jsonObject // result 객체가 없으면 최상위에 주입
                     val pid = when {
-                        result.has("problemId") -> result.getLong("problemId")
-                        result.has("exerciseId") -> result.getLong("exerciseId")
-                        else -> null
+                        target.has("problemId") -> target.getLong("problemId")
+                        target.has("exerciseId") -> target.getLong("exerciseId")
+                        else -> pidFromUrl
                     }
+                    
                     if (pid != null) {
                         val isBookmarked = MockDataStore.bookmarkedProblems.contains(pid)
-                        result.put("isBookmark", isBookmarked)
+                        target.put("isBookmark", isBookmarked)
                         if (isBookmarked) {
-                            result.put("bookmarkCount", result.optInt("bookmarkCount", 0) + 1)
+                            target.put("bookmarkCount", target.optInt("bookmarkCount", 0) + 1)
                         }
                         finalJson = jsonObject.toString()
                     }
@@ -179,7 +192,7 @@ class MockInterceptor : Interceptor {
             path.contains("/applications/completions") && method == "POST" -> Pair(MockResponseData.PRACTICE_COMPLETION, "응용 완료")
 
             // ── 문제 학습 목록 (주제별) ──
-            path.contains("/topics/") && path.contains("/problems") && method == "GET" -> Pair(MockResponseData.PROBLEM_LIST, "주제별 문제 목록")
+            path.endsWith("/problems") && path.contains("/topics/") && method == "GET" -> Pair(MockResponseData.PROBLEM_LIST, "주제별 문제 목록")
 
             // ── 전체 문제 목록 ──
             path.endsWith("/problems") && !path.contains("/topics/") && method == "GET" -> Pair(MockResponseData.PROBLEM_LIST, "전체 문제 목록")
@@ -188,7 +201,7 @@ class MockInterceptor : Interceptor {
             path.contains("/problems/") && path.contains("/histories") && method == "GET" -> Pair(MockResponseData.PROBLEM_HISTORIES, "제출 기록 조회")
 
             // ── 문제 학습 상세 ──
-            path.contains("/problems/") && !path.contains("/runs") && !path.contains("/submissions") && !path.contains("/solutions") && !path.contains("/histories") && !path.contains("/topics/") && method == "GET" -> {
+            path.contains("/problems/") && !path.contains("/runs") && !path.contains("/submissions") && !path.contains("/solutions") && !path.contains("/histories") && method == "GET" -> {
                 val idStr = path.substringAfter("/problems/").substringBefore("/").substringBefore("?")
                 val res = when {
                     idStr == "1" && language.uppercase() == "PYTHON" -> MockResponseData.PROBLEM_DETAIL_1_PYTHON

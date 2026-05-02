@@ -61,6 +61,8 @@ import com.example.fe.feature.solver.data.SolverDraftDataStore
 import com.example.fe.feature.profile.BookmarkViewModel
 import com.example.fe.feature.profile.BookmarkViewModelFactory
 import com.example.fe.feature.profile.data.BookmarkRepository
+import com.example.fe.feature.list.AllProblemListViewModel
+import com.example.fe.feature.list.AllProblemListViewModelFactory
 import com.example.fe.api.RetrofitClient
 
 @Composable
@@ -182,60 +184,94 @@ fun AppNavGraph() {
         }
 
         composable("problem") {
+            val factory = remember {
+                AllProblemListViewModelFactory(ProblemRepository(RetrofitClient.instance))
+            }
+            val viewModel: AllProblemListViewModel = viewModel(factory = factory)
+            val uiState by viewModel.uiState.collectAsState()
+            val currentPage by viewModel.currentPage.collectAsState()
+            val selectedDifficultyStr by viewModel.selectedDifficulty.collectAsState()
+
             var searchQuery by remember { mutableStateOf("") }
-            var selectedDifficulty by remember { mutableStateOf(AllProblemDifficultyFilter.ALL) }
-            var currentPage by remember { mutableIntStateOf(1) }
-            val totalPages = 3
+            
+            // ViewModel의 문자열 난이도 상태를 UI용 Enum으로 변환
+            val selectedDifficulty = when (selectedDifficultyStr) {
+                "EASY" -> AllProblemDifficultyFilter.EASY
+                "MEDIUM" -> AllProblemDifficultyFilter.MEDIUM
+                "HARD" -> AllProblemDifficultyFilter.HARD
+                else -> AllProblemDifficultyFilter.ALL
+            }
+            
+            val totalPages = 5 // Mock용
 
-            var sampleProblems by remember {
-                mutableStateOf(
-                    listOf(
-                        AllProblemItem(1, "배열 두 배 만들기", Difficulty.EASY, 120, false),
-                        AllProblemItem(2, "최빈값 구하기", Difficulty.MEDIUM, 85, false),
-                        AllProblemItem(3, "문자열 뒤집기", Difficulty.EASY, 210, true),
-                        AllProblemItem(4, "특정 문자 제거하기", Difficulty.HARD, 45, false),
-                        AllProblemItem(5, "다음에 올 숫자", Difficulty.HARD, 310, true)
-                    )
-                )
+            LaunchedEffect(Unit) {
+                viewModel.loadAllProblems()
             }
 
-            val filteredProblems = sampleProblems.filter { problem ->
-                val matchesSearch = problem.title.contains(searchQuery, ignoreCase = true)
-                val matchesDifficulty = when (selectedDifficulty) {
-                    AllProblemDifficultyFilter.ALL -> true
-                    AllProblemDifficultyFilter.EASY -> problem.difficulty == Difficulty.EASY
-                    AllProblemDifficultyFilter.MEDIUM -> problem.difficulty == Difficulty.MEDIUM
-                    AllProblemDifficultyFilter.HARD -> problem.difficulty == Difficulty.HARD
+            when (val state = uiState) {
+                is ProblemUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                        androidx.compose.material3.CircularProgressIndicator()
+                    }
                 }
-                matchesSearch && matchesDifficulty
-            }
+                is ProblemUiState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                        androidx.compose.material3.Text(text = state.message)
+                    }
+                }
+                is ProblemUiState.Success -> {
+                    val problems = state.problems.map { res ->
+                        AllProblemItem(
+                            problemId = res.problemId,
+                            title = res.title,
+                            difficulty = when (res.difficulty) {
+                                "EASY" -> Difficulty.EASY
+                                "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
+                                "HARD" -> Difficulty.HARD
+                                else -> Difficulty.EASY
+                            },
+                            bookmarkCount = res.bookmarkCount ?: 0,
+                            isBookmarked = res.isBookmark ?: false
+                        )
+                    }
 
-            AllProblemListScreen(
-                problems = filteredProblems,
-                selectedDifficulty = selectedDifficulty,
-                currentPage = currentPage,
-                totalPages = totalPages,
-                onDifficultySelected = { selectedDifficulty = it },
-                onProblemClick = { problem ->
-                    navController.navigate(Routes.solve(problem.problemId, problem.difficulty.name))
-                },
-                onBookmarkClick = { problemId ->
-                    sampleProblems = sampleProblems.map { problem ->
-                        if (problem.problemId == problemId) {
-                            problem.copy(isBookmarked = !problem.isBookmarked)
-                        } else {
-                            problem
+                    // 검색어 필터링은 클라이언트에서 수행
+                    val filteredProblems = problems.filter { problem ->
+                        problem.title.contains(searchQuery, ignoreCase = true)
+                    }
+
+                    AllProblemListScreen(
+                        problems = filteredProblems,
+                        selectedDifficulty = selectedDifficulty,
+                        currentPage = currentPage,
+                        totalPages = totalPages,
+                        onDifficultySelected = { filter ->
+                            val diffStr = when (filter) {
+                                AllProblemDifficultyFilter.EASY -> "EASY"
+                                AllProblemDifficultyFilter.MEDIUM -> "MEDIUM"
+                                AllProblemDifficultyFilter.HARD -> "HARD"
+                                else -> null
+                            }
+                            // 난이도 변경 시 1페이지부터 새로 로드
+                            viewModel.loadAllProblems(page = 1, difficulty = diffStr)
+                        },
+                        onProblemClick = { item ->
+                            navController.navigate(Routes.solve(item.problemId, item.difficulty.name))
+                        },
+                        onBookmarkClick = { problemId ->
+                            val isBookmarked = problems.find { it.problemId == problemId }?.isBookmarked ?: false
+                            viewModel.toggleBookmark(problemId, isBookmarked)
+                        },
+                        onPageChange = { viewModel.loadAllProblems(page = it) },
+                        onNavigate = { route ->
+                            navController.navigate(route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
-                    }
-                },
-                onPageChange = { currentPage = it },
-                onNavigate = { route ->
-                    navController.navigate(route) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    )
                 }
-            )
+            }
         }
 
         // 마이페이지

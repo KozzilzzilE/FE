@@ -147,7 +147,7 @@ class MockInterceptor : Interceptor {
             }
 
             // ── 주제 목록 ──
-            path.contains("/topics") && !path.contains("/problems") && !path.contains("/notions") && !path.contains("/applications") && method == "GET" -> 
+            path.contains("/topics") && !path.contains("/problems") && !path.contains("/notions") && !path.contains("/applications") && method == "GET" ->
                 Pair(MockResponseData.TOPICS, "주제 목록")
 
             // ── 개념 학습 ──
@@ -178,8 +178,11 @@ class MockInterceptor : Interceptor {
             // ── 응용 학습 완료 ──
             path.contains("/applications/completions") && method == "POST" -> Pair(MockResponseData.PRACTICE_COMPLETION, "응용 완료")
 
-            // ── 문제 학습 목록 ──
-            path.contains("/topics/") && path.contains("/problems") && method == "GET" -> Pair(MockResponseData.PROBLEM_LIST, "문제 목록")
+            // ── 문제 학습 목록 (주제별) ──
+            path.contains("/topics/") && path.contains("/problems") && method == "GET" -> Pair(MockResponseData.PROBLEM_LIST, "주제별 문제 목록")
+
+            // ── 전체 문제 목록 ──
+            path.endsWith("/problems") && !path.contains("/topics/") && method == "GET" -> Pair(MockResponseData.PROBLEM_LIST, "전체 문제 목록")
 
             // ── 문제별 사용자 제출 기록 조회 ──
             path.contains("/problems/") && path.contains("/histories") && method == "GET" -> Pair(MockResponseData.PROBLEM_HISTORIES, "제출 기록 조회")

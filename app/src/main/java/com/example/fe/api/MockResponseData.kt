@@ -419,6 +419,18 @@ object MockResponseData {
                     "title": "프로세스",
                     "difficulty": "HARD",
                     "difficultyDisplayName": "어려움"
+                },
+                {
+                    "problemId": 4,
+                    "title": "특정 문자 제거하기",
+                    "difficulty": "EASY",
+                    "difficultyDisplayName": "쉬움"
+                },
+                {
+                    "problemId": 5,
+                    "title": "다음에 올 숫자",
+                    "difficulty": "MEDIUM",
+                    "difficultyDisplayName": "보통"
                 }
             ]
         }

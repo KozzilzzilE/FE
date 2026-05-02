@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -59,11 +59,11 @@ fun ProblemListCard(
                 ) {
                     Icon(
                         imageVector = if (problem.isBookmarked) {
-                            Icons.Filled.Star
+                            Icons.Filled.Bookmark
                         } else {
-                            Icons.Outlined.StarBorder
+                            Icons.Outlined.BookmarkBorder
                         },
-                        contentDescription = "즐겨찾기",
+                        contentDescription = "찜하기",
                         tint = if (problem.isBookmarked) Color(0xFFFFC107) else Color(0xFF94A3B8),
                         modifier = Modifier.clickable { onBookmarkClick() }
                     )

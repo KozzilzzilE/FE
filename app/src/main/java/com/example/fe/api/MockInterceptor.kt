@@ -218,7 +218,9 @@ class MockInterceptor : Interceptor {
 
             // ── 코드 실행 및 제출 ──
             path.contains("/runs") && method == "POST" -> Pair(MockResponseData.PROBLEM_RUN, "코드 실행")
+            path.contains("/runs") && path.contains("/results") && method == "GET" -> Pair(MockResponseData.PROBLEM_RUN_RESULT, "코드 실행 결과 조회")
             path.contains("/submissions") && method == "POST" -> Pair(MockResponseData.PROBLEM_SUBMIT, "코드 제출 결과")
+            path.contains("/submissions") && path.contains("/results") && method == "GET" -> Pair(MockResponseData.PROBLEM_SUBMISSION_RESULT, "코드 채점 결과 조회")
             
             // ── 모범 답안 (언어별 분기 추가) ──
             path.contains("/solutions") && method == "GET" -> {

@@ -1,61 +1,41 @@
 package com.example.fe.feature.auth.ui
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import com.example.fe.feature.auth.component.GrayTextField
-
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.fe.R
+import com.example.fe.ui.theme.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import android.content.Context
-import android.content.ContextWrapper
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -63,24 +43,18 @@ private fun Context.findActivity(): Activity? = when (this) {
     else -> null
 }
 
-/*
-    로그인 페이지
-*/ 
-
 @Composable
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit,
     onGoogleLoginClick: (String) -> Unit = {},
     onGithubLoginClick: (Activity) -> Unit = {},
-    onSkipLoginClick: () -> Unit = {} // 개발용 스킵 버튼 콜백
+    onSkipLoginClick: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
     val context = LocalContext.current
 
-    // 구글 로그인 런처 설정
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -88,197 +62,186 @@ fun LoginScreen(
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             try {
                 val account = task.getResult(ApiException::class.java)
-                val idToken = account?.idToken
-                if (idToken != null) {
-                    onGoogleLoginClick(idToken)
-                } else {
-                    Log.e("GoogleLogin", "idToken is null")
-                }
+                account?.idToken?.let { onGoogleLoginClick(it) }
             } catch (e: ApiException) {
                 Log.e("GoogleLogin", "Google Sign In Failed", e)
             }
         }
     }
 
-    // 배경색 설정 (약간 회색빛)
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5)),
-        contentAlignment = Alignment.Center
+            .background(BgPrimary)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 흰색 카드 (그림자 포함)
-        Card(
+        Spacer(modifier = Modifier.height(80.dp))
+
+        // 로고
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = "PocketCo Logo",
+            modifier = Modifier.size(120.dp),
+            contentScale = ContentScale.Fit
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "모바일 알고리즘 학습 플랫폼",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Normal,
+            color = TextSecondary,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // 이메일 입력
+        AuthTextField(
+            value = email,
+            onValueChange = { email = it },
+            placeholder = "이메일을 입력하세요",
+            leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = TextMuted, modifier = Modifier.size(18.dp)) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 비밀번호 입력
+        AuthTextField(
+            value = password,
+            onValueChange = { password = it },
+            placeholder = "비밀번호를 입력하세요",
+            isPassword = true,
+            leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = TextMuted, modifier = Modifier.size(18.dp)) }
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 로그인 버튼
+        Button(
+            onClick = { onLoginClick(email, password) },
             modifier = Modifier
-                .width(360.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Primary)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // 1. 로고 영역 (파란색 그라데이션 박스 + 코드 아이콘)
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(Color(0xFF4A90E2), Color(0xFF50C9C3))
-                            ),
-                            shape = RoundedCornerShape(16.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Logo",
-                        tint = Color.White,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 2. 앱 이름
-                Text(
-                    text = "PocketCo",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Text(
-                    text = "모바일 알고리즘 학습 플랫폼",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // 3. 사용자 이름 (아이디/이메일) 입력창
-                GrayTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholder = "사용자 이름"
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // 4. 비밀번호 입력창
-                GrayTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    placeholder = "비밀번호",
-                    isPassword = true
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // 5. 로그인 버튼 (파란색)
-                Button(
-                    onClick = { onLoginClick(email, password) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4A90E2)
-                    )
-                ) {
-                    Text("로그인", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // 5-1. 구글 소셜 로그인 버튼
-                    Button(
-                        onClick = {
-                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestIdToken(context.getString(R.string.default_web_client_id))
-                                .requestEmail()
-                                .build()
-                            val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                            
-                            // 테스트용 캐시 강제 삭제 : 버튼 클릭 시마다 구글 회원가입 캐시 강제 삭제 (매번 계정 선택창 띄우기)
-                            googleSignInClient.signOut().addOnCompleteListener {
-                                launcher.launch(googleSignInClient.signInIntent)
-                            }
-                            
-                            // 계정 선택 창 없이 캐시 사용 자동 로그인
-                            // launcher.launch(googleSignInClient.signInIntent)
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4A90E2)
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
-                    ) {
-                        Text("Google", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                    }
-
-                    // 5-2. 깃허브 소셜 로그인 버튼
-                    Button(
-                        onClick = {
-                            val activity = context.findActivity()
-                            if (activity != null) {
-                                onGithubLoginClick(activity)
-                            } else {
-                                Log.e("GithubLogin", "Context is not an Activity")
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4A90E2)
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
-                    ) {
-                        Text("Github", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // 6. 하단 링크 (회원가입, 비번찾기)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(onClick = onSignUpClick) {
-                        Text("회원가입", color = Color(0xFF4A90E2), fontSize = 12.sp)
-                    }
-                    Text("·", color = Color.Gray)
-                    TextButton(onClick = { /* 비밀번호 찾기 */ }) {
-                        Text("비밀번호 찾기", color = Color.Gray, fontSize = 12.sp)
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // 개발 및 테스트용: 로그인 건너뛰기 버튼
-                TextButton(onClick = onSkipLoginClick) {
-                    Text("🛠 테스트용: 로그인 건너뛰고 홈 화면 보기", color = Color.LightGray, fontSize = 12.sp)
-                }
-            }
+            Text("로그인", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = BgPrimary)
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 구분선
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HorizontalDivider(modifier = Modifier.weight(1f), color = BgElevated)
+            Text(
+                "  또는  ",
+                color = TextMuted,
+                fontSize = 13.sp
+            )
+            HorizontalDivider(modifier = Modifier.weight(1f), color = BgElevated)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Google 로그인
+        SocialButton(
+            text = "Google로 계속하기",
+            iconResId = R.drawable.ic_launcher_foreground,
+            onClick = {
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(context.getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build()
+                val client = GoogleSignIn.getClient(context, gso)
+                client.signOut().addOnCompleteListener { launcher.launch(client.signInIntent) }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // GitHub 로그인
+        SocialButton(
+            text = "GitHub로 계속하기",
+            iconResId = R.drawable.ic_launcher_foreground,
+            onClick = {
+                context.findActivity()?.let { onGithubLoginClick(it) }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 회원가입
+        TextButton(onClick = onSignUpClick) {
+            Text("회원가입", color = Primary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+        }
+
+        // 개발용
+        TextButton(onClick = onSkipLoginClick) {
+            Text("🛠 테스트: 로그인 건너뛰기", color = TextMuted, fontSize = 11.sp)
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
+@Composable
+private fun AuthTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    isPassword: Boolean = false,
+    leadingIcon: @Composable (() -> Unit)? = null
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(54.dp),
+        placeholder = { Text(placeholder, color = TextMuted, fontSize = 15.sp) },
+        leadingIcon = leadingIcon,
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = BgSurface,
+            unfocusedContainerColor = BgSurface,
+            focusedBorderColor = Primary,
+            unfocusedBorderColor = Color.Transparent,
+            focusedTextColor = TextPrimary,
+            unfocusedTextColor = TextPrimary,
+            cursorColor = Primary
+        )
+    )
+}
 
+@Composable
+private fun SocialButton(
+    text: String,
+    iconResId: Int,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = BgSurface),
+        border = androidx.compose.foundation.BorderStroke(0.dp, Color.Transparent)
+    ) {
+        Text(text, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+    }
+}
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, backgroundColor = 0xFF1C1917)
 @Composable
 fun LoginScreenPreview() {
     LoginScreen(

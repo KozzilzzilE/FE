@@ -2,58 +2,44 @@ package com.example.fe.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// ── 피그마 디자인 시스템 ──────────────────────────────────
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Background
+val BgPrimary    = Color(0xFF1C1917)   // 메인 배경
+val BgSurface    = Color(0xFF292524)   // 카드/서피스
+val BgElevated   = Color(0xFF44403C)   // 높은 서피스 (구분선, 탭)
+val BgDivider    = Color(0xFF57534E)   // 구분선
 
-// 공통 앱 색상 추가
+// Text
+val TextPrimary   = Color(0xFFFAFAF9)  // 기본 텍스트
+val TextSecondary = Color(0xFFA8A29E)  // 보조 텍스트
+val TextMuted     = Color(0xFF78716C)  // 흐린 텍스트
 
-// 배경
-val PageBg = Color(0xFFF7F9FC)
-val CardBg = Color.White
+// Primary (Amber)
+val Primary       = Color(0xFFF59E0B)  // 메인 강조색
+val PrimaryDim15  = Color(0x26F59E0B)  // 15% opacity
+val PrimaryDim40  = Color(0x66F59E0B)  // 40% opacity
+val PrimaryDim80  = Color(0xCCF59E0B)  // 80% opacity
 
-// 텍스트
-val TitleText = Color(0xFF1F2937)
-val BodyText = Color(0xFF667085)
-val GrayText = Color(0xFF8C97A8)
+// Semantic
+val Success  = Color(0xFF22C55E)
+val Error    = Color(0xFFFB2C36)
+val ErrorAlt = Color(0xFFEF4444)
+val Blue     = Color(0xFF3B82F6)
+val Cyan     = Color(0xFF06B6D4)
 
-// TopBar
-val TopBarTitle = Color(0xFF1F2937)
-val TopBarSub = Color(0xFF98A2B3)
-val Mint = Color(0xFF8FD8CC)
+// Code editor background
+val CodeBgDark = Color(0xFF0D1117)
 
-// Divider
-val DividerColor = Color(0xFFE7EDF5)
+// Topic icon backgrounds (semi-transparent)
+val IconBgAmber   = Color(0x26F59E0B)  // 해시 등
+val IconBgSalmon  = Color(0x26FFBFB2)  // 스택/큐 등
+val IconBgYellow  = Color(0x26F2F3C7)  // 기타
 
-// Progress
-val ProgressBlue = Color(0xFF6E8FE6)
-val ProgressTrack = Color(0xFFE7EEF8)
-
-// Code 영역
-val CodeBg = Color(0xFF0C1433)
-val CodeText = Color(0xFFF4F7FF)
-
-// Blank 영역
-val BlankBox = Color(0xFF2D447D)
-val BlankBoxSelected = Color(0xFF5E7FE3)
-val BlankBorder = Color(0xFF5D6C99)
-val BlankBorderSelected = Color(0xFF9CB8FF)
-val BlankTextFilled = Color(0xFF7DA2F8)
-
-// 선택지 / 카드
-val ChoiceBorder = Color(0xFFD8E1EC)
-val SelectedAnswerBg = Color(0xFFEAF1FF)
-val EmptyBorder = Color(0xFFD9E3F0)
-
-// 버튼
-val CheckBtnBg = Color(0xFFE9EEF4)
-val CheckBtnText = Color(0xFF7A8699)
-val PrimaryButtonBlue = Color(0xFF4A90E2)
-
-// 결과 텍스트
-val CorrectText = Color(0xFF157F3B)
-val WrongText = Color(0xFFC62828)
+// Legacy (기존 코드 호환)
+val Purple80      = Color(0xFFD0BCFF)
+val PurpleGrey80  = Color(0xFFCCC2DC)
+val Pink80        = Color(0xFFEFB8C8)
+val Purple40      = Color(0xFF6650a4)
+val PurpleGrey40  = Color(0xFF625b71)
+val Pink40        = Color(0xFF7D5260)

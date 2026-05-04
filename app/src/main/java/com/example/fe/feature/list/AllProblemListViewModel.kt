@@ -11,51 +11,61 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-sealed class ProblemUiState {
-    object Loading : ProblemUiState()
-    data class Success(val problems: List<ProblemResult>) : ProblemUiState()
-    data class Error(val message: String) : ProblemUiState()
-}
+/**
+ * 전체 문제 목록을 관리하는 ViewModel (페이지당 20개, 난이도 필터링 지원)
+ */
+class AllProblemListViewModel(private val repository: ProblemRepository) : ViewModel() {
 
-class ProblemListViewModel(private val repository: ProblemRepository) : ViewModel() {
     private val _uiState = MutableStateFlow<ProblemUiState>(ProblemUiState.Loading)
     val uiState: StateFlow<ProblemUiState> = _uiState.asStateFlow()
 
-    fun loadProblems(topicId: Long) {
+    // 현재 페이지 상태
+    private val _currentPage = MutableStateFlow(1)
+    val currentPage: StateFlow<Int> = _currentPage.asStateFlow()
+
+    // 현재 선택된 난이도 필터 상태 (null이면 전체)
+    private val _selectedDifficulty = MutableStateFlow<String?>(null)
+    val selectedDifficulty: StateFlow<String?> = _selectedDifficulty.asStateFlow()
+
+    /**
+     * 전체 문제 목록 로드
+     * @param page 불러올 페이지 번호
+     * @param difficulty 필터링할 난이도 (null, "EASY", "MEDIUM", "HARD")
+     */
+    fun loadAllProblems(page: Int = _currentPage.value, difficulty: String? = _selectedDifficulty.value) {
         viewModelScope.launch {
+            _currentPage.value = page
+            _selectedDifficulty.value = difficulty
+            
             if (_uiState.value !is ProblemUiState.Success) {
                 _uiState.value = ProblemUiState.Loading
             }
+
             try {
-                // [MOCK] Interceptor를 사용하므로 더 이상 개별 Mock 플래그는 필요 없습니다.
-                // 토큰이 없더라도 MockInterceptor가 처리해 줄 것이므로 기본적인 토큰 획득 로직만 남깁니다.
                 val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
                 
-                if (token == null) { // 실제 서버 연동 시에는 이 체크가 필요하겠지만, 현재는 가짜 토큰을 사용합니다.
-                    _uiState.value = ProblemUiState.Error("로그인 토큰이 없습니다.")
-                    return@launch
-                }
-
-                val response = repository.getTopicProblems(token, topicId)
+                // 한 페이지에 20개씩, 난이도 필터 적용하여 요청
+                val response = repository.getAllProblems(token, page, difficulty)
                 if (response.isSuccessful) {
                     val body = response.body()
-                    Log.d("ProblemListViewModel", "문제 목록 로드 성공: code=${body?.code}, message=${body?.message}")
                     if (body != null && body.isSuccess && body.result != null) {
                         _uiState.value = ProblemUiState.Success(body.result.problems)
                     } else {
                         _uiState.value = ProblemUiState.Error(body?.message ?: "데이터를 불러올 수 없습니다")
                     }
                 } else {
-                    Log.e("ProblemListViewModel", "API 실패: ${response.code()}")
-                    _uiState.value = ProblemUiState.Error("서버 응답 오류")
+                    _uiState.value = ProblemUiState.Error("서버 응답 오류 (${response.code()})")
                 }
             } catch (e: Exception) {
-                Log.e("ProblemListViewModel", "예외 발생", e)
-                _uiState.value = ProblemUiState.Error("네트워크 오류")
+                Log.e("AllProblemListVM", "예외 발생", e)
+                _uiState.value = ProblemUiState.Error("네트워크 오류가 발생했습니다")
             }
         }
     }
 
+    /**
+     * 찜하기 토글
+     */
     fun toggleBookmark(problemId: Long, isCurrentlyBookmarked: Boolean) {
         val currentState = _uiState.value
         if (currentState !is ProblemUiState.Success) return
@@ -64,7 +74,6 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
             try {
                 val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
                 
-                // 낙관적 업데이트
                 val optimisticProblems = currentState.problems.map {
                     if (it.problemId == problemId) {
                         it.copy(
@@ -77,18 +86,14 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
 
                 val resultBookmarked = repository.toggleBookmark(token, problemId, isCurrentlyBookmarked)
                 
-                // 결과 보정
                 val verifiedProblems = optimisticProblems.map {
                     if (it.problemId == problemId) {
-                        it.copy(
-                            isBookmark = resultBookmarked,
-                            bookmarkCount = currentState.problems.find { p -> p.problemId == problemId }?.bookmarkCount?.plus(if (resultBookmarked) 1 else if (isCurrentlyBookmarked) -1 else 0) ?: 0
-                        )
+                        it.copy(isBookmark = resultBookmarked)
                     } else it
                 }
                 _uiState.value = ProblemUiState.Success(verifiedProblems)
+                
             } catch (e: Exception) {
-                // 실패 시 원래 상태로 복구
                 _uiState.value = currentState
             }
         }

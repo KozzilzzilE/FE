@@ -1,6 +1,7 @@
 package com.example.fe.api
 
 import com.example.fe.data.dto.ProblemListResponse
+import com.example.fe.data.dto.AllProblemListResponse
 import com.example.fe.data.dto.SignUpRequest
 import com.example.fe.data.dto.SignUpResponse
 import com.example.fe.data.dto.LoginRequest
@@ -27,6 +28,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.Header
 import retrofit2.http.PATCH
+import retrofit2.http.DELETE
 
 interface ApiService {
     // --- [인증] ---
@@ -91,12 +93,21 @@ interface ApiService {
 
     // --- [문제학습] ---
     
-    // 특정 알고리즘 주제의 문제 목록 가져오기
+    // 특정 알고리즘 주제의 문제 목록 조회
     @GET("api/v1/topics/{topicId}/problems")
     suspend fun getTopicProblems(
         @retrofit2.http.Header("Authorization") token: String,
         @Path("topicId") topicId: Long
     ): Response<ProblemListResponse>
+
+    // 전체 문제 목록 조회
+    @GET("api/v1/problems")
+    suspend fun getAllProblems(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Query("page") page: Int,
+        @Query("size") size: Int = 20,
+        @Query("difficulty") difficulty: String? = null
+    ): Response<AllProblemListResponse>
 
     // 문제 상세 정보 조회
     @GET("api/v1/problems/{problemId}")
@@ -181,6 +192,28 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: UpdateNicknameRequest
     ): Response<UpdateNicknameResponse>
+
+    // --- [찜(북마크)] ---
+
+    // 찜 목록 조회
+    @GET("api/v1/bookmarks/problems")
+    suspend fun getBookmarks(
+        @Header("Authorization") token: String
+    ): Response<com.example.fe.data.dto.BookmarkListResponse>
+
+    // 찜 추가
+    @POST("api/v1/bookmarks/problems/{problemId}")
+    suspend fun addBookmark(
+        @Header("Authorization") token: String,
+        @Path("problemId") problemId: Long
+    ): Response<com.example.fe.data.dto.BookmarkResponse>
+
+    // 찜 삭제
+    @DELETE("api/v1/bookmarks/problems/{problemId}")
+    suspend fun deleteBookmark(
+        @Header("Authorization") token: String,
+        @Path("problemId") problemId: Long
+    ): Response<com.example.fe.data.dto.BookmarkResponse>
 }
 
 

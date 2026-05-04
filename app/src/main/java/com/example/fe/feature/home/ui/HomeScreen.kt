@@ -76,7 +76,14 @@ fun HomeScreen(
             WelcomeSection(userName = "${displayUserName}님")
 
             // 2. 메인 액션 카드 섹션 (찜한 문제 + CS 퀴즈)
-            MainActionsRow()
+            MainActionsRow(
+                onFavoriteClick = {
+                    onNavigate(com.example.fe.navigation.Routes.FAVORITE_PROBLEMS)
+                },
+                onQuizClick = {
+                    // 퀴즈 클릭 시 동작 (필요시 추가)
+                }
+            )
 
             // 3. 오늘의 명언 섹션
             QuoteCard()

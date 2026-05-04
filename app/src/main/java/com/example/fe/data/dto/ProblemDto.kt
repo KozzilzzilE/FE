@@ -24,7 +24,25 @@ data class ProblemResult(
     @SerializedName("problemId") val problemId: Long,
     @SerializedName("title") val title: String,
     @SerializedName("difficulty") val difficulty: String,
-    @SerializedName("difficultyDisplayName") val difficultyDisplayName: String
+    @SerializedName("difficultyDisplayName") val difficultyDisplayName: String,
+    @SerializedName("bookmarkCount") val bookmarkCount: Int?,
+    @SerializedName("isBookmark") val isBookmark: Boolean?
+)
+
+/**
+ * [전체 문제 목록 조회 API]
+ * GET /api/v1/problems
+ */
+data class AllProblemListResponse(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: AllProblemListResult?
+)
+
+data class AllProblemListResult(
+    @SerializedName("count") val count: Int,
+    @SerializedName("problems") val problems: List<ProblemResult>
 )
 
 /**
@@ -45,7 +63,9 @@ data class ProblemDetailResult(
     @SerializedName("description") val description: String,
     @SerializedName("constraint") val constraint: String,
     @SerializedName("testCases") val testCases: List<TestCaseDto>,
-    @SerializedName("isCompleted") val isCompleted: Boolean
+    @SerializedName("isCompleted") val isCompleted: Boolean,
+    @SerializedName("bookmarkCount") val bookmarkCount: Int?,
+    @SerializedName("isBookmark") val isBookmark: Boolean?
 )
 
 data class TestCaseDto(

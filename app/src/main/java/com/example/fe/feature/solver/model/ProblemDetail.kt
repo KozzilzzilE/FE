@@ -9,5 +9,6 @@ data class ProblemDetail(
     val exampleOutput: String = "",
     val constraints: List<String> = emptyList(),
     val initialCode: String = "",
-    val testCases: List<TestCase> = emptyList()
+    val testCases: List<TestCase> = emptyList(),
+    val isBookmarked: Boolean = false
 )

@@ -7,12 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +26,7 @@ fun TopBar(
     title: String,
     subtitle: String? = null,
     leftContent: @Composable (() -> Unit)? = null,
+    rightContent: @Composable (() -> Unit)? = null,
     showBackIcon: Boolean = true,
     showHomeIcon: Boolean = false,
     onBackClick: () -> Unit,
@@ -78,6 +74,9 @@ fun TopBar(
             }
         },
         actions = {
+            if (rightContent != null) {
+                rightContent()
+            }
             if (showHomeIcon) {
                 IconButton(onClick = onHomeClick) {
                     Icon(

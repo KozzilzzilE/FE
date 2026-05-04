@@ -57,10 +57,10 @@ fun PracticeScreen(
     // ViewModel 상태 구독
     val state = vm.uiState.collectAsState().value
 
-    // 화면 진입 시 문제 로드
-    LaunchedEffect(topicId) {
-        vm.loadQuizzes(topicId)
-    }
+//    // 화면 진입 시 문제 로드
+//    LaunchedEffect(topicId) {
+//        vm.loadQuizzes(topicId)
+//    }
 
     PracticeContent(
         state = state,

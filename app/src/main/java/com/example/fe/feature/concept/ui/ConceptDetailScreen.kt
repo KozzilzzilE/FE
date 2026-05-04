@@ -1,13 +1,7 @@
 package com.example.fe.feature.concept.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
@@ -25,11 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.example.fe.common.MoveButtonBar
 import com.example.fe.common.TopBar
 import com.example.fe.feature.concept.ConceptViewModel
-import com.example.fe.feature.concept.component.CodeExampleBox
-import com.example.fe.feature.concept.component.ConceptDetailBox
-import com.example.fe.feature.concept.component.ConceptImage
-import com.example.fe.feature.concept.component.ConceptSummaryBox
-import com.example.fe.feature.concept.component.PageIndicatorDots
+import com.example.fe.feature.concept.component.*
 import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.Primary
 import com.example.fe.ui.theme.TextPrimary
@@ -46,6 +36,7 @@ fun ConceptDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // 뷰 진입 시 해당 주제의 개념 데이터 로드 (시작 인덱스 전달)
     LaunchedEffect(topicId) {
         viewModel.loadConcepts(topicId = topicId, initialIndex = initialIndex)
     }

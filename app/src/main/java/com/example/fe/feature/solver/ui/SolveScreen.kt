@@ -14,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,20 +36,20 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.fe.feature.solver.SolveTab
 import com.example.fe.feature.solver.SolverViewModel
+import com.example.fe.feature.solver.component.DraftSaveButton
 import com.example.fe.feature.solver.component.ExecutionTerminal
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
 import com.example.fe.feature.solver.component.SubmitTabContent
 import com.example.fe.feature.solver.model.ProblemDetail
 import com.example.fe.feature.solver.model.TestCase
+import com.example.fe.common.TopBar
 import com.example.fe.ui.theme.*
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +60,9 @@ fun SolveScreen(
     onHome: () -> Unit = {},
     onOpenEditorFull: (Long) -> Unit = {}
 ) {
-    LaunchedEffect(problemId) { viewModel.loadProblemDetail(problemId) }
+    LaunchedEffect(problemId) {
+        viewModel.loadDraft(problemId)
+    }
 
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by rememberSaveable { mutableStateOf(SolveTab.PROBLEM) }
@@ -106,61 +110,33 @@ fun SolveScreen(
         }
     }
 
-    // 공백 방지
     val density = LocalDensity.current
     val imeBottomPx = WindowInsets.ime.getBottom(density)
     val navBottomPx = WindowInsets.navigationBars.getBottom(density)
     val smartPadBottomDp = with(density) { max(0, imeBottomPx - navBottomPx).toDp() }
 
-    //
-    val attachFixDp = 3.dp
-    val attachFixPx = with(density) { attachFixDp.toPx() }.roundToInt()
-
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            // 중복 방지
             contentWindowInsets = WindowInsets(0),
-            // 상단바
             topBar = {
-                TopAppBar(
-                    title = {
-                        Column(
-                            modifier = Modifier.padding(start = 4.dp) // ← 아이콘 옆 간격
-                        ) {
-                            Text(
-                                text = "문제 풀이",
-                                style = MaterialTheme.typography.titleLarge,
-                                maxLines = 1
-                            )
-                            if (titleToShow.isNotBlank()) {
-                                Text(
-                                    text = titleToShow,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = TextSecondary,
-                                    maxLines = 1
-                                )
-                            }
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
+                TopBar(
+                    title = "문제 풀이",
+                    subtitle = titleToShow,
+                    showBackIcon = true,
+                    showHomeIcon = true,
+                    onBackClick = onBack,
+                    onHomeClick = onHome,
+                    rightContent = {
+                        val isBookmarked = detail?.isBookmarked == true
+                        IconButton(onClick = { viewModel.toggleBookmark() }) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back"
+                                imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = "즐겨찾기",
+                                tint = if (isBookmarked) Color(0xFFFFC107) else TextMuted
                             )
                         }
-                    },
-                    actions = {
-                        IconButton(onClick = onHome) {
-                            Icon(imageVector = Icons.Filled.Home, contentDescription = "Home")
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = BgSurface,
-                        titleContentColor = TextPrimary,
-                        navigationIconContentColor = TextPrimary,
-                        actionIconContentColor = TextPrimary
-                    )
+                    }
+                )
                 )
             },
             bottomBar = {
@@ -182,7 +158,6 @@ fun SolveScreen(
                     .padding(innerPadding)
                     .background(BgPrimary)
             ) {
-
                 SolveTabBar(
                     selectedTab = selectedTab,
                     onTabSelected = { selectedTab = it }
@@ -212,11 +187,15 @@ fun SolveScreen(
                 ) {
                     when (selectedTab) {
                         SolveTab.PROBLEM -> {
-                            ProblemTab(detail = detail, isLoading = uiState.isLoadingProblem)
+                            ProblemTab(
+                                detail = detail,
+                                isLoading = uiState.isLoadingProblem
+                            )
                         }
 
                         SolveTab.EDITOR -> {
                             val editorScrollState = rememberScrollState()
+
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -234,8 +213,11 @@ fun SolveScreen(
                                         viewModel.runCode()
                                         selectedTab = SolveTab.SUBMIT
                                     },
+                                    onSaveDraft = { viewModel.saveDraft() },
                                     isRunning = uiState.isRunning,
-                                    onEditorFocusChange = { focused -> editorFocused = focused }
+                                    onEditorFocusChange = { focused ->
+                                        editorFocused = focused
+                                    }
                                 )
 
                                 if (executionLines != null && testCases.isNotEmpty()) {
@@ -264,14 +246,14 @@ fun SolveScreen(
                             }
                         }
 
-                        SolveTab.SUBMIT -> SubmitTabContent(viewModel = viewModel)
+                        SolveTab.SUBMIT -> {
+                            SubmitTabContent(viewModel = viewModel)
+                        }
                     }
                 }
             }
         }
 
-        // 스마트 키보드
-        val extraLift = 20.dp
         AnimatedVisibility(
             visible = (selectedTab == SolveTab.EDITOR) && editorFocused,
             modifier = Modifier
@@ -292,7 +274,12 @@ fun SolveScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 0.dp)
+                        .padding(
+                            start = 12.dp,
+                            top = 8.dp,
+                            end = 12.dp,
+                            bottom = 0.dp
+                        )
                 )
             }
         }
@@ -314,6 +301,7 @@ private fun TestCaseSelectorBar(
     ) {
         repeat(count) { idx ->
             val isSelected = idx == selectedIndex
+
             Surface(
                 modifier = Modifier.size(width = 44.dp, height = 36.dp),
                 shape = RoundedCornerShape(10.dp),
@@ -341,10 +329,23 @@ private fun EditorTabContent(
     onExpand: () -> Unit,
     onReset: () -> Unit,
     onRun: () -> Unit,
+    onSaveDraft: () -> Unit,
     isRunning: Boolean,
     onEditorFocusChange: (Boolean) -> Unit
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            DraftSaveButton(
+                onClick = onSaveDraft
+            )
+        }
+
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -376,7 +377,11 @@ private fun EditorTabContent(
                     )
                 )
 
-                Box(modifier = Modifier.align(Alignment.TopEnd).zIndex(1f)) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .zIndex(1f)
+                ) {
                     IconButton(
                         onClick = onExpand,
                         modifier = Modifier
@@ -468,9 +473,18 @@ private fun RowScope.SolveTabChip(tab: SolveTab, selected: Boolean, onClick: () 
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Icon(tab.icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
+            Icon(
+                imageVector = tab.icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(18.dp)
+            )
             Spacer(modifier = Modifier.width(6.dp))
-            Text(tab.label, color = color, fontSize = 14.sp)
+            Text(
+                text = tab.label,
+                color = color,
+                fontSize = 14.sp
+            )
         }
     }
 }
@@ -483,7 +497,10 @@ private fun ProblemTab(
     val scroll = rememberScrollState()
 
     if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             CircularProgressIndicator()
         }
         return
@@ -502,12 +519,26 @@ private fun ProblemTab(
             .verticalScroll(scroll)
             .padding(16.dp)
     ) {
-        if (!detail.difficultyLabel.isNullOrBlank()) {
+        if (!detail.difficultyLabel.isNullOrBlank() && detail.difficultyLabel != "-") {
+            val diffLabelUpper = detail.difficultyLabel.uppercase()
+            val diffText = when (diffLabelUpper) {
+                "EASY" -> "쉬움"
+                "MEDIUM", "NORMAL" -> "보통"
+                "HARD" -> "어려움"
+                else -> detail.difficultyLabel
+            }
+            val diffColor = when (diffLabelUpper) {
+                "EASY", "쉬움" -> Color(0xFF10B981)
+                "MEDIUM", "NORMAL", "보통" -> Color(0xFFF59E0B)
+                "HARD", "어려움" -> Color(0xFFEF4444)
+                else -> Color(0xFFF04438)
+            }
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("난이도: ", color = TextSecondary, fontSize = 14.sp)
                 Text(
-                    text = detail.difficultyLabel,
-                    color = Error,
+                    text = diffText,
+                    color = diffColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
@@ -531,7 +562,7 @@ private fun ProblemTab(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            "입출력 예시",
+            text = "입출력 예시",
             fontWeight = FontWeight.SemiBold,
             color = TextMuted,
             fontSize = 14.sp
@@ -571,7 +602,10 @@ private fun ProblemTab(
 }
 
 @Composable
-private fun StepIndicator(total: Int, current: Int) {
+private fun StepIndicator(
+    total: Int,
+    current: Int
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -590,7 +624,10 @@ private fun StepIndicator(total: Int, current: Int) {
     }
 }
 
-private fun insertIntoTextFieldValue(value: TextFieldValue, insert: String): TextFieldValue {
+private fun insertIntoTextFieldValue(
+    value: TextFieldValue,
+    insert: String
+): TextFieldValue {
     val text = value.text
     val start = value.selection.start.coerceIn(0, text.length)
     val end = value.selection.end.coerceIn(0, text.length)
@@ -602,10 +639,16 @@ private fun insertIntoTextFieldValue(value: TextFieldValue, insert: String): Tex
     }
 
     val newCursor = start + insert.length
-    return value.copy(text = newText, selection = TextRange(newCursor))
+    return value.copy(
+        text = newText,
+        selection = TextRange(newCursor)
+    )
 }
 
-private fun buildLinesForUi(tc: TestCase, rawLines: List<String>): List<String> {
+private fun buildLinesForUi(
+    tc: TestCase,
+    rawLines: List<String>
+): List<String> {
     return buildList {
         add("$ input: ${tc.input}")
         add("$ expected: ${tc.expectedOutput}")

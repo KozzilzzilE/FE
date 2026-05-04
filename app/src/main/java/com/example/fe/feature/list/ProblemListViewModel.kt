@@ -23,7 +23,9 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
 
     fun loadProblems(topicId: Long) {
         viewModelScope.launch {
-            _uiState.value = ProblemUiState.Loading
+            if (_uiState.value !is ProblemUiState.Success) {
+                _uiState.value = ProblemUiState.Loading
+            }
             try {
                 // [MOCK] Interceptor를 사용하므로 더 이상 개별 Mock 플래그는 필요 없습니다.
                 // 토큰이 없더라도 MockInterceptor가 처리해 줄 것이므로 기본적인 토큰 획득 로직만 남깁니다.
@@ -50,6 +52,44 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
             } catch (e: Exception) {
                 Log.e("ProblemListViewModel", "예외 발생", e)
                 _uiState.value = ProblemUiState.Error("네트워크 오류")
+            }
+        }
+    }
+
+    fun toggleBookmark(problemId: Long, isCurrentlyBookmarked: Boolean) {
+        val currentState = _uiState.value
+        if (currentState !is ProblemUiState.Success) return
+
+        viewModelScope.launch {
+            try {
+                val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
+                
+                // 낙관적 업데이트
+                val optimisticProblems = currentState.problems.map {
+                    if (it.problemId == problemId) {
+                        it.copy(
+                            isBookmark = !isCurrentlyBookmarked,
+                            bookmarkCount = (it.bookmarkCount ?: 0) + (if (isCurrentlyBookmarked) -1 else 1)
+                        )
+                    } else it
+                }
+                _uiState.value = ProblemUiState.Success(optimisticProblems)
+
+                val resultBookmarked = repository.toggleBookmark(token, problemId, isCurrentlyBookmarked)
+                
+                // 결과 보정
+                val verifiedProblems = optimisticProblems.map {
+                    if (it.problemId == problemId) {
+                        it.copy(
+                            isBookmark = resultBookmarked,
+                            bookmarkCount = currentState.problems.find { p -> p.problemId == problemId }?.bookmarkCount?.plus(if (resultBookmarked) 1 else if (isCurrentlyBookmarked) -1 else 0) ?: 0
+                        )
+                    } else it
+                }
+                _uiState.value = ProblemUiState.Success(verifiedProblems)
+            } catch (e: Exception) {
+                // 실패 시 원래 상태로 복구
+                _uiState.value = currentState
             }
         }
     }

@@ -24,7 +24,25 @@ data class ProblemResult(
     @SerializedName("problemId") val problemId: Long,
     @SerializedName("title") val title: String,
     @SerializedName("difficulty") val difficulty: String,
-    @SerializedName("difficultyDisplayName") val difficultyDisplayName: String
+    @SerializedName("difficultyDisplayName") val difficultyDisplayName: String,
+    @SerializedName("bookmarkCount") val bookmarkCount: Int?,
+    @SerializedName("isBookmark") val isBookmark: Boolean?
+)
+
+/**
+ * [전체 문제 목록 조회 API]
+ * GET /api/v1/problems
+ */
+data class AllProblemListResponse(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: AllProblemListResult?
+)
+
+data class AllProblemListResult(
+    @SerializedName("count") val count: Int,
+    @SerializedName("problems") val problems: List<ProblemResult>
 )
 
 /**
@@ -45,7 +63,9 @@ data class ProblemDetailResult(
     @SerializedName("description") val description: String,
     @SerializedName("constraint") val constraint: String,
     @SerializedName("testCases") val testCases: List<TestCaseDto>,
-    @SerializedName("isCompleted") val isCompleted: Boolean
+    @SerializedName("isCompleted") val isCompleted: Boolean,
+    @SerializedName("bookmarkCount") val bookmarkCount: Int?,
+    @SerializedName("isBookmark") val isBookmark: Boolean?
 )
 
 data class TestCaseDto(
@@ -113,5 +133,60 @@ data class SubmitResponseDto(
 )
 
 data class SubmitResult(
-    @SerializedName("submissionId") val submissionId: String
+    @SerializedName("historyId") val historyId: Long?,
+    @SerializedName("submissionId") val submissionId: String?
+)
+
+/**
+ * [문제 코드 실행 결과 조회 API]
+ * GET /api/v1/problems/runs/{token}/results
+ */
+data class RunResultResponseDto(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: RunResultDto?
+)
+
+data class RunResultDto(
+    @SerializedName("statusId") val statusId: Int,
+    @SerializedName("status") val status: String,
+    @SerializedName("input") val input: String?,
+    @SerializedName("output") val output: String?
+)
+
+/**
+ * [문제 코드 채점 결과 조회 API]
+ * GET /api/v1/problems/submissions/{historyId}/results
+ */
+
+data class SubmissionResultResponseDto(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: SubmissionResultDto?
+)
+
+data class SubmissionResultDto(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("status") val status: String,
+    @SerializedName("message") val message: String
+)
+
+/**
+ * [문제별 사용자 제출 기록 조회 API]
+ */
+
+data class SubmissionHistoryResponseDto(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: List<SubmissionHistoryItem>?
+)
+
+data class SubmissionHistoryItem(
+    @SerializedName("sourceCode") val sourceCode: String,
+    @SerializedName("status") val status: String,
+    @SerializedName("language") val language: String,
+    @SerializedName("createdAt") val createdAt: String
 )

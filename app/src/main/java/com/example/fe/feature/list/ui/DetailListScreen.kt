@@ -27,6 +27,7 @@ fun DetailListScreen(
     screenTitle: String, // 동적 타이틀 (예: 개념학습, 응용학습, 문제학습)
     items: List<DetailItem>, // 범용 리스트 (Concept, Application, Problem)
     onItemClick: (DetailItem) -> Unit, // 클릭 이벤트
+    onBookmarkClick: ((DetailItem) -> Unit)? = null, // 북마크 클릭 이벤트
     onBackClick: () -> Unit, // 뒤로 가기 동작 연동
     onNavigate: (String) -> Unit
 ) {
@@ -59,7 +60,8 @@ fun DetailListScreen(
                     items(items) { item ->
                         DetailCard(
                             item = item,
-                            onClick = { onItemClick(item) }
+                            onClick = { onItemClick(item) },
+                            onBookmarkClick = if (onBookmarkClick != null) { { onBookmarkClick(item) } } else null
                         )
                     }
                 }

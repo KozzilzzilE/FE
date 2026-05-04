@@ -1,22 +1,14 @@
 package com.example.fe.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,20 +21,13 @@ import androidx.compose.ui.unit.sp
 import com.example.fe.feature.list.model.DetailItem
 import com.example.fe.feature.list.model.Difficulty
 import com.example.fe.feature.list.model.Problem
-import com.example.fe.ui.theme.BgDivider
-import com.example.fe.ui.theme.BgElevated
-import com.example.fe.ui.theme.BgSurface
-import com.example.fe.ui.theme.Error
-import com.example.fe.ui.theme.Primary
-import com.example.fe.ui.theme.Success
-import com.example.fe.ui.theme.TextMuted
-import com.example.fe.ui.theme.TextPrimary
-import com.example.fe.ui.theme.TextSecondary
+import com.example.fe.ui.theme.*
 
 @Composable
 fun DetailCard(
     item: DetailItem,
     onClick: () -> Unit,
+    onBookmarkClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -59,7 +44,7 @@ fun DetailCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 번호 뱃지
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(12.dp))
@@ -87,6 +72,30 @@ fun DetailCard(
                 DifficultyBadge(difficulty = item.difficulty)
             }
 
+            // 북마크 (팀원 추가 기능 반영 + 디자인 수정)
+            if (item is Problem) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { onBookmarkClick?.invoke() },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (item.isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                            contentDescription = "북마크",
+                            tint = if (item.isBookmarked) Color(0xFFFFC107) else TextMuted
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${item.bookmarkCount}",
+                        fontSize = 12.sp,
+                        color = TextMuted
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+            }
+
+            // 문제 해결 여부 아이콘
             Icon(
                 imageVector = if (item.isCompleted) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
                 contentDescription = null,
@@ -100,9 +109,9 @@ fun DetailCard(
 @Composable
 fun DifficultyBadge(difficulty: Difficulty) {
     val backgroundColor = when (difficulty) {
-        Difficulty.EASY   -> Color(0x2022C55E)  // Success 15%
-        Difficulty.MEDIUM -> Color(0x20F59E0B)  // Primary 15%
-        Difficulty.HARD   -> Color(0x20FB2C36)  // Error 15%
+        Difficulty.EASY   -> Color(0x2022C55E)
+        Difficulty.MEDIUM -> Color(0x20F59E0B)
+        Difficulty.HARD   -> Color(0x20FB2C36)
     }
     val textColor = when (difficulty) {
         Difficulty.EASY   -> Success
@@ -127,9 +136,9 @@ fun DifficultyBadge(difficulty: Difficulty) {
 @Preview(showBackground = true, backgroundColor = 0xFF1C1917)
 @Composable
 fun DetailCardPreview() {
-    Column(modifier = Modifier.background(com.example.fe.ui.theme.BgPrimary)) {
-        DetailCard(item = Problem(1L, "두 수의 합", Difficulty.EASY, false), onClick = {})
-        DetailCard(item = Problem(2L, "스택 구현하기", Difficulty.MEDIUM, true), onClick = {})
-        DetailCard(item = Problem(3L, "힙 정렬", Difficulty.HARD, false), onClick = {})
+    Column(modifier = Modifier.background(BgPrimary)) {
+        DetailCard(item = Problem(1L, "두 수의 합", Difficulty.EASY, false, true, 42), onClick = {})
+        DetailCard(item = Problem(2L, "스택 구현하기", Difficulty.MEDIUM, true, false, 15), onClick = {})
+        DetailCard(item = Problem(3L, "힙 정렬", Difficulty.HARD, false, true, 8), onClick = {})
     }
 }

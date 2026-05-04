@@ -28,8 +28,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import com.example.fe.common.AppConstants
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun LanguageDropdown(
@@ -48,7 +52,7 @@ fun LanguageDropdown(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .background(Color(0xFFEEF2F6), RoundedCornerShape(12.dp))
+                .background(BgSurface, RoundedCornerShape(12.dp))
                 .clickable { expanded = true }
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -56,21 +60,21 @@ fun LanguageDropdown(
         ) {
             Text(
                 text = "언어 설정:",
-                color = Color(0xFF888888),
+                color = TextMuted,
                 fontSize = 14.sp
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = selectedLanguage.ifEmpty { "선택" },
-                    color = Color(0xFF333333),
+                    color = Primary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = "드롭다운 열기",
-                    tint = Color(0xFF666666)
+                    tint = TextSecondary
                 )
             }
         }

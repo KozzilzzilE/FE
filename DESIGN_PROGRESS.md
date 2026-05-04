@@ -2,7 +2,7 @@
 
 > 브랜치: `design`  
 > 피그마: [디자인 개선안](https://www.figma.com/design/2jgj6jIRRfjk1LI86nSI20/)  
-> 마지막 업데이트: 2026-05-03
+> 마지막 업데이트: 2026-05-04
 
 ---
 
@@ -55,29 +55,48 @@
   - 소셜 회원가입 버튼 → 입력폼 순서
   - 오렌지 필드 테두리 (포커스 시), Amber 완료 버튼
 
+### 4. 홈 화면 (Phase 1 완료 ✅ — 2026-05-04)
+- **`feature/home/component/HomeTopBar.kt`** — 다크 테마 재작성
+  - 좌측: Amber 원형 로고 + "PocketCo" 텍스트
+  - 우측: 프로필 아이콘 버튼 (`BgElevated` 배경, `onProfileClick` 콜백)
+- **`feature/home/component/ContributionGraph.kt`** — 다크 테마 색상 적용
+  - 잔디 색상: 파란 계열 → Amber 계열 (투명도 40%~100%)
+  - 배경: `BgSurface`, 텍스트: `TextMuted`
+- **`feature/home/component/LanguageDropdown.kt`** — 다크 테마 색상 적용
+  - 배경: `BgSurface`, 선택값: `Primary`, 아이콘: `TextSecondary`
+- **`feature/home/ui/HomeScreen.kt`** — 전체 레이아웃 개편
+  - `BgPrimary` 배경, 세로 스크롤 레이아웃
+  - 인사말 섹션 (ViewModel의 `name` 표시)
+  - 빠른 메뉴 3칸 (학습하기→`topic`, 즐겨찾기→`my`, CS 퀴즈→`cs_quiz`)
+  - 스트릭 그래프 (`ContributionGraph` 재사용)
+  - 명언 카드 (랜덤 표시)
+  - ViewModel·상태 관리·LaunchedEffect·BottomNav 전부 유지
+- **`ui/theme/Color.kt`** — 레거시 컬러 별칭 추가
+  - 다른 화면에서 쓰던 구 토큰 14개(`CardBg`, `CodeBg`, `TitleText` 등)를 신규 토큰으로 매핑하여 빌드 에러 해결
+
+### 5. 학습 탐색 및 개념 플로우 (Phase 2 완료 ✅ — 2026-05-04)
+- **`common/TopBar.kt`** — 다크 테마 (`BgSurface` 배경, `TextPrimary` 제목, `Primary` 홈 아이콘)
+- **`common/NextPrevButton.kt`** — MoveButton 다크 테마 (`Primary` Amber 버튼, `BgSurface` 이전 버튼)
+- **`common/ProblemCard.kt`** — DetailCard + DifficultyBadge 다크 테마
+  - `BgSurface` 카드, `BgElevated` 번호 뱃지, `Primary` 번호, 투명 배경 난이도 배지
+- **`feature/list/component/TopicCard.kt`** — `BgSurface` 카드, `TextPrimary` 텍스트
+- **`feature/list/ui/TopicListScreen.kt`** — `BgPrimary` 배경
+- **`feature/list/ui/DetailListScreen.kt`** — `BgPrimary` 배경
+- **`feature/list/ui/ProblemListScreen.kt`** — `BgPrimary` 배경
+- **`feature/step/component/StepCard.kt`** — `BgElevated` 아이콘 박스, `TextPrimary`/`TextSecondary`
+- **`feature/step/ui/StepSelectionScreen.kt`** — `BgPrimary` 배경, `BgSurface` 카드, Blue/Success/Error 아이콘
+- **`feature/concept/component/ConceptSummaryBox.kt`** — `BgSurface` + `TextPrimary`
+- **`feature/concept/component/CodeExampleBox.kt`** — `CodeBgDark` + `Cyan` 코드 텍스트
+- **`feature/concept/component/ConceptDetailBox.kt`** — `BgSurface`, Markdown 다크 테마
+- **`feature/concept/ui/ConceptDetailScreen.kt`** — `BgPrimary`, `Primary` 밑줄, `TextPrimary` 제목
+
 ---
 
 ## 진행 예정 작업 🔜
 
-### 4. 인증 (나머지)
+### 6. 인증 (나머지)
 - [ ] **`feature/auth/ui/SocialSignUpScreen.kt`** → `AdditionalInfoScreen` 디자인 적용
   - 추가 정보 입력 (이름, 이메일, 주 사용 언어)
-
-### 5. 홈 화면
-- [ ] **`feature/home/ui/HomeScreen.kt`**
-  - 상단: 로고 + 프로필 아이콘
-  - 인사말 + 빠른 메뉴 3칸 (학습하기 / 즐겨찾기 / CS 퀴즈)
-  - 연속 학습 스트릭 그래프 (기존 ContributionGraph 다크 테마 적용)
-  - 명언 카드 (하단)
-- [ ] **`feature/home/component/HomeTopBar.kt`** — 로고 이미지 + 프로필 버튼
-- [ ] **`feature/home/component/ContributionGraph.kt`** — 다크 테마 색상 적용
-
-### 6. 학습 목록
-- [ ] **`feature/list/ui/TopicListScreen.kt`**
-  - 아이콘 배지 + 주제명 + 화살표 카드 리스트
-  - 하단 학습 탭 활성화 상태
-- [ ] **`feature/list/ui/ProblemListScreen.kt`** — 다크 테마 적용
-- [ ] **`feature/step/ui/StepSelectionScreen.kt`** — 단계 선택 카드 디자인
 
 ### 7. 문제 풀기
 - [ ] **`feature/solver/ui/SolveScreen.kt`** — 다크 에디터 + 탭바
@@ -117,9 +136,39 @@
 
 ---
 
-## 작업 방식
+## 🗺️ 향후 진행 로드맵 (Roadmap)
 
-1. 피그마 API로 각 화면의 색상/텍스트 스타일 추출
-2. 기존 코드 구조 (ViewModel, Repository) 유지
-3. UI 레이어만 교체 (비즈니스 로직 변경 없음)
-4. 모든 변경사항은 `design` 브랜치에서 작업
+체계적이고 안정적인 디자인 적용을 위해 아래와 같이 5단계 페이즈(Phase)로 나누어 진행하는 것을 제안합니다.
+
+### ~~Phase 1: 홈 화면 및 핵심 네비게이션~~ ✅ 완료 (2026-05-04)
+- ~~홈 화면(`HomeScreen`) 레이아웃 개편 및 다크 테마 컴포넌트(잔디밭 그래프, 빠른 메뉴 등) 적용~~
+- ~~하단 네비게이션과 메인 화면들(홈, 학습) 간의 자연스러운 라우팅 구조 확립~~
+
+### Phase 2: 학습 탐색 및 개념/응용 플로우 (학습 코어)
+- `TopicListScreen` 및 `StepSelectionScreen` 카드 UI 개선
+- `ConceptDetailScreen` (개념 슬라이드) 및 `PracticeScreen` (빈칸 채우기) 다크 테마 적용
+- 가독성이 매우 중요한 화면이므로 텍스트 색상(`TextPrimary`, `TextSecondary`) 대비를 중점적으로 확인
+
+### Phase 3: 문제 풀이 및 제출 환경 (에디터 코어)
+- `SolveScreen`의 3탭(문제/에디터/제출) 구조 디자인 확립
+- 코드 에디터 화면의 다크 모드 최적화 (키보드 패널 포함)
+- 신규 화면인 **제출 상세 화면(`SubmissionDetailScreen`)** 생성 및 연동
+
+### Phase 4: 마이페이지 및 부가 기능 (기능 확장)
+- 피그마에는 있지만 아직 없는 **마이페이지(`MyPageScreen`)** 및 하위 설정 화면들 신규 생성
+- **CS 지식 OX 퀴즈 화면(`CsQuizScreen`)** 구현
+- `Routes` 및 `AppNavGraph`에 신규 라우팅 최종 추가
+
+### Phase 5: 최종 폴리싱 (Polishing)
+- 컴포저블(Composable) 간 부드러운 전환 애니메이션 적용
+- 피그마 시안과 대조하여 마진(Margin), 패딩(Padding), 타이포그래피 미세 조정
+- 앱 전반의 다크 테마 일관성 퀄리티 보증(QA)
+
+---
+
+## 💡 작업 방식
+
+1. 피그마에서 각 화면의 색상/텍스트 스타일 추출 후 `ui/theme`의 토큰 적극 활용
+2. 기존 코드의 아키텍처 (ViewModel, Repository, State)는 최대한 유지
+3. UI 레이어만 교체 (비즈니스 로직 변경 최소화)
+4. 모든 변경사항은 `design` 브랜치에서 안전하게 작업 후 커밋

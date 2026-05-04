@@ -45,6 +45,7 @@ import com.example.fe.feature.solver.component.SmartKeyboardPanel
 import com.example.fe.feature.solver.component.SubmitTabContent
 import com.example.fe.feature.solver.model.ProblemDetail
 import com.example.fe.feature.solver.model.TestCase
+import com.example.fe.ui.theme.*
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -135,7 +136,7 @@ fun SolveScreen(
                                 Text(
                                     text = titleToShow,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = Color(0xFF8A94A6),
+                                    color = TextSecondary,
                                     maxLines = 1
                                 )
                             }
@@ -155,10 +156,10 @@ fun SolveScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White,
-                        titleContentColor = Color.Black,
-                        navigationIconContentColor = Color.Black,
-                        actionIconContentColor = Color.Black
+                        containerColor = BgSurface,
+                        titleContentColor = TextPrimary,
+                        navigationIconContentColor = TextPrimary,
+                        actionIconContentColor = TextPrimary
                     )
                 )
             },
@@ -179,14 +180,14 @@ fun SolveScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .background(Color.White)
+                    .background(BgPrimary)
             ) {
 
                 SolveTabBar(
                     selectedTab = selectedTab,
                     onTabSelected = { selectedTab = it }
                 )
-                HorizontalDivider(thickness = 1.dp, color = Color(0xFFE2E8F0))
+                HorizontalDivider(thickness = 1.dp, color = BgDivider)
 
                 Box(
                     modifier = Modifier
@@ -280,7 +281,7 @@ fun SolveScreen(
         ) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
+                color = BgSurface,
                 shadowElevation = 8.dp
             ) {
                 SmartKeyboardPanel(
@@ -316,14 +317,14 @@ private fun TestCaseSelectorBar(
             Surface(
                 modifier = Modifier.size(width = 44.dp, height = 36.dp),
                 shape = RoundedCornerShape(10.dp),
-                color = if (isSelected) Color(0xFF8199E5) else Color(0xFFF3F4F6),
-                border = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE5E7EB)),
+                color = if (isSelected) Primary else BgSurface,
+                border = if (isSelected) null else BorderStroke(1.dp, BgDivider),
                 onClick = { onSelect(idx) }
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         text = "${idx + 1}",
-                        color = if (isSelected) Color.White else Color(0xFF4B5563),
+                        color = if (isSelected) BgPrimary else TextSecondary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -349,8 +350,8 @@ private fun EditorTabContent(
                 .fillMaxWidth()
                 .height(400.dp),
             shape = RoundedCornerShape(18.dp),
-            color = Color(0xFF0E1627),
-            border = BorderStroke(1.dp, Color(0xFF1C2A44))
+            color = CodeBgDark,
+            border = BorderStroke(1.dp, BgDivider)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 BasicTextField(
@@ -361,7 +362,7 @@ private fun EditorTabContent(
                         .padding(16.dp)
                         .onFocusChanged { onEditorFocusChange(it.isFocused) },
                     textStyle = TextStyle(
-                        color = Color(0xFFE6EDF7),
+                        color = TextPrimary,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 14.sp,
                         lineHeight = 20.sp
@@ -385,7 +386,7 @@ private fun EditorTabContent(
                         Icon(
                             imageVector = Icons.Filled.OpenInFull,
                             contentDescription = "Fullscreen",
-                            tint = Color(0xFFE6EDF7),
+                            tint = TextPrimary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -402,20 +403,20 @@ private fun EditorTabContent(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7CC8B8))
+            colors = ButtonDefaults.buttonColors(containerColor = Primary)
         ) {
             if (isRunning) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(18.dp),
-                        color = Color.White
+                        color = BgPrimary
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text("실행 중...", fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("실행 중...", fontWeight = FontWeight.Bold, color = BgPrimary)
                 }
             } else {
-                Text("▷ 실행", fontWeight = FontWeight.Bold, color = Color.White)
+                Text("▷ 실행", fontWeight = FontWeight.Bold, color = BgPrimary)
             }
         }
 
@@ -427,8 +428,8 @@ private fun EditorTabContent(
                 .fillMaxWidth()
                 .height(52.dp),
             shape = RoundedCornerShape(14.dp),
-            border = BorderStroke(1.dp, Color(0xFFE2E8F0))
-        ) { Text("초기화", color = Color.Black) }
+            border = BorderStroke(1.dp, BgDivider)
+        ) { Text("초기화", color = TextPrimary) }
     }
 }
 
@@ -442,7 +443,7 @@ private fun SolveTabBar(
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFEFF2F6))
+            .background(BgElevated)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -454,11 +455,11 @@ private fun SolveTabBar(
 
 @Composable
 private fun RowScope.SolveTabChip(tab: SolveTab, selected: Boolean, onClick: () -> Unit) {
-    val color = if (selected) Color.Black else Color(0xFF7A8699)
+    val color = if (selected) TextPrimary else TextMuted
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = if (selected) Color.White else Color.Transparent,
+        color = if (selected) BgSurface else Color.Transparent,
         modifier = Modifier
             .weight(1f)
             .height(44.dp)
@@ -490,7 +491,7 @@ private fun ProblemTab(
 
     if (detail == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("문제 정보를 불러오지 못했습니다.", color = Color.Gray)
+            Text("문제 정보를 불러오지 못했습니다.", color = TextMuted)
         }
         return
     }
@@ -503,10 +504,10 @@ private fun ProblemTab(
     ) {
         if (!detail.difficultyLabel.isNullOrBlank()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("난이도: ", color = Color(0xFF6B7280), fontSize = 14.sp)
+                Text("난이도: ", color = TextSecondary, fontSize = 14.sp)
                 Text(
                     text = detail.difficultyLabel,
-                    color = Color(0xFFF04438),
+                    color = Error,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
@@ -517,12 +518,13 @@ private fun ProblemTab(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, Color(0xFFE6EEF7))
+            color = BgSurface,
+            border = BorderStroke(1.dp, BgDivider)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("문제 설명", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("문제 설명", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(detail.description, lineHeight = 22.sp, fontSize = 15.sp)
+                Text(detail.description, lineHeight = 22.sp, fontSize = 15.sp, color = TextSecondary)
             }
         }
 
@@ -531,7 +533,7 @@ private fun ProblemTab(
         Text(
             "입출력 예시",
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF6B7280),
+            color = TextMuted,
             fontSize = 14.sp
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -539,14 +541,14 @@ private fun ProblemTab(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            color = Color(0xFFF6F8FA)
+            color = BgSurface
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("입력:", color = Color(0xFF94A3B8), fontSize = 13.sp)
-                Text(detail.exampleInput, fontSize = 14.sp)
+                Text("입력:", color = TextMuted, fontSize = 13.sp)
+                Text(detail.exampleInput, fontSize = 14.sp, color = TextPrimary)
                 Spacer(modifier = Modifier.height(12.dp))
-                Text("출력:", color = Color(0xFF94A3B8), fontSize = 13.sp)
-                Text(detail.exampleOutput, fontSize = 14.sp)
+                Text("출력:", color = TextMuted, fontSize = 13.sp)
+                Text(detail.exampleOutput, fontSize = 14.sp, color = TextPrimary)
             }
         }
 
@@ -555,12 +557,12 @@ private fun ProblemTab(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                color = Color(0xFFFEF2F2),
-                border = BorderStroke(1.dp, Color(0xFFFEE2E2))
+                color = Color(0x20FB2C36),
+                border = BorderStroke(1.dp, Color(0x40FB2C36))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     detail.constraints.forEach {
-                        Text("• $it", color = Color(0xFFB91C1C), fontSize = 13.sp)
+                        Text("• $it", color = Error, fontSize = 13.sp)
                     }
                 }
             }
@@ -582,7 +584,7 @@ private fun StepIndicator(total: Int, current: Int) {
                     .height(6.dp)
                     .width(if (i + 1 == current) 32.dp else 8.dp)
                     .clip(RoundedCornerShape(999.dp))
-                    .background(if (i + 1 == current) Color(0xFF4C83FF) else Color(0xFFD7E2FF))
+                    .background(if (i + 1 == current) Primary else BgElevated)
             )
         }
     }

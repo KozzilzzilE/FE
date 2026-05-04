@@ -50,7 +50,7 @@ fun DetailListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFFF7F9FB)) // Light background
+                .background(com.example.fe.ui.theme.BgPrimary)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(

@@ -39,7 +39,7 @@ fun TopicListScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        containerColor = Color(0xFFF1F5F9), // 약간 그레이톤/푸르스름한 배경
+        containerColor = com.example.fe.ui.theme.BgPrimary,
         topBar = {
             TopBar(
                 title = "알고리즘 학습",
@@ -64,7 +64,7 @@ fun TopicListScreen(
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color(0xFF4A90E2))
+                    CircularProgressIndicator(color = com.example.fe.ui.theme.Primary)
                 }
             }
             is TopicUiState.Error -> {

@@ -1,11 +1,8 @@
 package com.example.fe.common
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -17,21 +14,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
     title: String,
     subtitle: String? = null,
-    leftContent: @Composable (() -> Unit)? = null, // 화살표 옆 커스텀 아이콘 등을 위한 슬롯
-    showBackIcon: Boolean = true, // 뒤로 가기 화살표 렌더링 여부 속성 (기본 활성화)
-    showHomeIcon: Boolean = false, // 홈 아이콘 렌더링 여부 속성
+    leftContent: @Composable (() -> Unit)? = null,
+    showBackIcon: Boolean = true,
+    showHomeIcon: Boolean = false,
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -46,13 +47,13 @@ fun TopBar(
                     text = title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    color = Color(0xFF1A1F27)
+                    color = TextPrimary
                 )
                 if (subtitle != null) {
                     Text(
-                        text = subtitle, 
+                        text = subtitle,
                         fontSize = 14.sp,
-                        color = Color(0xFF7A828A),
+                        color = TextSecondary,
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
@@ -60,13 +61,13 @@ fun TopBar(
         },
         navigationIcon = {
             if (showBackIcon || leftContent != null) {
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     if (showBackIcon) {
                         IconButton(onClick = onBackClick) {
                             Icon(
                                 imageVector = Icons.Filled.ArrowBackIosNew,
                                 contentDescription = "뒤로 가기",
-                                tint = Color(0xFF1A1F27) // 화살표 짙은 색
+                                tint = TextPrimary
                             )
                         }
                     }
@@ -82,13 +83,13 @@ fun TopBar(
                     Icon(
                         imageVector = Icons.Outlined.Home,
                         contentDescription = "홈",
-                        tint = Color(0xFF38B2AC) // 시안의 민트색/청록색 아이콘
+                        tint = Primary
                     )
                 }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
+            containerColor = BgSurface
         ),
         modifier = modifier
     )

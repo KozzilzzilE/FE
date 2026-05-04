@@ -9,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
 
 @Composable
 fun TopicCard(title: String, onClick: () -> Unit) {
@@ -22,7 +24,7 @@ fun TopicCard(title: String, onClick: () -> Unit) {
             .height(56.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = BgSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -36,12 +38,12 @@ fun TopicCard(title: String, onClick: () -> Unit) {
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF333333)
+                color = TextPrimary
             )
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "이동",
-                tint = Color.Gray
+                tint = TextMuted
             )
         }
     }

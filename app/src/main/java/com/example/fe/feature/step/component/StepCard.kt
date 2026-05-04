@@ -16,6 +16,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun StepCard(
@@ -40,12 +44,11 @@ fun StepCard(
                 .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 왼쪽 아이콘 영역 (하얀 박스 배경)
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White),
+                    .background(BgElevated),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -58,27 +61,25 @@ fun StepCard(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // 중앙 텍스트 컨텐츠
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
+                    color = TextPrimary
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = description,
                     fontSize = 14.sp,
-                    color = Color(0xFF666666)
+                    color = TextSecondary
                 )
             }
 
-            // 우측 화살표 아이콘
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "이동",
-                tint = Color.Gray
+                tint = TextMuted
             )
         }
     }

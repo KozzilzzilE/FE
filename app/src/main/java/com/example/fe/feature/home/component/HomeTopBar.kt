@@ -3,88 +3,82 @@ package com.example.fe.feature.home.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun HomeTopBar(
     userName: String,
+    onProfileClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 20.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 좌측 브랜드 로고 영역
+        // 좌측: 로고
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF4A90E2)),
+                    .size(36.dp)
+                    .background(Primary, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "</>",
-                    color = Color.White,
+                    color = androidx.compose.ui.graphics.Color.Black,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 13.sp
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "PocketCo",
+                text = "  PocketCo",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF222222)
+                color = TextPrimary
             )
         }
 
-        // 우측 유저 환영 메시지 영역
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = Color(0xFF4A90E2), fontWeight = FontWeight.Bold)) {
-                        append(userName)
-                    }
-                    withStyle(style = SpanStyle(color = Color(0xFF666666))) {
-                        append("님")
-                    }
-                },
-                fontSize = 16.sp
-            )
-            Text(
-                text = "환영합니다",
-                color = Color(0xFF888888),
-                fontSize = 12.sp
+        // 우측: 프로필 아이콘 버튼
+        IconButton(
+            onClick = onProfileClick,
+            modifier = Modifier
+                .size(40.dp)
+                .background(BgElevated, shape = CircleShape)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AccountCircle,
+                contentDescription = "프로필",
+                tint = TextSecondary,
+                modifier = Modifier.size(24.dp)
             )
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, backgroundColor = 0xFF1C1917)
 @Composable
 fun HomeTopBarPreview() {
     HomeTopBar(userName = "홍길동")

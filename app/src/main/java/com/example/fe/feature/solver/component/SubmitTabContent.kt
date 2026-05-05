@@ -2,23 +2,22 @@ package com.example.fe.feature.solver.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FactCheck
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,6 +25,7 @@ import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.model.SubmissionRecord
 import com.example.fe.feature.solver.model.TestCase
 import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgElevated
 import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.BgSurface
 import com.example.fe.ui.theme.Error
@@ -44,16 +44,14 @@ fun SubmitTabContent(
     viewModel: SolverViewModel
 ) {
     var currentSubScreen by remember { mutableStateOf(SubmitSubScreen.MAIN) }
-
     val uiState by viewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        SubmitMenuGrid(
-            selectedMenu = currentSubScreen,
-            onMenuClick = { next ->
+        // ersPills - 4개 탭 가로 선택
+        ErsPills(
+            selected = currentSubScreen,
+            onSelect = { next ->
                 currentSubScreen = next
-
-                // 모범답안 자동
                 if (next == SubmitSubScreen.SOLUTION) {
                     viewModel.loadSolution()
                 }
@@ -62,141 +60,222 @@ fun SubmitTabContent(
 
         Box(modifier = Modifier.weight(1f)) {
             when (currentSubScreen) {
-                SubmitSubScreen.MAIN -> SubmitHistoryView(
+                SubmitSubScreen.MAIN -> SubmitResultView(
                     viewModel = viewModel,
                     isSubmitting = uiState.isSubmitting
                 )
-
                 SubmitSubScreen.TESTCASE -> TestCaseTabContent(viewModel)
-
                 SubmitSubScreen.RESULT -> ExecutionResultView(viewModel)
-
-                // 해설 탭: viewModel.uiState.solution 쓰는 화면으로 연결
                 SubmitSubScreen.SOLUTION -> ProblemSolutionTabContent(viewModel)
             }
         }
     }
 }
 
-// 상단 고정 메뉴
 @Composable
-private fun SubmitMenuGrid(
-    selectedMenu: SubmitSubScreen,
-    onMenuClick: (SubmitSubScreen) -> Unit
+private fun ErsPills(
+    selected: SubmitSubScreen,
+    onSelect: (SubmitSubScreen) -> Unit
 ) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            SubmitMenuButton(
-                title = "제출 및 결과",
-                icon = Icons.Filled.Send,
-                isSelected = selectedMenu == SubmitSubScreen.MAIN,
-                modifier = Modifier.weight(1f),
-                onClick = { onMenuClick(SubmitSubScreen.MAIN) }
-            )
-            SubmitMenuButton(
-                title = "테스트케이스",
-                icon = Icons.Filled.FactCheck,
-                isSelected = selectedMenu == SubmitSubScreen.TESTCASE,
-                modifier = Modifier.weight(1f),
-                onClick = { onMenuClick(SubmitSubScreen.TESTCASE) }
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            SubmitMenuButton(
-                title = "실행 결과",
-                icon = Icons.Filled.Terminal,
-                isSelected = selectedMenu == SubmitSubScreen.RESULT,
-                modifier = Modifier.weight(1f),
-                onClick = { onMenuClick(SubmitSubScreen.RESULT) }
-            )
-            SubmitMenuButton(
-                title = "문제 해설",
-                icon = Icons.Filled.MenuBook,
-                isSelected = selectedMenu == SubmitSubScreen.SOLUTION,
-                modifier = Modifier.weight(1f),
-                onClick = { onMenuClick(SubmitSubScreen.SOLUTION) }
-            )
+    val items = listOf(
+        SubmitSubScreen.MAIN to "제출결과",
+        SubmitSubScreen.TESTCASE to "테스트케이스",
+        SubmitSubScreen.RESULT to "실행결과",
+        SubmitSubScreen.SOLUTION to "문제해설"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(BgSurface)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp)
+    ) {
+        items.forEach { (screen, label) ->
+            val isSelected = selected == screen
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (isSelected) Primary else Color.Transparent)
+                    .clickable { onSelect(screen) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = label,
+                    fontSize = 11.sp,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isSelected) BgPrimary else TextMuted
+                )
+            }
         }
     }
 }
 
-// 제출 및 최근 제출 내역
 @Composable
-private fun SubmitHistoryView(
+private fun SubmitResultView(
     viewModel: SolverViewModel,
     isSubmitting: Boolean
 ) {
     val submissions by viewModel.submissions.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val latestResult = uiState.submitResult
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp)
-    ) {
-        Surface(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp),
-            shape = RoundedCornerShape(16.dp),
-            onClick = { if (!isSubmitting) viewModel.submitCode() }
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 100.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Box(
-                modifier = Modifier.background(
-                    brush = Brush.horizontalGradient(
-                        listOf(Primary, Success)
-                    )
-                ),
-                contentAlignment = Alignment.Center
+            // resCard - 최근 제출 결과 (항상 표시)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = BgSurface
             ) {
-                if (isSubmitting) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        CircularProgressIndicator(
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(18.dp),
-                            color = BgPrimary
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (latestResult != null || submissions.isNotEmpty()) {
+                        val isCorrect = latestResult?.isCorrect ?: submissions.firstOrNull()?.isCorrect ?: false
+                        Icon(
+                            imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
+                            contentDescription = null,
+                            tint = if (isCorrect) Success else Error,
+                            modifier = Modifier.size(52.dp)
                         )
-                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            "제출 중...",
-                            color = BgPrimary,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            text = if (isCorrect) "정답입니다!" else "오답입니다.",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isCorrect) Success else Error
+                        )
+                        HorizontalDivider(thickness = 1.dp, color = BgElevated)
+                    } else {
+                        // 제출 전 placeholder
+                        Icon(
+                            imageVector = Icons.Outlined.HourglassEmpty,
+                            contentDescription = null,
+                            tint = TextMuted,
+                            modifier = Modifier.size(40.dp)
+                        )
+                        Text(
+                            text = "아직 제출하지 않았습니다",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = "코드를 작성한 후 제출해 보세요",
+                            fontSize = 13.sp,
+                            color = TextMuted
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Button(
+                            onClick = { if (!isSubmitting) viewModel.submitCode() },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                        ) {
+                            if (isSubmitting) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(
+                                        strokeWidth = 2.dp,
+                                        modifier = Modifier.size(18.dp),
+                                        color = BgPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text("제출 중...", color = BgPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                Text("제출하기", color = BgPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // histLbl - 제출 기록 (항상 표시)
+            Text(
+                text = "제출 기록",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+            if (submissions.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    submissions.forEach { record ->
+                        SubmissionRecordItem(record)
+                    }
+                }
+            } else {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    color = BgSurface
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "제출 기록이 없습니다",
+                            fontSize = 13.sp,
+                            color = TextMuted
                         )
                     }
-                } else {
-                    Text(
-                        "제출하기",
-                        color = BgPrimary,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
-
-        Text(
-            "최근 제출 내역",
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            color = TextSecondary
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        submissions.forEach { record ->
-            SubmissionRecordItem(record)
-            Spacer(modifier = Modifier.height(12.dp))
+        // 하단 버튼 (제출 이력이 있을 때)
+        if (submissions.isNotEmpty() || latestResult != null) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .background(BgPrimary)
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .navigationBarsPadding(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { viewModel.loadSolution() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.5.dp, Primary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Primary)
+                ) {
+                    Text("해설 보기", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                }
+                Button(
+                    onClick = { if (!isSubmitting) viewModel.submitCode() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                ) {
+                    Text("다음 문제", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = BgPrimary)
+                }
+            }
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
-// 실행 결과 화면
 @Composable
 private fun ExecutionResultView(viewModel: SolverViewModel) {
     val executionResult by viewModel.executionResult.collectAsState()
@@ -207,108 +286,171 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
         if (selectedIndex > testCases.lastIndex) selectedIndex = 0
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        if (executionResult == null || testCases.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    "실행 결과가 없습니다.\n에디터에서 코드를 실행해 보세요.",
-                    color = TextMuted,
-                    fontSize = 14.sp
-                )
-            }
-            return
-        }
-
-        val lines = executionResult!!
-        val tc = testCases[selectedIndex]
-        val terminalLines = buildLinesForUi(tc, lines)
-        val passed = inferPassed(lines)
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(top = 4.dp, bottom = 80.dp)
-        ) {
-            ExecutionTerminal(
-                title = "테스트 ${selectedIndex + 1}",
-                passed = passed,
-                lines = terminalLines,
-                modifier = Modifier.fillMaxWidth()
+    if (testCases.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                "테스트 케이스가 없습니다.",
+                color = TextMuted,
+                fontSize = 14.sp
             )
         }
+        return
+    }
 
-        Surface(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(bottom = 12.dp),
-            color = Color.Transparent
+    val hasResult = executionResult != null
+    val tc = testCases[selectedIndex]
+    
+    val caseCount = testCases.size
+    val inputText = tc.input
+    val expectedText = tc.expectedOutput
+    val myOutputText = if (hasResult) {
+        executionResult!!.filter { !it.startsWith("$") }.joinToString("\n").ifEmpty { "(출력 없음)" }
+    } else {
+        "출력 없음"
+    }
+    val passed = if (hasResult) inferPassed(executionResult!!) else null
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
+            .padding(top = 4.dp, bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // caseRow — 케이스 선택 칩
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                testCases.forEachIndexed { idx, _ ->
-                    val isSelected = idx == selectedIndex
+            (0 until caseCount).forEach { idx ->
+                val isSelected = idx == selectedIndex
+                val chipBg = if (isSelected) Color(0x1A22C55E) else BgSurface
+                val chipBorder = if (isSelected) Color(0xFF22C55E) else Color(0xFF44403C)
+                
+                // 결과가 있으면 결과에 따라, 없으면 기본 초록색 도트 표시
+                val dotColor = when {
+                    passed == null -> if (isSelected) Color(0xFF22C55E) else Color(0xFF78716C)
+                    passed -> Color(0xFF22C55E)
+                    else -> Color(0xFFEF4444)
+                }
+                
+                val textColor = if (isSelected) Color(0xFF22C55E) else TextMuted
 
-                    Surface(
-                        modifier = Modifier.size(width = 44.dp, height = 36.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) Primary else BgSurface,
-                        border = if (isSelected) null else BorderStroke(1.dp, BgDivider),
-                        onClick = { selectedIndex = idx }
+                Surface(
+                    modifier = Modifier.height(32.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = chipBg,
+                    border = BorderStroke(1.dp, chipBorder),
+                    onClick = { selectedIndex = idx }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "${idx + 1}",
-                                color = if (isSelected) BgPrimary else TextSecondary,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(RoundedCornerShape(99.dp))
+                                .background(dotColor)
+                        )
+                        Text(
+                            text = "Case ${idx + 1}",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = textColor
+                        )
                     }
                 }
             }
         }
+
+        // statRow — 결과 상태 (결과가 있을 때만 표시)
+        if (passed != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val isCorrect = passed == true
+                Icon(
+                    imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
+                    contentDescription = null,
+                    tint = if (isCorrect) Color(0xFF22C55E) else Error,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = if (isCorrect) "맞았습니다" else "틀렸습니다",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isCorrect) Color(0xFF22C55E) else Error
+                )
+            }
+        }
+
+        // inCard — 입력 카드
+        ExecInfoCard(
+            label = "입력",
+            content = inputText
+        )
+
+        // myCard — 나의 출력 카드
+        ExecInfoCard(
+            label = "나의 출력",
+            content = myOutputText
+        )
+
+        // ansCard — 정답 카드
+        ExecInfoCard(
+            label = "정답",
+            content = expectedText
+        )
     }
 }
 
-// 각종 버튼
+/**
+ * 피그마 inCard / myCard / ansCard 공통 카드
+ * - 배경: #292524 (BgSurface), 테두리: #44403C, 둥글기: 12dp
+ * - 라벨: 12sp SemiBold #78716C
+ * - 값 박스: 배경 #1C1917 (BgPrimary), 둥글기: 8dp, 패딩: 10x12
+ * - 값 텍스트: 12sp Regular #A8A29E
+ */
 @Composable
-private fun SubmitMenuButton(
-    title: String,
-    icon: ImageVector,
-    modifier: Modifier = Modifier,
-    isSelected: Boolean = false,
-    onClick: () -> Unit
+private fun ExecInfoCard(
+    label: String,
+    content: String
 ) {
-    val containerColor = if (isSelected) Primary else BgSurface
-    val contentColor = if (isSelected) BgPrimary else TextSecondary
-
     Surface(
-        modifier = modifier.height(64.dp),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = containerColor,
-        border = if (!isSelected) BorderStroke(1.dp, BgDivider) else null,
-        onClick = onClick
+        color = BgSurface,
+        border = BorderStroke(1.dp, Color(0xFF44403C))
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+        Column(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(title, color = contentColor, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextMuted
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(BgPrimary, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = content,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFFA8A29E),
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    lineHeight = 18.sp
+                )
+            }
         }
     }
 }
@@ -317,24 +459,33 @@ private fun SubmitMenuButton(
 private fun SubmissionRecordItem(record: SubmissionRecord) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, BgDivider),
+        shape = RoundedCornerShape(10.dp),
         color = BgSurface
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(record.date, fontSize = 12.sp, color = TextMuted)
-                Text(record.language, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
-            }
             Text(
-                text = record.result,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (record.isCorrect) Success else Error
+                text = if (record.isCorrect) "정답" else "오답",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = if (record.isCorrect) Success else Error,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = record.language,
+                fontSize = 11.sp,
+                color = TextMuted,
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Text(
+                text = record.date,
+                fontSize = 12.sp,
+                color = TextMuted
             )
         }
     }

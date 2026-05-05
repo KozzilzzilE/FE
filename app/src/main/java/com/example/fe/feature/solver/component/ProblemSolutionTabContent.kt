@@ -1,81 +1,100 @@
 package com.example.fe.feature.solver.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.solver.SolverViewModel
-import com.example.fe.ui.theme.BgDivider
-import com.example.fe.ui.theme.BgElevated
-import com.example.fe.ui.theme.BgSurface
-import com.example.fe.ui.theme.CodeBgDark
-import com.example.fe.ui.theme.Primary
-import com.example.fe.ui.theme.TextMuted
-import com.example.fe.ui.theme.TextPrimary
-import com.example.fe.ui.theme.TextSecondary
+import com.example.fe.ui.theme.*
 
 @Composable
 fun ProblemSolutionTabContent(
     viewModel: SolverViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     val scroll = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scroll)
-            .padding(16.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 헤더 + 새로고침
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("문제 해설", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
-            TextButton(onClick = { viewModel.loadSolution() }) {
-                Text("새로고침", color = Primary)
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
         // 로딩 상태
         if (uiState.isLoadingSolution) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                color = BgSurface
+                color = BgSurface,
+                border = BorderStroke(1.dp, BgDivider)
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     CircularProgressIndicator(
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(18.dp),
                         color = Primary
                     )
-                    Text("모범 답안을 불러오는 중...", color = TextSecondary)
+                    Text("해설을 불러오는 중...", color = TextSecondary, fontSize = 14.sp)
                 }
             }
-            Spacer(Modifier.height(16.dp))
         }
 
         val solution = uiState.solution
-        if (solution == null) {
+        if (solution == null && !uiState.isLoadingSolution) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = BgSurface,
+                border = BorderStroke(1.dp, BgDivider)
+            ) {
+                Column(Modifier.padding(20.dp)) {
+                    Text(
+                        "해설이 아직 없습니다.",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = TextPrimary
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "제출 후 '문제 해설' 탭에서 모범 답안과 상세 설명을 확인하실 수 있습니다.",
+                        fontSize = 13.sp,
+                        color = Color(0xFFA8A29E),
+                        lineHeight = 20.sp
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = { viewModel.loadSolution() },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                    ) {
+                        Text("해설 불러오기", color = BgPrimary, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+            return
+        }
+
+        if (solution != null) {
+            // 1. 모범 답안 카드
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -84,72 +103,67 @@ fun ProblemSolutionTabContent(
             ) {
                 Column(Modifier.padding(16.dp)) {
                     Text(
-                        "해설이 아직 없습니다.",
-                        fontWeight = FontWeight.SemiBold,
+                        text = "모범 답안",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
                         color = TextPrimary
                     )
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(10.dp))
+                    
+                    // 간단 설명 (brief)
                     Text(
-                        "제출 메뉴에서 '문제 해설'을 눌러 불러오거나, 새로고침을 시도해 보세요.",
+                        text = "해시맵을 사용하여 O(n) 시간 복잡도로 해결할 수 있습니다.",
                         fontSize = 13.sp,
-                        color = TextMuted,
+                        color = Color(0xFFA8A29E),
                         lineHeight = 18.sp
+                    )
+                    
+                    Spacer(Modifier.height(10.dp))
+
+                    // 코드 블록
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF0D1117), RoundedCornerShape(10.dp))
+                            .padding(14.dp)
+                    ) {
+                        Text(
+                            text = solution.code.ifBlank { "// 정답 코드가 비어있습니다." },
+                            color = Color(0xFFA8A29E),
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 12.sp,
+                            lineHeight = 18.sp
+                        )
+                    }
+                }
+            }
+
+            // 2. 문제 해설 카드
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = BgSurface,
+                border = BorderStroke(1.dp, BgDivider)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(
+                        text = "문제 해설",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = TextPrimary
+                    )
+                    Spacer(Modifier.height(10.dp))
+
+                    Text(
+                        text = solution.explanation.ifBlank { "상세 해설이 제공되지 않았습니다." },
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp,
+                        color = Color(0xFFA8A29E)
                     )
                 }
             }
-            return
+            
+            Spacer(Modifier.height(40.dp)) // 하단 여백
         }
-
-        // 모범 답안
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = BgSurface
-        ) {
-            Column(Modifier.padding(20.dp)) {
-                Text("모범 답안", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
-                Spacer(Modifier.height(8.dp))
-
-                val brief = solution.explanation.takeIf { it.isNotBlank() } ?: "해설이 제공되지 않았습니다."
-                Text(brief, fontSize = 14.sp, color = TextSecondary, lineHeight = 20.sp)
-
-                Spacer(Modifier.height(16.dp))
-
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .background(CodeBgDark, RoundedCornerShape(12.dp))
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = solution.code.ifBlank { "// 정답 코드가 비어있습니다." },
-                        color = TextPrimary,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 13.sp,
-                        lineHeight = 18.sp
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        // 상세 해설 영역
-        Text("상세 해설", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
-        Spacer(Modifier.height(12.dp))
-
-        Text(
-            text = solution.explanation.ifBlank { "상세 해설이 제공되지 않았습니다." },
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            color = TextSecondary
-        )
-
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = "※ 모범 답안은 선택한 언어(${uiState.language}) 기준입니다.",
-            fontSize = 12.sp,
-            color = TextMuted
-        )
     }
 }

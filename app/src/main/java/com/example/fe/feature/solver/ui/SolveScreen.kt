@@ -3,6 +3,8 @@ package com.example.fe.feature.solver.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -13,9 +15,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,7 +27,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -37,18 +37,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.example.fe.feature.solver.SolveTab
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.DraftSaveButton
-import com.example.fe.feature.solver.component.ExecutionTerminal
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
 import com.example.fe.feature.solver.component.SubmitTabContent
 import com.example.fe.feature.solver.model.ProblemDetail
 import com.example.fe.feature.solver.model.TestCase
-import com.example.fe.common.TopBar
 import com.example.fe.ui.theme.*
-import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,6 +85,8 @@ fun SolveScreen(
 
     val detail = uiState.problemDetail
     val titleToShow = detail?.title.orEmpty()
+    val isBookmarked = detail?.isBookmarked == true
+    val bookmarkCount = detail?.bookmarkCount ?: 0
 
     var dragSum by remember { mutableStateOf(0f) }
     val swipeThreshold = 80f
@@ -109,34 +107,56 @@ fun SolveScreen(
         }
     }
 
-    val density = LocalDensity.current
-    val imeBottomPx = WindowInsets.ime.getBottom(density)
-    val navBottomPx = WindowInsets.navigationBars.getBottom(density)
-    val smartPadBottomDp = with(density) { max(0, imeBottomPx - navBottomPx).toDp() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             contentWindowInsets = WindowInsets(0),
-            topBar = {
-                TopBar(
-                    title = "문제 풀이",
-                    subtitle = titleToShow,
-                    showBackIcon = true,
-                    showHomeIcon = true,
-                    onBackClick = onBack,
-                    onHomeClick = onHome,
-                    rightContent = {
-                        val isBookmarked = detail?.isBookmarked == true
-                        val bookmarkCount = detail?.bookmarkCount ?: 0
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(end = 8.dp)
-                        ) {
-                            IconButton(onClick = { viewModel.toggleBookmark() }) {
+            containerColor = BgPrimary
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                // 헤더
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(BgPrimary)
+                        .statusBarsPadding()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "뒤로",
+                                tint = TextPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Text(
+                            text = titleToShow.ifBlank { "문제 풀이" },
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(
+                                onClick = { viewModel.toggleBookmark() },
+                                modifier = Modifier.size(36.dp)
+                            ) {
                                 Icon(
                                     imageVector = Icons.Outlined.BookmarkBorder,
-                                    contentDescription = "즐겨찾기",
-                                    tint = if (isBookmarked) Primary else BgElevated
+                                    contentDescription = "북마크",
+                                    tint = if (isBookmarked) Primary else BgElevated,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                             Text(
@@ -146,33 +166,15 @@ fun SolveScreen(
                             )
                         }
                     }
-                )
-            },
-            bottomBar = {
-                if (!(selectedTab == SolveTab.EDITOR && editorFocused)) {
-                    StepIndicator(
-                        total = 3,
-                        current = when (selectedTab) {
-                            SolveTab.PROBLEM -> 1
-                            SolveTab.EDITOR -> 2
-                            SolveTab.SUBMIT -> 3
-                        }
-                    )
                 }
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(BgPrimary)
-            ) {
+
+                // 탭바
                 SolveTabBar(
                     selectedTab = selectedTab,
                     onTabSelected = { selectedTab = it }
                 )
-                HorizontalDivider(thickness = 1.dp, color = BgDivider)
 
+                // 컨텐츠
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -203,53 +205,118 @@ fun SolveScreen(
                         }
 
                         SolveTab.EDITOR -> {
-                            val editorScrollState = rememberScrollState()
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(editorScrollState)
-                            ) {
-                                EditorTabContent(
-                                    value = tfv,
-                                    onValueChange = { newValue ->
-                                        tfv = newValue
-                                        viewModel.updateCode(newValue.text)
-                                    },
-                                    onExpand = { onOpenEditorFull(problemId) },
-                                    onReset = { viewModel.updateCode("") },
-                                    onRun = {
-                                        viewModel.runCode()
-                                        selectedTab = SolveTab.SUBMIT
-                                    },
-                                    onSaveDraft = { viewModel.saveDraft() },
-                                    isRunning = uiState.isRunning,
-                                    onEditorFocusChange = { focused ->
-                                        editorFocused = focused
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                // edtStrip
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .background(BgSurface)
+                                        .padding(horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = uiState.language.replaceFirstChar { it.uppercaseChar() },
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = TextSecondary
+                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        DraftSaveButton(onClick = { viewModel.saveDraft() })
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        IconButton(
+                                            onClick = { onOpenEditorFull(problemId) },
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.OpenInFull,
+                                                contentDescription = "전체화면",
+                                                tint = TextSecondary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
                                     }
-                                )
+                                }
 
-                                if (executionLines != null && testCases.isNotEmpty()) {
-                                    val tc = testCases[selectedResultIndex]
-                                    val terminalLines = buildLinesForUi(tc, executionLines)
-                                    val passed = inferPassed(executionLines)
-
-                                    Column(modifier = Modifier.padding(16.dp)) {
-                                        ExecutionTerminal(
-                                            title = "테스트 ${selectedResultIndex + 1}",
-                                            passed = passed,
-                                            lines = terminalLines
+                                // 코드에디터 (남은 공간 전체)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .background(Color(0xFF1A1A1A))
+                                ) {
+                                    BasicTextField(
+                                        value = tfv,
+                                        onValueChange = { newValue ->
+                                            tfv = newValue
+                                            viewModel.updateCode(newValue.text)
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(16.dp)
+                                            .onFocusChanged { editorFocused = it.isFocused },
+                                        textStyle = TextStyle(
+                                            color = TextPrimary,
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 14.sp,
+                                            lineHeight = 24.sp
+                                        ),
+                                        cursorBrush = SolidColor(Primary),
+                                        keyboardOptions = KeyboardOptions(
+                                            capitalization = KeyboardCapitalization.None,
+                                            autoCorrect = false,
+                                            keyboardType = KeyboardType.Ascii,
+                                            imeAction = ImeAction.None
                                         )
+                                    )
+                                }
 
-                                        Spacer(modifier = Modifier.height(12.dp))
-
-                                        TestCaseSelectorBar(
-                                            count = testCases.size,
-                                            selectedIndex = selectedResultIndex,
-                                            onSelect = { selectedResultIndex = it }
-                                        )
-
-                                        Spacer(modifier = Modifier.height(20.dp))
+                                // 하단 고정 버튼 (실행하기 + 제출하기)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(BgPrimary)
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            viewModel.runCode()
+                                            selectedTab = SolveTab.SUBMIT
+                                        },
+                                        enabled = !uiState.isRunning,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(44.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                                    ) {
+                                        if (uiState.isRunning) {
+                                            CircularProgressIndicator(
+                                                strokeWidth = 2.dp,
+                                                modifier = Modifier.size(16.dp),
+                                                color = BgPrimary
+                                            )
+                                        } else {
+                                            Text("▶  실행하기", color = BgPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Button(
+                                        onClick = {
+                                            viewModel.submitCode()
+                                            selectedTab = SolveTab.SUBMIT
+                                        },
+                                        enabled = !uiState.isSubmitting,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(44.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                                    ) {
+                                        Text("▶  제출하기", color = BgPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -263,6 +330,7 @@ fun SolveScreen(
             }
         }
 
+        // 스마트 키보드 (에디터 포커스 시)
         AnimatedVisibility(
             visible = (selectedTab == SolveTab.EDITOR) && editorFocused,
             modifier = Modifier
@@ -281,19 +349,184 @@ fun SolveScreen(
                         tfv = updated
                         viewModel.updateCode(updated.text)
                     },
+                    onRun = {
+                        viewModel.runCode()
+                        selectedTab = SolveTab.SUBMIT
+                    },
+                    onSubmit = {
+                        viewModel.submitCode()
+                        selectedTab = SolveTab.SUBMIT
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            start = 12.dp,
-                            top = 8.dp,
-                            end = 12.dp,
-                            bottom = 0.dp
-                        )
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 )
             }
         }
     }
 }
+
+@Composable
+private fun SolveTabBar(
+    selectedTab: SolveTab,
+    onTabSelected: (SolveTab) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .background(BgPrimary)
+            .border(BorderStroke(1.dp, BgElevated))
+    ) {
+        SolveTab.values().forEach { tab ->
+            val selected = tab == selectedTab
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clickable { onTabSelected(tab) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = tab.label,
+                    color = if (selected) Primary else TextMuted,
+                    fontSize = 14.sp,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                )
+                if (selected) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(2.dp)
+                            .background(Primary)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProblemTab(
+    detail: ProblemDetail?,
+    isLoading: Boolean
+) {
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Primary)
+        }
+        return
+    }
+
+    if (detail == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("문제 정보를 불러오지 못했습니다.", color = TextMuted)
+        }
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
+            .padding(top = 20.dp, bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // probMeta: 난이도 태그
+        if (!detail.difficultyLabel.isNullOrBlank() && detail.difficultyLabel != "-") {
+            val diffLabelUpper = detail.difficultyLabel.uppercase()
+            val diffText = when (diffLabelUpper) {
+                "EASY" -> "쉬움"
+                "MEDIUM", "NORMAL" -> "보통"
+                "HARD" -> "어려움"
+                else -> detail.difficultyLabel
+            }
+            val diffColor = when (diffLabelUpper) {
+                "EASY" -> Success
+                "MEDIUM", "NORMAL" -> Primary
+                "HARD" -> Error
+                else -> Error
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(diffText, color = diffColor, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+        // descCard
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = BgSurface,
+            border = BorderStroke(1.dp, BgElevated)
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text("문제 설명", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(detail.description, fontSize = 13.sp, color = TextSecondary, lineHeight = 20.sp)
+            }
+        }
+
+        HorizontalDivider(thickness = 1.dp, color = BgElevated)
+
+        // ioCard
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = BgSurface,
+            border = BorderStroke(1.dp, BgElevated)
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text("입출력 예시", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(CodeBgDark)
+                        .padding(12.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text("입력", color = Primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            Text(detail.exampleInput, color = TextPrimary, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text("출력", color = Primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            Text(detail.exampleOutput, color = TextPrimary, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+            }
+        }
+
+        // constCard
+        if (detail.constraints.isNotEmpty()) {
+            HorizontalDivider(thickness = 1.dp, color = BgElevated)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = BgSurface,
+                border = BorderStroke(1.dp, BgElevated)
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("제약 조건", fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = TextPrimary)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        detail.constraints.forEach {
+                            Text("• $it", color = TextSecondary, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun TestCaseSelectorBar(
@@ -310,7 +543,6 @@ private fun TestCaseSelectorBar(
     ) {
         repeat(count) { idx ->
             val isSelected = idx == selectedIndex
-
             Surface(
                 modifier = Modifier.size(width = 44.dp, height = 36.dp),
                 shape = RoundedCornerShape(10.dp),
@@ -331,333 +563,20 @@ private fun TestCaseSelectorBar(
     }
 }
 
-@Composable
-private fun EditorTabContent(
-    value: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
-    onExpand: () -> Unit,
-    onReset: () -> Unit,
-    onRun: () -> Unit,
-    onSaveDraft: () -> Unit,
-    isRunning: Boolean,
-    onEditorFocusChange: (Boolean) -> Unit
-) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            DraftSaveButton(
-                onClick = onSaveDraft
-            )
-        }
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp),
-            shape = RoundedCornerShape(18.dp),
-            color = CodeBgDark,
-            border = BorderStroke(1.dp, BgDivider)
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                BasicTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .onFocusChanged { onEditorFocusChange(it.isFocused) },
-                    textStyle = TextStyle(
-                        color = TextPrimary,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
-                    ),
-                    cursorBrush = SolidColor(Primary),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.None,
-                        autoCorrect = false,
-                        keyboardType = KeyboardType.Ascii,
-                        imeAction = ImeAction.None
-                    )
-                )
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .zIndex(1f)
-                ) {
-                    IconButton(
-                        onClick = onExpand,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.OpenInFull,
-                            contentDescription = "Fullscreen",
-                            tint = TextPrimary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = onRun,
-            enabled = !isRunning,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Primary)
-        ) {
-            if (isRunning) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(18.dp),
-                        color = BgPrimary
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text("실행 중...", fontWeight = FontWeight.Bold, color = BgPrimary)
-                }
-            } else {
-                Text("▷ 실행", fontWeight = FontWeight.Bold, color = BgPrimary)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedButton(
-            onClick = onReset,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            border = BorderStroke(1.dp, BgDivider)
-        ) { Text("초기화", color = TextPrimary) }
-    }
-}
-
-@Composable
-private fun SolveTabBar(
-    selectedTab: SolveTab,
-    onTabSelected: (SolveTab) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 10.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(BgElevated)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        SolveTab.values().forEach { tab ->
-            SolveTabChip(tab, selectedTab == tab) { onTabSelected(tab) }
-        }
-    }
-}
-
-@Composable
-private fun RowScope.SolveTabChip(tab: SolveTab, selected: Boolean, onClick: () -> Unit) {
-    val color = if (selected) TextPrimary else TextMuted
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
-        color = if (selected) BgSurface else Color.Transparent,
-        modifier = Modifier
-            .weight(1f)
-            .height(44.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = tab.icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = tab.label,
-                color = color,
-                fontSize = 14.sp
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProblemTab(
-    detail: ProblemDetail?,
-    isLoading: Boolean
-) {
-    val scroll = rememberScrollState()
-
-    if (isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-        return
-    }
-
-    if (detail == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("문제 정보를 불러오지 못했습니다.", color = TextMuted)
-        }
-        return
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scroll)
-            .padding(16.dp)
-    ) {
-        if (!detail.difficultyLabel.isNullOrBlank() && detail.difficultyLabel != "-") {
-            val diffLabelUpper = detail.difficultyLabel.uppercase()
-            val diffText = when (diffLabelUpper) {
-                "EASY" -> "쉬움"
-                "MEDIUM", "NORMAL" -> "보통"
-                "HARD" -> "어려움"
-                else -> detail.difficultyLabel
-            }
-            val diffColor = when (diffLabelUpper) {
-                "EASY", "쉬움" -> Color(0xFF10B981)
-                "MEDIUM", "NORMAL", "보통" -> Color(0xFFF59E0B)
-                "HARD", "어려움" -> Color(0xFFEF4444)
-                else -> Color(0xFFF04438)
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("난이도: ", color = TextSecondary, fontSize = 14.sp)
-                Text(
-                    text = diffText,
-                    color = diffColor,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
-            }
-            Spacer(modifier = Modifier.height(18.dp))
-        }
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            color = BgSurface,
-            border = BorderStroke(1.dp, BgDivider)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("문제 설명", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(detail.description, lineHeight = 22.sp, fontSize = 15.sp, color = TextSecondary)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "입출력 예시",
-            fontWeight = FontWeight.SemiBold,
-            color = TextMuted,
-            fontSize = 14.sp
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            color = BgSurface
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("입력:", color = TextMuted, fontSize = 13.sp)
-                Text(detail.exampleInput, fontSize = 14.sp, color = TextPrimary)
-                Spacer(modifier = Modifier.height(12.dp))
-                Text("출력:", color = TextMuted, fontSize = 13.sp)
-                Text(detail.exampleOutput, fontSize = 14.sp, color = TextPrimary)
-            }
-        }
-
-        if (detail.constraints.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0x20FB2C36),
-                border = BorderStroke(1.dp, Color(0x40FB2C36))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    detail.constraints.forEach {
-                        Text("• $it", color = Error, fontSize = 13.sp)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StepIndicator(
-    total: Int,
-    current: Int
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
-    ) {
-        repeat(total) { i ->
-            Box(
-                modifier = Modifier
-                    .height(6.dp)
-                    .width(if (i + 1 == current) 32.dp else 8.dp)
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(if (i + 1 == current) Primary else BgElevated)
-            )
-        }
-    }
-}
-
-private fun insertIntoTextFieldValue(
-    value: TextFieldValue,
-    insert: String
-): TextFieldValue {
+private fun insertIntoTextFieldValue(value: TextFieldValue, insert: String): TextFieldValue {
     val text = value.text
     val start = value.selection.start.coerceIn(0, text.length)
     val end = value.selection.end.coerceIn(0, text.length)
-
     val newText = buildString(text.length + insert.length) {
         append(text.substring(0, start))
         append(insert)
         append(text.substring(end))
     }
-
     val newCursor = start + insert.length
-    return value.copy(
-        text = newText,
-        selection = TextRange(newCursor)
-    )
+    return value.copy(text = newText, selection = TextRange(newCursor))
 }
 
-private fun buildLinesForUi(
-    tc: TestCase,
-    rawLines: List<String>
-): List<String> {
+private fun buildLinesForUi(tc: TestCase, rawLines: List<String>): List<String> {
     return buildList {
         add("$ input: ${tc.input}")
         add("$ expected: ${tc.expectedOutput}")

@@ -176,13 +176,10 @@ private fun PracticeBlankContent(
     onCheckAnswer: (List<String>) -> Boolean
 ) {
 
-    // blanks는 API에서 null 가능하므로 안전 처리
-    val blanks = quiz.blanks ?: emptyList()
-
-    // 각 빈칸에 입력된 사용자 답
+    // 각 빈칸에 입력된 사용자 답 — totalBlanks가 실제 빈칸 수
     val filledAnswers = remember(quiz.exerciseId) {
         mutableStateListOf<String?>().apply {
-            repeat(blanks.size) { add(null) }
+            repeat(quiz.totalBlanks) { add(null) }
         }
     }
 
@@ -198,7 +195,7 @@ private fun PracticeBlankContent(
 
     // 모든 빈칸이 채워졌는지 여부
     val isAnswerComplete =
-        blanks.isNotEmpty() && filledAnswers.none { it.isNullOrBlank() }
+        quiz.totalBlanks > 0 && filledAnswers.none { it.isNullOrBlank() }
 
     BlankScreen(
         quiz = quiz,

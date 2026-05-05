@@ -9,29 +9,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.common.MoveButtonBar
 import com.example.fe.data.dto.BlankDto
 import com.example.fe.data.dto.QuizItemDto
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.CardBg
-import com.example.fe.ui.theme.CheckBtnBg
-import com.example.fe.ui.theme.CheckBtnText
-import com.example.fe.ui.theme.CorrectText
 import com.example.fe.ui.theme.PageBg
-import com.example.fe.ui.theme.PrimaryButtonBlue
+import com.example.fe.ui.theme.TextPrimary
 import com.example.fe.ui.theme.TitleText
-import com.example.fe.ui.theme.WrongText
 
 @Composable
 fun BlankScreen(
@@ -148,10 +145,14 @@ fun BlankScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isAnswerComplete) PrimaryButtonBlue else CheckBtnBg,
-                        contentColor = if (isAnswerComplete) CheckBtnText else CheckBtnText
+                        containerColor = BgPrimary,
+                        contentColor = TextPrimary,
+                        disabledContainerColor = BgPrimary.copy(alpha = 0.5f),
+                        disabledContentColor = TextPrimary.copy(alpha = 0.4f)
                     ),
+                    border = BorderStroke(1.dp, BgElevated),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
                     Text(
@@ -161,22 +162,18 @@ fun BlankScreen(
                     )
                 }
 
-                // 정답/오답 결과 표시
-                if (checkResult != null) {
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = if (checkResult) "정답입니다!" else "오답입니다. 다시 시도해보세요.",
-                        color = if (checkResult) CorrectText else WrongText,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                }
-
                 Spacer(modifier = Modifier.height(16.dp))
             }
+        }
+
+        // 정답/오답 결과 모달
+        if (checkResult != null) {
+            ResultModal(
+                isCorrect = checkResult,
+                isLastProblem = currentIndex == totalCount - 1,
+                onClose = onResetAnswers,
+                onAction = if (checkResult) onNextClick else onResetAnswers
+            )
         }
     }
 }

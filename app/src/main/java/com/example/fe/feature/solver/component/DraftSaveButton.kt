@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.Primary
 
 @Composable
 fun DraftSaveButton(
@@ -18,16 +19,16 @@ fun DraftSaveButton(
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = "임시 저장",
-        color = Color(0xFF3B82F6),
+        text = "임시저장",
+        color = Primary,
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
         modifier = modifier
             .background(
-                color = Color(0x203B82F6),
-                shape = RoundedCornerShape(8.dp)
+                color = Color(0x26F59E0B),
+                shape = RoundedCornerShape(6.dp)
             )
             .clickable { onClick() }
-            .padding(horizontal = 10.dp, vertical = 6.dp)
+            .padding(horizontal = 10.dp, vertical = 5.dp)
     )
 }

@@ -17,10 +17,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun ProfileHeader(
@@ -34,26 +40,16 @@ fun ProfileHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        Box(
-            contentAlignment = Alignment.BottomEnd
-        ) {
+        Box(contentAlignment = Alignment.BottomEnd) {
             Box(
                 modifier = Modifier
                     .size(84.dp)
                     .clip(CircleShape)
-                    .background(Color.White)
-                    .border(
-                        width = 3.dp,
-                        color = Color(0xFF72A7F7),
-                        shape = CircleShape
-                    ),
+                    .background(BgSurface)
+                    .border(width = 3.dp, color = Primary, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "○",
-                    color = Color(0xFFBFC5D2),
-                    fontSize = 28.sp
-                )
+                Text(text = "○", color = TextMuted, fontSize = 28.sp)
             }
 
             Box(
@@ -61,12 +57,12 @@ fun ProfileHeader(
                     .offset(x = (-2).dp, y = (-2).dp)
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF5B8DEF)),
+                    .background(Primary),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = level.toString(),
-                    color = Color.White,
+                    color = BgPrimary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -80,12 +76,12 @@ fun ProfileHeader(
                 text = userName,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E2430)
+                color = TextPrimary
             )
             Text(
                 text = bio,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF8B93A1)
+                color = TextSecondary
             )
         }
     }

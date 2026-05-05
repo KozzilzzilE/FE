@@ -25,6 +25,15 @@ import androidx.compose.ui.unit.sp
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.model.SubmissionRecord
 import com.example.fe.feature.solver.model.TestCase
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.Error
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.Success
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 private enum class SubmitSubScreen {
     MAIN, TESTCASE, RESULT, SOLUTION
@@ -112,7 +121,7 @@ private fun SubmitMenuGrid(
     }
 }
 
-// 제출 및 최근 제출 내역 (※ '최근 제출 결과: 정답 ✅' 박스 삭제 버전)
+// 제출 및 최근 제출 내역
 @Composable
 private fun SubmitHistoryView(
     viewModel: SolverViewModel,
@@ -137,7 +146,7 @@ private fun SubmitHistoryView(
             Box(
                 modifier = Modifier.background(
                     brush = Brush.horizontalGradient(
-                        listOf(Color(0xFF6397FF), Color(0xFF72C6B4))
+                        listOf(Primary, Success)
                     )
                 ),
                 contentAlignment = Alignment.Center
@@ -147,12 +156,12 @@ private fun SubmitHistoryView(
                         CircularProgressIndicator(
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(18.dp),
-                            color = Color.White
+                            color = BgPrimary
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             "제출 중...",
-                            color = Color.White,
+                            color = BgPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -160,7 +169,7 @@ private fun SubmitHistoryView(
                 } else {
                     Text(
                         "제출하기",
-                        color = Color.White,
+                        color = BgPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -174,7 +183,7 @@ private fun SubmitHistoryView(
             "최근 제출 내역",
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
-            color = Color(0xFF4B5563)
+            color = TextSecondary
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -207,7 +216,7 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     "실행 결과가 없습니다.\n에디터에서 코드를 실행해 보세요.",
-                    color = Color.Gray,
+                    color = TextMuted,
                     fontSize = 14.sp
                 )
             }
@@ -254,14 +263,14 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
                     Surface(
                         modifier = Modifier.size(width = 44.dp, height = 36.dp),
                         shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) Color(0xFF8199E5) else Color(0xFFF3F4F6),
-                        border = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE5E7EB)),
+                        color = if (isSelected) Primary else BgSurface,
+                        border = if (isSelected) null else BorderStroke(1.dp, BgDivider),
                         onClick = { selectedIndex = idx }
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
                                 text = "${idx + 1}",
-                                color = if (isSelected) Color.White else Color(0xFF4B5563),
+                                color = if (isSelected) BgPrimary else TextSecondary,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -282,14 +291,14 @@ private fun SubmitMenuButton(
     isSelected: Boolean = false,
     onClick: () -> Unit
 ) {
-    val containerColor = if (isSelected) Color(0xFF8199E5) else Color.White
-    val contentColor = if (isSelected) Color.White else Color(0xFF4B5563)
+    val containerColor = if (isSelected) Primary else BgSurface
+    val contentColor = if (isSelected) BgPrimary else TextSecondary
 
     Surface(
         modifier = modifier.height(64.dp),
         shape = RoundedCornerShape(12.dp),
         color = containerColor,
-        border = if (!isSelected) BorderStroke(1.dp, Color(0xFFE5E7EB)) else null,
+        border = if (!isSelected) BorderStroke(1.dp, BgDivider) else null,
         onClick = onClick
     ) {
         Row(
@@ -309,8 +318,8 @@ private fun SubmissionRecordItem(record: SubmissionRecord) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Color(0xFFF3F4F6)),
-        color = Color.White
+        border = BorderStroke(1.dp, BgDivider),
+        color = BgSurface
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -318,14 +327,14 @@ private fun SubmissionRecordItem(record: SubmissionRecord) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(record.date, fontSize = 12.sp, color = Color(0xFF9CA3AF))
-                Text(record.language, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                Text(record.date, fontSize = 12.sp, color = TextMuted)
+                Text(record.language, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
             }
             Text(
                 text = record.result,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (record.isCorrect) Color(0xFF72C6B4) else Color(0xFFF04438)
+                color = if (record.isCorrect) Success else Error
             )
         }
     }

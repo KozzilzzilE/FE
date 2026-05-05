@@ -6,19 +6,21 @@ import android.content.ContextWrapper
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -77,7 +79,7 @@ fun SignUpScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onNavigateBack) {
-                Icon(Icons.Filled.ArrowBackIosNew, contentDescription = "뒤로", tint = TextPrimary, modifier = Modifier.size(20.dp))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로", tint = TextPrimary, modifier = Modifier.size(20.dp))
             }
             Text(
                 text = "회원 가입",
@@ -96,13 +98,19 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // GitHub 소셜 버튼
-            SignUpSocialButton(text = "Github로 회원가입") {
+            SignUpSocialButton(
+                text = "Github로 회원가입",
+                iconResId = R.drawable.ic_github_logo
+            ) {
                 context.findActivityFromSignUp()?.let { onGithubSignUpClick(it) }
             }
             Spacer(modifier = Modifier.height(10.dp))
 
             // Google 소셜 버튼
-            SignUpSocialButton(text = "Google로 회원가입") {
+            SignUpSocialButton(
+                text = "Google로 회원가입",
+                iconResId = R.drawable.ic_google_logo
+            ) {
                 val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(context.getString(R.string.default_web_client_id))
                     .requestEmail().build()
@@ -206,7 +214,7 @@ private fun SignUpTextField(
 }
 
 @Composable
-private fun SignUpSocialButton(text: String, onClick: () -> Unit) {
+private fun SignUpSocialButton(text: String, iconResId: Int, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -214,7 +222,18 @@ private fun SignUpSocialButton(text: String, onClick: () -> Unit) {
         colors = ButtonDefaults.outlinedButtonColors(containerColor = BgSurface),
         border = androidx.compose.foundation.BorderStroke(0.dp, Color.Transparent)
     ) {
-        Text(text, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = iconResId),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        }
     }
 }
 

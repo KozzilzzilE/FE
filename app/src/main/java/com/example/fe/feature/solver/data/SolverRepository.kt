@@ -75,7 +75,8 @@ public class Solution {
                 .filter { it.isNotBlank() },
             initialCode = DEFAULT_JAVA_TEMPLATE,
             testCases = mappedTestCases,
-            isBookmarked = result.isBookmark ?: false
+            isBookmarked = result.isBookmark ?: false,
+            bookmarkCount = result.bookmarkCount ?: 0
         )
     }
 

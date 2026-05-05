@@ -1,20 +1,22 @@
 package com.example.fe.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,15 +41,17 @@ fun BottomNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .background(BgPrimary)
-            .padding(horizontal = 21.dp, vertical = 9.dp),
+            .padding(horizontal = 21.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(62.dp)
                 .clip(RoundedCornerShape(36.dp))
                 .background(BgSurface)
-                .padding(horizontal = 4.dp, vertical = 4.dp),
+                .border(1.dp, BgElevated, RoundedCornerShape(36.dp))
+                .padding(4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -56,15 +60,15 @@ fun BottomNavigationBar(
                 Box(
                     modifier = Modifier
                         .weight(1f)
+                        .fillMaxHeight()
                         .clip(RoundedCornerShape(26.dp))
-                        .background(if (selected) Primary else androidx.compose.ui.graphics.Color.Transparent)
-                        .clickable { onNavigate(item.route) }
-                        .padding(vertical = 10.dp),
+                        .background(if (selected) Primary else Color.Transparent)
+                        .clickable { onNavigate(item.route) },
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
                     ) {
                         Icon(
                             imageVector = item.icon,
@@ -75,7 +79,7 @@ fun BottomNavigationBar(
                         Text(
                             text = item.title,
                             fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                             color = if (selected) BgPrimary else TextMuted
                         )
                     }
@@ -87,8 +91,8 @@ fun BottomNavigationBar(
 
 val bottomNavItems = listOf(
     BottomNavItem("홈", Icons.Default.Home, "home"),
-    BottomNavItem("학습", Icons.Default.Menu, "topic"),
-    BottomNavItem("문제", Icons.Default.Star, "problem"),
+    BottomNavItem("학습", Icons.Default.MenuBook, "topic"),
+    BottomNavItem("문제", Icons.Default.List, "problem"),
     BottomNavItem("MY", Icons.Default.Person, "my"),
 )
 
@@ -97,7 +101,7 @@ val bottomNavItems = listOf(
 fun BottomNavigationBarPreview() {
     BottomNavigationBar(
         items = bottomNavItems,
-        currentRoute = "home",
+        currentRoute = "topic",
         onNavigate = {}
     )
 }

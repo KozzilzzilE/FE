@@ -16,22 +16,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -46,6 +43,13 @@ import com.example.fe.feature.profile.component.ProfileHeader
 import com.example.fe.feature.profile.component.StatSection
 import com.example.fe.feature.profile.model.ProfileStat
 import com.example.fe.navigation.Routes
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun MyPageScreen(
@@ -67,12 +71,8 @@ fun MyPageScreen(
                 viewModel.loadMyPageInfo()
             }
         }
-
         lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     MyPageScreenContent(
@@ -99,7 +99,7 @@ private fun MyPageScreenContent(
     onSettingsClick: () -> Unit = {}
 ) {
     Scaffold(
-        containerColor = Color(0xFFF6F7FB),
+        containerColor = BgPrimary,
         bottomBar = {
             BottomNavigationBar(
                 items = bottomNavItems,
@@ -111,12 +111,12 @@ private fun MyPageScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF6F7FB))
+                .background(BgPrimary)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            TopBar(onSettingsClick = onSettingsClick)
+            MyPageTopBar(onSettingsClick = onSettingsClick)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -128,10 +128,7 @@ private fun MyPageScreenContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            HorizontalDivider(
-                color = Color(0xFFE6EAF0),
-                thickness = 1.dp
-            )
+            HorizontalDivider(color = BgDivider, thickness = 1.dp)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -148,7 +145,7 @@ private fun MyPageScreenContent(
             MenuItemCard(
                 title = "개인 정보 수정",
                 iconText = "👤",
-                iconColor = Color(0xFF5B8DEF),
+                iconColor = Primary,
                 onClick = onEditProfileClick
             )
 
@@ -157,31 +154,35 @@ private fun MyPageScreenContent(
             SectionTitle("학습 관리")
             Spacer(modifier = Modifier.height(10.dp))
 
-            Card(
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                color = BgSurface
             ) {
-                Column(
-                    modifier = Modifier.padding(vertical = 6.dp)
-                ) {
+                Column(modifier = Modifier.padding(vertical = 6.dp)) {
                     MenuItemCardInner(
                         title = "선호 언어 설정",
                         iconText = "🌐",
-                        iconColor = Color(0xFF4DB6AC),
                         onClick = onLanguageClick
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = BgDivider,
+                        thickness = 0.5.dp
                     )
                     MenuItemCardInner(
                         title = "내가 찜한 문제",
                         iconText = "☆",
-                        iconColor = Color(0xFFE57373),
                         onClick = onFavoriteClick
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = BgDivider,
+                        thickness = 0.5.dp
                     )
                     MenuItemCardInner(
                         title = "제출 기록 보기",
                         iconText = "↺",
-                        iconColor = Color(0xFF6C63FF),
                         onClick = onSubmissionClick
                     )
                 }
@@ -197,9 +198,7 @@ private fun MyPageScreenContent(
 }
 
 @Composable
-private fun TopBar(
-    onSettingsClick: () -> Unit
-) {
+private fun MyPageTopBar(onSettingsClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -209,14 +208,13 @@ private fun TopBar(
             text = "마이페이지",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E2430)
+            color = TextPrimary
         )
-
         IconButton(onClick = onSettingsClick) {
             Icon(
                 imageVector = Icons.Outlined.Settings,
                 contentDescription = "설정",
-                tint = Color(0xFFAAB1BC),
+                tint = TextMuted,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -228,7 +226,7 @@ private fun SectionTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleSmall,
-        color = Color(0xFF7D8592),
+        color = TextSecondary,
         fontWeight = FontWeight.SemiBold
     )
 }
@@ -237,50 +235,22 @@ private fun SectionTitle(title: String) {
 private fun MenuItemCardInner(
     title: String,
     iconText: String,
-    iconColor: Color,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(58.dp)
+            .height(56.dp)
             .clickable { onClick() }
-            .background(Color.White)
             .padding(horizontal = 18.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = iconText,
-                color = iconColor
-            )
+            Text(text = iconText, color = Primary)
             Spacer(modifier = Modifier.size(12.dp))
-            Text(
-                text = title,
-                color = Color(0xFF1E2430)
-            )
+            Text(text = title, color = TextPrimary)
         }
-
-        Text(
-            text = ">",
-            color = Color(0xFFC2C7D0)
-        )
+        Text(text = ">", color = TextMuted)
     }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-private fun MyPageScreenPreview() {
-    MyPageScreenContent(
-        uiState = MyPageUiState(
-            userName = "이성규",
-            languageName = "JAVA",
-            level = 1,
-            stat = ProfileStat(
-                streak = "14D",
-                solved = "85"
-            )
-        )
-    )
 }

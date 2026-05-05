@@ -13,10 +13,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.TextMuted
 
 @Composable
 fun SaveButtonBar(
@@ -28,7 +32,7 @@ fun SaveButtonBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(BgSurface)
             .navigationBarsPadding()
             .padding(horizontal = 24.dp, vertical = 14.dp)
     ) {
@@ -40,22 +44,16 @@ fun SaveButtonBar(
                 .height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF6E93E6),
-                contentColor = Color.White,
-                disabledContainerColor = Color(0xFFB8C7EA),
-                disabledContentColor = Color.White
+                containerColor = Primary,
+                contentColor = BgPrimary,
+                disabledContainerColor = BgElevated,
+                disabledContentColor = TextMuted
             )
         ) {
             if (isLoading) {
-                CircularProgressIndicator(
-                    strokeWidth = 2.dp
-                )
+                CircularProgressIndicator(strokeWidth = 2.dp, color = BgPrimary)
             } else {
-                Text(
-                    text = text,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

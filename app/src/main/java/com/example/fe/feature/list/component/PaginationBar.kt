@@ -16,6 +16,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.Blue
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
 
 @Composable
 fun PaginationBar(
@@ -35,7 +39,7 @@ fun PaginationBar(
         Icon(
             imageVector = Icons.Filled.ChevronLeft,
             contentDescription = "이전 페이지",
-            tint = if (currentPage > 1) Color(0xFF64748B) else Color(0xFFCBD5E1),
+            tint = if (currentPage > 1) TextMuted else BgDivider,
             modifier = Modifier
                 .clickable(enabled = currentPage > 1) {
                     onPageChange(currentPage - 1)
@@ -51,7 +55,7 @@ fun PaginationBar(
             Box(
                 modifier = Modifier
                     .background(
-                        if (isSelected) Color(0xFF7EA3F7) else Color.Transparent,
+                        if (isSelected) Blue else Color.Transparent,
                         shape = CircleShape
                     )
                     .clickable { onPageChange(page) }
@@ -60,7 +64,7 @@ fun PaginationBar(
             ) {
                 Text(
                     text = page.toString(),
-                    color = if (isSelected) Color.White else Color(0xFF64748B),
+                    color = if (isSelected) TextPrimary else TextMuted,
                     fontSize = 14.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                 )
@@ -72,7 +76,7 @@ fun PaginationBar(
         Icon(
             imageVector = Icons.Filled.ChevronRight,
             contentDescription = "다음 페이지",
-            tint = if (currentPage < totalPages) Color(0xFF64748B) else Color(0xFFCBD5E1),
+            tint = if (currentPage < totalPages) TextMuted else BgDivider,
             modifier = Modifier
                 .clickable(enabled = currentPage < totalPages) {
                     onPageChange(currentPage + 1)

@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.BgSurface
 import com.example.fe.ui.theme.Primary
 import com.example.fe.ui.theme.TextPrimary
@@ -61,7 +62,7 @@ fun TopBar(
                     if (showBackIcon) {
                         IconButton(onClick = onBackClick) {
                             Icon(
-                                imageVector = Icons.Filled.ArrowBackIosNew,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "뒤로 가기",
                                 tint = TextPrimary
                             )
@@ -88,7 +89,7 @@ fun TopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = BgSurface
+            containerColor = BgPrimary
         ),
         modifier = modifier
     )

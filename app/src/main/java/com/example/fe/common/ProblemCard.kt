@@ -2,12 +2,12 @@ package com.example.fe.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,53 +26,67 @@ import com.example.fe.ui.theme.*
 @Composable
 fun DetailCard(
     item: DetailItem,
+    index: Int = 0,
     onClick: () -> Unit,
     onBookmarkClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val difficultyColor = when (item.difficulty) {
+        Difficulty.EASY   -> Success
+        Difficulty.MEDIUM -> Primary
+        Difficulty.HARD   -> Error
+    }
+
     Card(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = BgSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 번호 뱃지
+            // 번호 배지 - 40dp 원형
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(BgElevated),
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(PrimaryDim15),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = item.id.toString(),
+                    text = if (index > 0) index.toString() else item.id.toString(),
                     color = Primary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.title,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = TextPrimary
                 )
-                Spacer(modifier = Modifier.size(4.dp))
-                DifficultyBadge(difficulty = item.difficulty)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = item.difficulty.label,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = difficultyColor
+                )
             }
 
-            // 북마크 (팀원 추가 기능 반영 + 디자인 수정)
+            // 북마크 (Problem 타입에만 표시)
             if (item is Problem) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
@@ -80,9 +94,9 @@ fun DetailCard(
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
-                            imageVector = if (item.isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                            imageVector = Icons.Outlined.BookmarkBorder,
                             contentDescription = "북마크",
-                            tint = if (item.isBookmarked) Color(0xFFFFC107) else TextMuted
+                            tint = if (item.isBookmarked) Primary else BgElevated
                         )
                     }
                     Spacer(modifier = Modifier.width(4.dp))
@@ -92,15 +106,15 @@ fun DetailCard(
                         color = TextMuted
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
             }
 
-            // 문제 해결 여부 아이콘
+            // 완료 여부 아이콘
             Icon(
-                imageVector = if (item.isCompleted) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
+                imageVector = if (item.isCompleted) Icons.Outlined.CheckCircle else Icons.Outlined.Circle,
                 contentDescription = null,
-                tint = if (item.isCompleted) Primary else BgDivider,
-                modifier = Modifier.size(28.dp)
+                tint = if (item.isCompleted) Success else BgDivider,
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -137,8 +151,8 @@ fun DifficultyBadge(difficulty: Difficulty) {
 @Composable
 fun DetailCardPreview() {
     Column(modifier = Modifier.background(BgPrimary)) {
-        DetailCard(item = Problem(1L, "두 수의 합", Difficulty.EASY, false, true, 42), onClick = {})
-        DetailCard(item = Problem(2L, "스택 구현하기", Difficulty.MEDIUM, true, false, 15), onClick = {})
-        DetailCard(item = Problem(3L, "힙 정렬", Difficulty.HARD, false, true, 8), onClick = {})
+        DetailCard(item = Problem(1L, "두 수의 합", Difficulty.EASY, false, 42, true), index = 1, onClick = {})
+        DetailCard(item = Problem(2L, "스택 구현하기", Difficulty.MEDIUM, true, 15, false), index = 2, onClick = {})
+        DetailCard(item = Problem(3L, "힙 정렬", Difficulty.HARD, false, 8, true), index = 3, onClick = {})
     }
 }

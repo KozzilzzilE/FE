@@ -19,6 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.Success
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
 
 @Composable
 fun StatSection(
@@ -30,18 +35,19 @@ fun StatSection(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-
         StatItem(
             icon = "⚡",
-            iconBg = Color(0xFFFBECEE),
+            iconBg = Color(0x20F59E0B), // Primary 15%
             label = "STREAK",
-            value = streak
+            value = streak,
+            valueColor = Primary
         )
         StatItem(
             icon = "<>",
-            iconBg = Color(0xFFEAF8F6),
+            iconBg = Color(0x2022C55E), // Success 15%
             label = "SOLVED",
-            value = solved
+            value = solved,
+            valueColor = Success
         )
     }
 }
@@ -51,21 +57,17 @@ private fun StatItem(
     icon: String,
     iconBg: Color,
     label: String,
-    value: String
+    value: String,
+    valueColor: Color = TextPrimary
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
                 .size(44.dp)
                 .background(iconBg, RoundedCornerShape(14.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = icon,
-                fontSize = 16.sp
-            )
+            Text(text = icon, fontSize = 16.sp)
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -73,13 +75,13 @@ private fun StatItem(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF9CA3AF)
+            color = TextMuted
         )
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E2430)
+            color = valueColor
         )
     }
 }

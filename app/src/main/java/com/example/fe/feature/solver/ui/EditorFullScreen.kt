@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -26,6 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.CodeBgDark
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun EditorFullScreen(
@@ -33,7 +39,6 @@ fun EditorFullScreen(
     viewModel: SolverViewModel,
     onBack: () -> Unit = {}
 ) {
-
 
     val uiState by viewModel.uiState.collectAsState()
     val codeFromVm = uiState.code
@@ -53,12 +58,13 @@ fun EditorFullScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(BgPrimary)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(BgSurface)
                     .padding(top = 10.dp, end = 16.dp),
                 contentAlignment = Alignment.TopEnd
             ) {
@@ -66,7 +72,7 @@ fun EditorFullScreen(
                     Icon(
                         imageVector = Icons.Default.CloseFullscreen,
                         contentDescription = "닫기",
-                        tint = Color(0xFF111827),
+                        tint = TextSecondary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -76,12 +82,12 @@ fun EditorFullScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     shape = RoundedCornerShape(18.dp),
-                    color = Color(0xFF0E1627)
+                    color = CodeBgDark
                 ) {
                     BasicTextField(
                         value = tfv,
@@ -96,10 +102,10 @@ fun EditorFullScreen(
                         textStyle = TextStyle(
                             fontFamily = FontFamily.Monospace,
                             fontSize = 14.sp,
-                            color = Color(0xFFE6EDF7),
+                            color = TextPrimary,
                             lineHeight = 20.sp
                         ),
-                        cursorBrush = SolidColor(Color.White),
+                        cursorBrush = SolidColor(Primary),
                         keyboardOptions = KeyboardOptions(
                             capitalization = KeyboardCapitalization.None,
                             autoCorrect = false,
@@ -120,19 +126,22 @@ fun EditorFullScreen(
         ) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
+                color = BgSurface,
                 shadowElevation = 8.dp
             ) {
-                SmartKeyboardPanel(
-                    onInsert = { insert ->
-                        val updated = insertIntoTextFieldValue(tfv, insert)
-                        tfv = updated
-                        viewModel.updateCode(updated.text)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 10.dp)
-                )
+                Column {
+                    HorizontalDivider(color = BgDivider)
+                    SmartKeyboardPanel(
+                        onInsert = { insert ->
+                            val updated = insertIntoTextFieldValue(tfv, insert)
+                            tfv = updated
+                            viewModel.updateCode(updated.text)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                    )
+                }
             }
         }
     }

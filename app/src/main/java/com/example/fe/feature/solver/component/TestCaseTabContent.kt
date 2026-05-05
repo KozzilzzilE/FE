@@ -10,7 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
@@ -18,6 +17,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.model.TestCase
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun TestCaseTabContent(
@@ -32,17 +37,15 @@ fun TestCaseTabContent(
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
-        // 상단 헤더 (추가 버튼 제거)
         Text(
             text = "테스트케이스 관리",
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
-            color = Color(0xFF374151)
+            color = TextPrimary
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 테스트케이스 카드 리스트
         testCases.forEachIndexed { index, testCase ->
             TestCaseItem(
                 number = index + 1,
@@ -67,22 +70,20 @@ private fun TestCaseItem(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, Color(0xFFE6EEF7)),
-        color = Color.White
+        border = BorderStroke(1.dp, BgDivider),
+        color = BgSurface
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-
-            // 제목
             Text(
                 text = "테스트 $number",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                color = Color(0xFF111827)
+                color = TextPrimary
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("입력", fontSize = 13.sp, color = Color(0xFF94A3B8))
+            Text("입력", fontSize = 13.sp, color = TextMuted)
             Spacer(modifier = Modifier.height(8.dp))
             TestCaseInputField(
                 value = testCase.input,
@@ -91,7 +92,7 @@ private fun TestCaseItem(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("예상 출력", fontSize = 13.sp, color = Color(0xFF94A3B8))
+            Text("예상 출력", fontSize = 13.sp, color = TextMuted)
             Spacer(modifier = Modifier.height(8.dp))
             TestCaseInputField(
                 value = testCase.expectedOutput,
@@ -110,7 +111,7 @@ private fun TestCaseInputField(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 60.dp)
-            .background(Color(0xFFF8FAFC), RoundedCornerShape(12.dp))
+            .background(BgElevated, RoundedCornerShape(12.dp))
             .padding(12.dp)
     ) {
         BasicTextField(
@@ -119,7 +120,7 @@ private fun TestCaseInputField(
             modifier = Modifier.fillMaxWidth(),
             textStyle = TextStyle(
                 fontSize = 15.sp,
-                color = Color(0xFF1F2937),
+                color = TextPrimary,
                 fontFamily = FontFamily.Monospace
             )
         )

@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.TextPrimary
 
 @Composable
 fun SocialLoginButton(text: String, iconResId: Int?, onClick: () -> Unit) {
@@ -20,10 +23,10 @@ fun SocialLoginButton(text: String, iconResId: Int?, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(12.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE)),
-        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
+        border = androidx.compose.foundation.BorderStroke(1.dp, BgDivider),
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = BgSurface)
     ) {
         // 아이콘 + 텍스트 Row
-        Text(text, color = Color.Black, fontWeight = FontWeight.SemiBold)
+        Text(text, color = TextPrimary, fontWeight = FontWeight.SemiBold)
     }
 }

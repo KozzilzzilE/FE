@@ -16,6 +16,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.Blue
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
 
 @Composable
 fun DifficultyChip(
@@ -26,15 +32,15 @@ fun DifficultyChip(
     Surface(
         modifier = Modifier.clickable { onClick() },
         shape = CircleShape,
-        color = if (selected) Color(0xFF7EA3F7) else Color.White,
+        color = if (selected) Blue else BgSurface,
         border = BorderStroke(
             1.dp,
-            if (selected) Color(0xFF7EA3F7) else Color(0xFFE2E8F0)
+            if (selected) Blue else BgDivider
         )
     ) {
         Text(
             text = text,
-            color = if (selected) Color.White else Color(0xFF64748B),
+            color = if (selected) TextPrimary else TextMuted,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
@@ -48,7 +54,7 @@ private fun DifficultyChipPreview() {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
-            .background(Color.White)
+            .background(BgPrimary)
             .padding(16.dp)
     ) {
         DifficultyChip(

@@ -6,11 +6,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.CodeBgDark
+import com.example.fe.ui.theme.Error
+import com.example.fe.ui.theme.Success
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
 
 @Composable
 fun ExecutionTerminal(
@@ -22,14 +26,14 @@ fun ExecutionTerminal(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color(0xFF0E1627), RoundedCornerShape(20.dp))
+            .background(CodeBgDark, RoundedCornerShape(20.dp))
             .padding(20.dp)
     ) {
         // 헤더: 제목 + PASS/FAIL
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = title,
-                color = Color.White,
+                color = TextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -44,7 +48,7 @@ fun ExecutionTerminal(
             if (badgeText.isNotEmpty()) {
                 Text(
                     text = badgeText,
-                    color = if (passed == true) Color(0xFF72C6B4) else Color(0xFFF04438),
+                    color = if (passed == true) Success else Error,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
@@ -55,10 +59,10 @@ fun ExecutionTerminal(
 
         lines.forEach { line ->
             val textColor = when {
-                line.contains("✓") || line.contains("passed", ignoreCase = true) -> Color(0xFF72C6B4)
-                line.contains("fail", ignoreCase = true) || line.contains("error", ignoreCase = true) -> Color(0xFFF04438)
-                line.startsWith("$") -> Color(0xFF94A3B8)
-                else -> Color.White
+                line.contains("✓") || line.contains("passed", ignoreCase = true) -> Success
+                line.contains("fail", ignoreCase = true) || line.contains("error", ignoreCase = true) -> Error
+                line.startsWith("$") -> TextMuted
+                else -> TextPrimary
             }
 
             Text(

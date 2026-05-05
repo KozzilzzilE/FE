@@ -68,7 +68,7 @@ fun BlankSlot(
     ) {
         Text(
             text = if (text.isBlank()) "___" else text,
-            color = if (text.isBlank()) Color.White else BlankTextFilled,
+            color = if (text.isBlank()) BlankTextFilled else BlankTextFilled,
             fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
             textAlign = TextAlign.Center
@@ -86,7 +86,7 @@ fun SelectedAnswerItem(
 ) {
     val isFilled = answer != "?"
 
-    val backgroundColor = if (isSelected) SelectedAnswerBg else Color.White
+    val backgroundColor = if (isSelected) SelectedAnswerBg else BlankBox
 
     val borderColor = when {
         isSelected -> BlankTextFilled

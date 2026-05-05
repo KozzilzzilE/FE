@@ -1,21 +1,21 @@
 package com.example.fe.feature.home.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.LocalDate
 import com.example.fe.api.RetrofitClient
-import com.example.fe.common.AppConstants
 import com.example.fe.common.BottomNavigationBar
 import com.example.fe.common.bottomNavItems
 import com.example.fe.feature.home.HomeUiState
@@ -36,20 +36,6 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
 
-    // 언어 선택 상태 (임시)
-    var selectedLanguage by remember { mutableStateOf("") }
-
-    // 서버 언어 응답 -> 로컬 선택값 동기화
-    LaunchedEffect(uiState) {
-        if (uiState is HomeUiState.Success && selectedLanguage.isEmpty()) {
-            val serverLang = (uiState as HomeUiState.Success).languageName
-            val matchedLang = AppConstants.SUPPORTED_LANGUAGES.find {
-                it.equals(serverLang, ignoreCase = true)
-            } ?: "Java"
-            selectedLanguage = matchedLang
-        }
-    }
-
     val displayUserName = when (uiState) {
         is HomeUiState.Success -> (uiState as HomeUiState.Success).name
         else -> "사용자"
@@ -58,16 +44,10 @@ fun HomeScreen(
     Scaffold(
         containerColor = BgPrimary,
         topBar = {
-            Column {
-                HomeTopBar(
-                    userName = displayUserName,
-                    onProfileClick = { onNavigate(Routes.MY) }
-                )
-                LanguageDropdown(
-                    selectedLanguage = selectedLanguage,
-                    onLanguageSelected = { selectedLanguage = it }
-                )
-            }
+            HomeTopBar(
+                userName = displayUserName,
+                onProfileClick = { onNavigate(Routes.MY) }
+            )
         },
         bottomBar = {
             BottomNavigationBar(
@@ -89,10 +69,9 @@ fun HomeScreen(
                 }
             }
             is HomeUiState.Error -> {
-                // 에러 처리 (필요시 추가)
+                // 에러 처리
             }
             is HomeUiState.Success -> {
-                // 기여 데이터 생성 로직
                 val dummyContributions = remember {
                     val map = mutableMapOf<LocalDate, Int>()
                     val today = LocalDate.now()
@@ -100,7 +79,7 @@ fun HomeScreen(
                         val date = today.minusDays(i.toLong())
                         map[date] = (5..15).random()
                     }
-                    for (i in 14..150) {
+                    for (i in 14..120) {
                         val date = today.minusDays(i.toLong())
                         if (i % 2 == 0) map[date] = (0..20).random()
                     }
@@ -112,28 +91,46 @@ fun HomeScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                         .verticalScroll(scrollState)
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    // 1. 환영 섹션 (팀원 컴포넌트 + 성규님 디자인 테마 적용 가능하도록 수정됨)
-                    WelcomeSection(userName = "${displayUserName}님")
-
-                    // 2. 메인 액션 카드 (찜한 문제 + CS 퀴즈)
-                    MainActionsRow(
-                        onFavoriteClick = { onNavigate(Routes.BOOKMARK) },
-                        onQuizClick = { onNavigate("cs_quiz") }
+                    // 1. 환영 섹션
+                    WelcomeSection(
+                        userName = "안녕하세요, ${displayUserName}님 👋"
                     )
 
-                    // 3. 명언 카드 (아까 정리한 40개 명언 데이터 버전)
+                    // 2. "빠른 메뉴" 섹션 타이틀
+                    Text(
+                        text = "빠른 메뉴",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+
+                    // 3. 빠른 메뉴 카드 3장
+                    MainActionsRow(
+                        onStudyClick = { onNavigate(Routes.TOPIC) },
+                        onFavoriteClick = { onNavigate(Routes.MY) },
+                        onQuizClick = { onNavigate(Routes.CS_QUIZ) }
+                    )
+
+                    // 4. "연속 학습" 섹션 타이틀
+                    Text(
+                        text = "연속 학습",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+
+                    // 5. 학습 기록 잔디 (카드 안에)
+                    ContributionGraph(
+                        contributions = dummyContributions
+                    )
+
+                    // 6. 명언 카드 (Amber 테두리)
                     QuoteCard()
 
-                    // 4. 학습 기록 잔디
-                    ContributionGraph(
-                        contributions = dummyContributions,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                    
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
@@ -145,4 +142,3 @@ fun HomeScreen(
 fun HomeScreenPreview() {
     HomeScreen(onNavigate = {})
 }
- 

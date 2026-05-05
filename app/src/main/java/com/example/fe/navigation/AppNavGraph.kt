@@ -782,5 +782,12 @@ fun AppNavGraph() {
                 onBack = { navController.popBackStack() }
             )
         }
+
+        // CS 퀴즈
+        composable(Routes.CS_QUIZ) {
+            com.example.fe.feature.csquiz.ui.CsQuizScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
     }
 }

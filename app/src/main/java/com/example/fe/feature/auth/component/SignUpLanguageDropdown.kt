@@ -1,6 +1,7 @@
 package com.example.fe.feature.auth.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.common.AppConstants
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
 
 @Composable
 fun SignUpLanguageDropdown(
@@ -38,23 +44,15 @@ fun SignUpLanguageDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     
-    // label 출력
-    Text(text = "사용 언어 (선택)", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-    Spacer(modifier = Modifier.height(8.dp))
-    
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
-                .background(Color.White, RoundedCornerShape(8.dp))
-                .run { 
-                    shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)) 
-                        .background(Color.White, RoundedCornerShape(8.dp)) // 그림자 위 배경
-                }
-                .background(Color.White) // 배경 확실히
+                .height(54.dp)
+                .background(BgSurface, RoundedCornerShape(12.dp))
+                .border(1.dp, BgElevated, RoundedCornerShape(12.dp))
                 .clickable { expanded = true }
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 14.dp),
             contentAlignment = Alignment.CenterStart
         ) {
              Row(
@@ -63,20 +61,20 @@ fun SignUpLanguageDropdown(
                  verticalAlignment = Alignment.CenterVertically
              ) {
                  Text(
-                     text = if (selectedLanguage.isEmpty()) "언어를 선택해주세요" else selectedLanguage, 
-                     fontSize = 16.sp, 
-                     color = if(selectedLanguage.isEmpty()) Color.Gray else Color.Black
+                     text = if (selectedLanguage.isEmpty()) "언어를 선택해주세요" else selectedLanguage,
+                     fontSize = 16.sp,
+                     color = if(selectedLanguage.isEmpty()) TextMuted else TextPrimary
                  )
-                 Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Gray)
+                 Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = TextMuted)
              }
         }
-        
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .fillMaxWidth(0.85f)
-                .background(Color.White)
+                .background(BgSurface)
         ) {
             AppConstants.SUPPORTED_LANGUAGES.forEach { lang ->
                 DropdownMenuItem(

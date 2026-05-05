@@ -19,12 +19,12 @@ fun DraftSaveButton(
 ) {
     Text(
         text = "임시 저장",
-        color = Color(0xFF5B7FFF),
+        color = Color(0xFF3B82F6),
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
         modifier = modifier
             .background(
-                color = Color(0xFFF3F6FF), // 연한 배경
+                color = Color(0x203B82F6),
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable { onClick() }

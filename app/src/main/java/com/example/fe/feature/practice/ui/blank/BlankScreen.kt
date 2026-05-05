@@ -150,7 +150,7 @@ fun BlankScreen(
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isAnswerComplete) PrimaryButtonBlue else CheckBtnBg,
-                        contentColor = if (isAnswerComplete) Color.White else CheckBtnText
+                        contentColor = if (isAnswerComplete) CheckBtnText else CheckBtnText
                     ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {

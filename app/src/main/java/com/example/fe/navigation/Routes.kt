@@ -20,6 +20,9 @@ object Routes {
     const val LANGUAGE_SETTING = "language_setting"
     const val FAVORITE_PROBLEMS = "favorite_problems"
 
+    // CS 퀴즈
+    const val CS_QUIZ = "cs_quiz"
+
     // Args
     const val PROBLEM_ID = "problemId"
     const val TOPIC_ID = "topicId"

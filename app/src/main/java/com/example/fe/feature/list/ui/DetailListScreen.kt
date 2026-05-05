@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -57,9 +57,10 @@ fun DetailListScreen(
                 LazyColumn(
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
-                    items(items) { item ->
+                    itemsIndexed(items) { index, item ->
                         DetailCard(
                             item = item,
+                            index = index + 1,
                             onClick = { onItemClick(item) },
                             onBookmarkClick = if (onBookmarkClick != null) { { onBookmarkClick(item) } } else null
                         )

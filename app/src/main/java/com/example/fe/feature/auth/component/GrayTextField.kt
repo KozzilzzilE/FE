@@ -13,6 +13,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.TextMuted
 
 // 회색 배경의 둥근 입력창 (재사용 컴포넌트)
 @Composable
@@ -25,15 +28,15 @@ fun GrayTextField(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(placeholder, color = Color.Gray, fontSize = 14.sp) },
+        placeholder = { Text(placeholder, color = TextMuted, fontSize = 14.sp) },
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = Modifier
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(12.dp),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFFF5F6F8),
-            unfocusedContainerColor = Color(0xFFF5F6F8),
+            focusedContainerColor = BgElevated,
+            unfocusedContainerColor = BgSurface,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),

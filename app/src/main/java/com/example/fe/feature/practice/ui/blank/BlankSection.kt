@@ -57,56 +57,51 @@ fun PracticeHeaderBar(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(CardBg)
+            .background(com.example.fe.ui.theme.BgPrimary)
             .statusBarsPadding()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(74.dp)
-                .padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .height(52.dp)
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "뒤로가기",
-                    tint = TopBarTitle
+                    tint = TopBarTitle,
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 2.dp)
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = title,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = TopBarTitle
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = subtitle,
-                    fontSize = 12.sp,
-                    color = TopBarSub
-                )
+                if (subtitle.isNotBlank()) {
+                    Text(
+                        text = subtitle,
+                        fontSize = 11.sp,
+                        color = TopBarSub
+                    )
+                }
             }
 
-            IconButton(onClick = onHome) {
+            IconButton(onClick = onHome, modifier = Modifier.size(40.dp)) {
                 Icon(
                     imageVector = Icons.Outlined.Home,
                     contentDescription = "홈",
-                    tint = Mint
+                    tint = TopBarTitle,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
-
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = DividerColor
-        )
     }
 }
 

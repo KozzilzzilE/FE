@@ -1,36 +1,27 @@
 package com.example.fe.feature.list.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fe.common.BottomNavigationBar
-import com.example.fe.common.TopBar
 import com.example.fe.common.bottomNavItems
 import com.example.fe.navigation.Routes
 import com.example.fe.feature.list.TopicViewModel
 import com.example.fe.feature.list.TopicUiState
 import com.example.fe.feature.list.component.TopicCard
+import com.example.fe.ui.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopicListScreen(
     viewModel: TopicViewModel = viewModel(),
@@ -39,17 +30,7 @@ fun TopicListScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        containerColor = com.example.fe.ui.theme.BgPrimary,
-        topBar = {
-            TopBar(
-                title = "알고리즘 학습",
-                subtitle = null, // 대분류 화면에는 서브타이틀 없음
-                showBackIcon = false, // 탭 화면이므로 뒤로 가기 제거
-                showHomeIcon = false, // TopicList 화면에서는 우측 상단 홈버튼 제거
-                onBackClick = { /* TODO: 뒤로가기 로직 */ },
-                onHomeClick = { onNavigate(Routes.HOME) }
-            )
-        },
+        containerColor = BgPrimary,
         bottomBar = {
             BottomNavigationBar(
                 items = bottomNavItems,
@@ -64,33 +45,62 @@ fun TopicListScreen(
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = com.example.fe.ui.theme.Primary)
+                    CircularProgressIndicator(color = Primary)
                 }
             }
-            is TopicUiState.Error -> {
-            }
-            is TopicUiState.Success -> { // 성공이면 토픽 목록 화면에 표시
-                val topics = state.topics // 토픽 목록
-                val scrollState = rememberScrollState() // 스크롤 상태
+            is TopicUiState.Error -> {}
+            is TopicUiState.Success -> {
+                val topics = state.topics
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .verticalScroll(scrollState)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    topics.forEach { topic ->
-                        TopicCard(
-                            title = topic.displayName,
-                            onClick = {
-                                onNavigate(Routes.step(topic.topicId, topic.displayName))
-                            }
+                    // 헤더
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "알고리즘 학습",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = "${topics.size}개 주제",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = TextMuted
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // 토픽 목록
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        topics.forEachIndexed { index, topic ->
+                            TopicCard(
+                                title = topic.displayName,
+                                index = index,
+                                onClick = {
+                                    onNavigate(Routes.step(topic.topicId, topic.displayName))
+                                }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
     }
 }
-

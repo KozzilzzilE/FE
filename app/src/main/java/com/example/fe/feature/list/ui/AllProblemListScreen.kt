@@ -25,6 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.fe.common.BottomNavigationBar
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
 import com.example.fe.common.TopBar
 import com.example.fe.common.bottomNavItems
 import com.example.fe.common.ProblemListCard
@@ -75,7 +78,7 @@ fun AllProblemListScreen(
                 onNavigate = onNavigate
             )
         },
-        containerColor = Color.White
+        containerColor = BgPrimary
     ) { innerPadding ->
 
         Column(
@@ -87,7 +90,7 @@ fun AllProblemListScreen(
             // 상단 구분선
             HorizontalDivider(
                 thickness = 1.dp,
-                color = Color(0xFFE5E7EB)
+                color = BgDivider
             )
 
             // 필터
@@ -101,7 +104,7 @@ fun AllProblemListScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .background(Color(0xFFF7F9FB))
+                    .background(BgSurface)
                     .padding(top = 12.dp)   // 여기 추가
             ) {
                 LazyColumn(

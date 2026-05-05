@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,6 +29,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.list.model.Difficulty
 import com.example.fe.feature.list.ui.AllProblemItem
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.Blue
+import com.example.fe.ui.theme.Error
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.Success
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
 
 @Composable
 fun ProblemListCard(
@@ -40,7 +48,7 @@ fun ProblemListCard(
     Card(
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = BgSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -58,13 +66,9 @@ fun ProblemListCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = if (problem.isBookmarked) {
-                            Icons.Filled.Bookmark
-                        } else {
-                            Icons.Outlined.BookmarkBorder
-                        },
+                        imageVector = Icons.Outlined.BookmarkBorder,
                         contentDescription = "찜하기",
-                        tint = if (problem.isBookmarked) Color(0xFFFFC107) else Color(0xFF94A3B8),
+                        tint = if (problem.isBookmarked) Primary else BgElevated,
                         modifier = Modifier.clickable { onBookmarkClick() }
                     )
 
@@ -73,7 +77,7 @@ fun ProblemListCard(
                     Text(
                         text = "${problem.bookmarkCount}",
                         fontSize = 12.sp,
-                        color = Color(0xFF94A3B8)
+                        color = TextMuted
                     )
                 }
             }
@@ -84,7 +88,7 @@ fun ProblemListCard(
                 text = problem.title,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF111827)
+                color = TextPrimary
             )
         }
     }
@@ -95,15 +99,15 @@ private fun ProblemDifficultyBadge(
     difficulty: Difficulty
 ) {
     val backgroundColor = when (difficulty) {
-        Difficulty.EASY -> Color(0xFFE7F8F0)
-        Difficulty.MEDIUM -> Color(0xFFEAF1FF)
-        Difficulty.HARD -> Color(0xFFFFEAEA)
+        Difficulty.EASY -> Color(0x2022C55E)   // Success 20%
+        Difficulty.MEDIUM -> Color(0x203B82F6) // Blue 20%
+        Difficulty.HARD -> Color(0x20FB2C36)   // Error 20%
     }
 
     val textColor = when (difficulty) {
-        Difficulty.EASY -> Color(0xFF2EB67D)
-        Difficulty.MEDIUM -> Color(0xFF5B8DEF)
-        Difficulty.HARD -> Color(0xFFF26464)
+        Difficulty.EASY -> Success
+        Difficulty.MEDIUM -> Blue
+        Difficulty.HARD -> Error
     }
 
     val label = when (difficulty) {
@@ -132,7 +136,7 @@ private fun ProblemDifficultyBadge(
 private fun ProblemListCardPreview() {
     Column(
         modifier = Modifier
-            .background(Color(0xFFF7F9FB))
+            .background(BgPrimary)
             .padding(16.dp)
     ) {
         ProblemListCard(

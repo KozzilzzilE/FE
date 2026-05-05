@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.auth.component.InputSection
 import com.example.fe.feature.auth.component.SignUpLanguageDropdown
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.TextPrimary
 
 /*
 """
@@ -38,7 +41,7 @@ fun SocialSignUpScreen(
     var language by remember { mutableStateOf("") }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = BgPrimary,
         topBar = {
             Row(
                 modifier = Modifier
@@ -47,12 +50,13 @@ fun SocialSignUpScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onNavigateBack) {
-                    Icon(Icons.Filled.ArrowBackIosNew, contentDescription = "Back", tint = Color(0xFF1A1F27))
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextPrimary, modifier = Modifier.size(20.dp))
                 }
                 Text(
-                    text = "추가 정보 입력",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = "추가정보 입력",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -65,9 +69,13 @@ fun SocialSignUpScreen(
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(24.dp))
-            
-            Text("원활한 서비스 이용을 위해\n추가 정보를 입력해주세요.", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            
+            Text(
+                text = "원활한 서비스 이용을 위해\n추가 정보를 입력해주세요.", 
+                fontSize = 14.sp, 
+                fontWeight = FontWeight.Normal, 
+                color = com.example.fe.ui.theme.TextMuted,
+                lineHeight = 22.sp
+            )
             Spacer(modifier = Modifier.height(32.dp))
 
             InputSection(
@@ -89,6 +97,11 @@ fun SocialSignUpScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // 사용 언어 (드롭다운)
+            Row {
+                Text(text = "주 사용 언어", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+                Text(text = " *", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = com.example.fe.ui.theme.Primary)
+            }
+            Spacer(modifier = Modifier.height(6.dp))
             SignUpLanguageDropdown(
                 selectedLanguage = language,
                 onLanguageSelected = { language = it },
@@ -106,22 +119,10 @@ fun SocialSignUpScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                contentPadding = PaddingValues(0.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                colors = ButtonDefaults.buttonColors(containerColor = com.example.fe.ui.theme.Primary)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(Color(0xFF4A90E2), Color(0xFF50C9C3))
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("가입 완료", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                }
+                Text("가입 완료", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = BgPrimary)
             }
         }
     }

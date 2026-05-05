@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.*
@@ -128,15 +127,25 @@ fun SolveScreen(
                     onHomeClick = onHome,
                     rightContent = {
                         val isBookmarked = detail?.isBookmarked == true
-                        IconButton(onClick = { viewModel.toggleBookmark() }) {
-                            Icon(
-                                imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                                contentDescription = "즐겨찾기",
-                                tint = if (isBookmarked) Color(0xFFFFC107) else TextMuted
+                        val bookmarkCount = detail?.bookmarkCount ?: 0
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            IconButton(onClick = { viewModel.toggleBookmark() }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.BookmarkBorder,
+                                    contentDescription = "즐겨찾기",
+                                    tint = if (isBookmarked) Primary else BgElevated
+                                )
+                            }
+                            Text(
+                                text = "$bookmarkCount",
+                                fontSize = 13.sp,
+                                color = BgElevated
                             )
                         }
                     }
-                )
                 )
             },
             bottomBar = {
@@ -368,7 +377,7 @@ private fun EditorTabContent(
                         fontSize = 14.sp,
                         lineHeight = 20.sp
                     ),
-                    cursorBrush = SolidColor(Color.White),
+                    cursorBrush = SolidColor(Primary),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,
                         autoCorrect = false,

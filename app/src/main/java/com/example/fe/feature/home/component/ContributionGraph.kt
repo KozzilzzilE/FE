@@ -1,24 +1,18 @@
 package com.example.fe.feature.home.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.ui.theme.*
@@ -60,55 +54,52 @@ fun ContributionGraph(
         count
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        // 스트릭 정보 (성규님 디자인 테마에 팀원 레이아웃 통합)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(BgSurface, shape = RoundedCornerShape(14.dp))
+            .border(1.dp, BgElevated, RoundedCornerShape(14.dp))
+            .padding(horizontal = 14.dp, vertical = 16.dp)
+    ) {
+        // 스트릭 정보 (피그마 calCard 레이아웃)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(PrimaryDim15, shape = CircleShape),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.CalendarToday,
-                    contentDescription = null,
-                    tint = Primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(14.dp))
-            Column {
                 Text(
-                    text = "이번 달 학습일",
-                    fontSize = 13.sp,
+                    text = streakCount.toString(),
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Primary
+                )
+                Text(
+                    text = "일 연속 학습 중",
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = TextSecondary
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontSize = 20.sp, fontWeight = FontWeight.Black, color = TextPrimary)) {
-                            append("${streakCount}일 ")
-                        }
-                        withStyle(style = SpanStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Primary)) {
-                            append("연속")
-                        }
-                        append(" 🔥")
-                    },
                     color = TextPrimary
                 )
+                Text(
+                    text = "🔥",
+                    fontSize = 18.sp
+                )
             }
+            Text(
+                text = "최근 18주",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                color = TextMuted
+            )
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(BgSurface, shape = RoundedCornerShape(16.dp))
-                .padding(horizontal = 14.dp, vertical = 14.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Row {
                 Column(

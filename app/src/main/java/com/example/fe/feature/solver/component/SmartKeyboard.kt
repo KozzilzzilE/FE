@@ -8,10 +8,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun SmartKeyboardPanel(
@@ -91,7 +95,7 @@ private fun PageNavButton(
             text = text,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = if (enabled) Color(0xFF111827) else Color(0xFFCBD5E1)
+            color = if (enabled) TextPrimary else TextMuted
         )
     }
 }
@@ -105,13 +109,13 @@ private fun SmallKey(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        color = Color(0xFFF1F4F9),
+        color = BgElevated,
         modifier = modifier.height(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = text,
-                color = Color(0xFF111827),
+                color = TextPrimary,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -128,13 +132,13 @@ private fun BigKey(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        color = Color(0xFFE9EEF5),
+        color = BgSurface,
         modifier = modifier.height(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = text,
-                color = Color(0xFF4A5568),
+                color = TextSecondary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )

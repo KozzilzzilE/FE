@@ -81,9 +81,11 @@ fun LoginScreen(
 
         // 로고
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.logo_main),
             contentDescription = "PocketCo Logo",
-            modifier = Modifier.size(120.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(160.dp),
             contentScale = ContentScale.Fit
         )
 
@@ -126,7 +128,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Primary)
         ) {
             Text("로그인", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = BgPrimary)
@@ -153,7 +155,7 @@ fun LoginScreen(
         // Google 로그인
         SocialButton(
             text = "Google로 계속하기",
-            iconResId = R.drawable.ic_launcher_foreground,
+            iconResId = R.drawable.ic_google_logo,
             onClick = {
                 val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(context.getString(R.string.default_web_client_id))
@@ -169,7 +171,7 @@ fun LoginScreen(
         // GitHub 로그인
         SocialButton(
             text = "GitHub로 계속하기",
-            iconResId = R.drawable.ic_launcher_foreground,
+            iconResId = R.drawable.ic_github_logo,
             onClick = {
                 context.findActivity()?.let { onGithubLoginClick(it) }
             }
@@ -204,7 +206,7 @@ private fun AuthTextField(
         onValueChange = onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .height(54.dp),
+            .height(52.dp),
         placeholder = { Text(placeholder, color = TextMuted, fontSize = 15.sp) },
         leadingIcon = leadingIcon,
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
@@ -214,7 +216,7 @@ private fun AuthTextField(
             focusedContainerColor = BgSurface,
             unfocusedContainerColor = BgSurface,
             focusedBorderColor = Primary,
-            unfocusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = BgElevated,
             focusedTextColor = TextPrimary,
             unfocusedTextColor = TextPrimary,
             cursorColor = Primary
@@ -235,9 +237,20 @@ private fun SocialButton(
             .height(52.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.outlinedButtonColors(containerColor = BgSurface),
-        border = androidx.compose.foundation.BorderStroke(0.dp, Color.Transparent)
+        border = androidx.compose.foundation.BorderStroke(1.dp, BgElevated)
     ) {
-        Text(text, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = iconResId),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        }
     }
 }
 

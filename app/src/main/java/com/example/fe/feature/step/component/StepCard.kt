@@ -1,86 +1,109 @@
 package com.example.fe.feature.step.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material3.*
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fe.ui.theme.BgElevated
-import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.BgSurface
 import com.example.fe.ui.theme.TextPrimary
 import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun StepCard(
+    stepNumber: String,
     title: String,
     description: String,
-    backgroundColor: Color,
-    icon: ImageVector,
-    iconTint: Color,
+    accentColor: Color,
+    accentBg: Color,
     onClick: () -> Unit
 ) {
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            .height(130.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(BgSurface)
+            .border(1.dp, accentColor, RoundedCornerShape(14.dp))
+            .clickable { onClick() }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            // 좌측: 스텝 번호 패널
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(BgElevated),
+                    .width(80.dp)
+                    .fillMaxHeight()
+                    .background(accentBg),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = iconTint,
-                    modifier = Modifier.size(24.dp)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+                ) {
+                    Text(
+                        text = stepNumber,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = accentColor
+                    )
+                    Text(
+                        text = "STEP",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
+            // 우측: 내용
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(start = 14.dp, end = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
+            ) {
                 Text(
                     text = title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
                 )
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = description,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     color = TextSecondary
                 )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "시작하기",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = accentColor
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
             }
-
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "이동",
-                tint = TextMuted
-            )
         }
     }
 }

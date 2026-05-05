@@ -40,6 +40,15 @@ import androidx.compose.ui.zIndex
 import com.example.fe.common.TopBar
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
+import com.example.fe.ui.theme.BgDivider
+import com.example.fe.ui.theme.BgElevated
+import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
+import com.example.fe.ui.theme.CodeBgDark
+import com.example.fe.ui.theme.Primary
+import com.example.fe.ui.theme.TextMuted
+import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 
 @Composable
 fun EditorScreen(
@@ -51,7 +60,6 @@ fun EditorScreen(
     onGoSubmit: () -> Unit = {},
     onFullscreenClick: () -> Unit = {}
 ) {
-
 
     val uiState by viewModel.uiState.collectAsState()
     val titleToShow = uiState.problemDetail?.title.orEmpty()
@@ -72,8 +80,9 @@ fun EditorScreen(
 
     val isKeyboardVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Box(modifier = Modifier.fillMaxSize().background(BgPrimary)) {
         Scaffold(
+            containerColor = BgPrimary,
             contentWindowInsets = WindowInsets(0),
             topBar = {
                 TopBar(
@@ -85,7 +94,7 @@ fun EditorScreen(
             },
             bottomBar = {
                 if (!isKeyboardVisible && !editorFocused) {
-                    StepIndicator(total = 3, current = 2)
+                    StepIndicatorEditor(total = 3, current = 2)
                 }
             }
         ) { innerPadding ->
@@ -99,13 +108,13 @@ fun EditorScreen(
                         text = titleToShow,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         fontSize = 14.sp,
-                        color = Color(0xFF8A94A6),
+                        color = TextSecondary,
                         fontWeight = FontWeight.Medium
                     )
                 }
 
                 SolveTabBarForEditor(onGoProblem = onGoProblem, onGoSubmit = onGoSubmit)
-                HorizontalDivider(thickness = 1.dp, color = Color(0xFFE2E8F0))
+                HorizontalDivider(thickness = 1.dp, color = BgDivider)
 
                 Column(
                     modifier = Modifier
@@ -118,8 +127,8 @@ fun EditorScreen(
                             .fillMaxWidth()
                             .weight(1f),
                         shape = RoundedCornerShape(18.dp),
-                        color = Color(0xFF0E1627),
-                        border = BorderStroke(1.dp, Color(0xFF1C2A44))
+                        color = CodeBgDark,
+                        border = BorderStroke(1.dp, BgDivider)
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
                             IconButton(
@@ -132,7 +141,7 @@ fun EditorScreen(
                                 Icon(
                                     imageVector = Icons.Filled.OpenInFull,
                                     contentDescription = "전체화면",
-                                    tint = Color(0xFFE6EDF7),
+                                    tint = TextPrimary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -151,10 +160,10 @@ fun EditorScreen(
                                 textStyle = TextStyle(
                                     fontFamily = FontFamily.Monospace,
                                     fontSize = 14.sp,
-                                    color = Color(0xFFE6EDF7),
+                                    color = TextPrimary,
                                     lineHeight = 20.sp
                                 ),
-                                cursorBrush = SolidColor(Color.White),
+                                cursorBrush = SolidColor(Primary),
                                 keyboardOptions = KeyboardOptions(
                                     capitalization = KeyboardCapitalization.None,
                                     autoCorrect = false,
@@ -174,9 +183,9 @@ fun EditorScreen(
                                 .fillMaxWidth()
                                 .height(56.dp),
                             shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7CC8B8))
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary)
                         ) {
-                            Text("▷ 실행", fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("▷ 실행", fontWeight = FontWeight.Bold, color = BgPrimary)
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         OutlinedButton(
@@ -185,15 +194,14 @@ fun EditorScreen(
                                 .fillMaxWidth()
                                 .height(52.dp),
                             shape = RoundedCornerShape(14.dp),
-                            border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                            border = BorderStroke(1.dp, BgDivider)
                         ) {
-                            Text("초기화", color = Color.Black)
+                            Text("초기화", color = TextPrimary)
                         }
                     }
                 }
             }
         }
-
 
         AnimatedVisibility(
             visible = editorFocused || isKeyboardVisible,
@@ -205,11 +213,11 @@ fun EditorScreen(
         ) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
+                color = BgSurface,
                 shadowElevation = 16.dp
             ) {
                 Column {
-                    HorizontalDivider(color = Color(0xFFE2E8F0))
+                    HorizontalDivider(color = BgDivider)
                     SmartKeyboardPanel(
                         onInsert = { insert ->
                             val updated = insertIntoTextFieldValue(tfv, insert)
@@ -219,7 +227,6 @@ fun EditorScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            // ✅ 패널이 떠보이면 padding을 0에 가깝게
                             .padding(horizontal = 4.dp, vertical = 4.dp)
                     )
                 }
@@ -244,7 +251,7 @@ private fun SolveTabBarForEditor(onGoProblem: () -> Unit, onGoSubmit: () -> Unit
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFEFF2F6))
+            .background(BgElevated)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -264,7 +271,7 @@ private fun RowScope.SolveTabChipStatic(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = if (selected) Color.White else Color.Transparent,
+        color = if (selected) BgSurface else Color.Transparent,
         modifier = Modifier
             .weight(1f)
             .height(44.dp)
@@ -274,18 +281,27 @@ private fun RowScope.SolveTabChipStatic(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Icon(icon, label, tint = if (selected) Color.Black else Color.Gray, modifier = Modifier.size(18.dp))
+            Icon(
+                icon, label,
+                tint = if (selected) TextPrimary else TextMuted,
+                modifier = Modifier.size(18.dp)
+            )
             Spacer(Modifier.width(6.dp))
-            Text(label, color = if (selected) Color.Black else Color.Gray, fontSize = 14.sp)
+            Text(
+                label,
+                color = if (selected) TextPrimary else TextMuted,
+                fontSize = 14.sp
+            )
         }
     }
 }
 
 @Composable
-private fun StepIndicator(total: Int, current: Int) {
+private fun StepIndicatorEditor(total: Int, current: Int) {
     Row(
         Modifier
             .fillMaxWidth()
+            .background(BgPrimary)
             .padding(vertical = 10.dp),
         Arrangement.Center,
         Alignment.CenterVertically
@@ -297,7 +313,7 @@ private fun StepIndicator(total: Int, current: Int) {
                     .height(6.dp)
                     .width(if (active) 28.dp else 6.dp)
                     .clip(RoundedCornerShape(999.dp))
-                    .background(if (active) Color(0xFF4C83FF) else Color(0xFFD7E2FF))
+                    .background(if (active) Primary else BgElevated)
             )
             Spacer(Modifier.width(6.dp))
         }

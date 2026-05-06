@@ -20,7 +20,13 @@ object Routes {
     const val LANGUAGE_SETTING = "language_setting"
     const val FAVORITE_PROBLEMS = "favorite_problems"
 
-    // CS 퀴즈
+    // SubmissionRecord
+    const val HISTORY_ID = "historyId"
+    const val SUBMISSION_RECORD = "submission_record"
+    const val SUBMISSION_DETAIL_ROUTE = "submission_detail/{$HISTORY_ID}"
+    fun submissionDetail(historyId: Long) = "submission_detail/$historyId"
+
+    // CS Quiz
     const val CS_QUIZ = "cs_quiz"
 
     // Args

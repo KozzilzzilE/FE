@@ -57,8 +57,12 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
                     _uiState.value = ProblemUiState.Error("서버 응답 오류 (${response.code()})")
                 }
             } catch (e: Exception) {
-                Log.e("AllProblemListVM", "예외 발생", e)
-                _uiState.value = ProblemUiState.Error("네트워크 오류가 발생했습니다")
+                Log.e("AllProblemListVM", "예외 발생 — 더미 데이터 사용", e)
+                val dummy = com.example.fe.feature.list.data.ProblemDummyData.problems
+                val filtered = if (difficulty != null)
+                    dummy.filter { it.difficulty.equals(difficulty, ignoreCase = true) }
+                else dummy
+                _uiState.value = ProblemUiState.Success(filtered)
             }
         }
     }

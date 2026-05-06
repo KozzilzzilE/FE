@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.example.fe.ui.theme.BgDivider
 import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.BgSurface
-import com.example.fe.ui.theme.Blue
+import com.example.fe.ui.theme.Primary
 import com.example.fe.ui.theme.TextMuted
 import com.example.fe.ui.theme.TextPrimary
 
@@ -32,15 +32,15 @@ fun DifficultyChip(
     Surface(
         modifier = Modifier.clickable { onClick() },
         shape = CircleShape,
-        color = if (selected) Blue else BgSurface,
+        color = if (selected) Primary else BgSurface,
         border = BorderStroke(
             1.dp,
-            if (selected) Blue else BgDivider
+            if (selected) Primary else BgDivider
         )
     ) {
         Text(
             text = text,
-            color = if (selected) TextPrimary else TextMuted,
+            color = if (selected) BgPrimary else TextMuted,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)

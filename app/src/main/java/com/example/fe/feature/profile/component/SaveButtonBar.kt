@@ -32,7 +32,7 @@ fun SaveButtonBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BgSurface)
+            .background(BgPrimary)
             .navigationBarsPadding()
             .padding(horizontal = 24.dp, vertical = 14.dp)
     ) {

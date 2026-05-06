@@ -64,6 +64,9 @@ import com.example.fe.feature.profile.data.BookmarkRepository
 import com.example.fe.feature.list.AllProblemListViewModel
 import com.example.fe.feature.list.AllProblemListViewModelFactory
 import com.example.fe.api.RetrofitClient
+import com.example.fe.feature.aireview.SubmissionViewModel
+import com.example.fe.feature.aireview.ui.SubmissionRecordScreen
+import com.example.fe.feature.aireview.ui.SubmissionDetailScreen
 
 @Composable
 fun AppNavGraph() {
@@ -82,6 +85,9 @@ fun AppNavGraph() {
         SolverViewModelFactory(solverRepository, solverDraftDataStore)
     }
     val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
+
+    // 제출 기록 / AI 리뷰 ViewModel
+    val submissionViewModel: SubmissionViewModel = viewModel()
 
     // 마이페이지 ViewModel은 여기서 1번만 생성해서 공유
     val profileRepository = remember { ProfileRepository(RetrofitClient.instance) }
@@ -208,70 +214,53 @@ fun AppNavGraph() {
                 viewModel.loadAllProblems()
             }
 
-            when (val state = uiState) {
-                is ProblemUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                        androidx.compose.material3.CircularProgressIndicator()
-                    }
-                }
-                is ProblemUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                        androidx.compose.material3.Text(text = state.message)
-                    }
-                }
-                is ProblemUiState.Success -> {
-                    val problems = state.problems.map { res ->
-                        AllProblemItem(
-                            problemId = res.problemId,
-                            title = res.title,
-                            difficulty = when (res.difficulty) {
-                                "EASY" -> Difficulty.EASY
-                                "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
-                                "HARD" -> Difficulty.HARD
-                                else -> Difficulty.EASY
-                            },
-                            bookmarkCount = res.bookmarkCount ?: 0,
-                            isBookmarked = res.isBookmark ?: false
-                        )
-                    }
-
-                    // 검색어 필터링은 클라이언트에서 수행
-                    val filteredProblems = problems.filter { problem ->
-                        problem.title.contains(searchQuery, ignoreCase = true)
-                    }
-
-                    AllProblemListScreen(
-                        problems = filteredProblems,
-                        selectedDifficulty = selectedDifficulty,
-                        currentPage = currentPage,
-                        totalPages = totalPages,
-                        onDifficultySelected = { filter ->
-                            val diffStr = when (filter) {
-                                AllProblemDifficultyFilter.EASY -> "EASY"
-                                AllProblemDifficultyFilter.MEDIUM -> "MEDIUM"
-                                AllProblemDifficultyFilter.HARD -> "HARD"
-                                else -> null
-                            }
-                            // 난이도 변경 시 1페이지부터 새로 로드
-                            viewModel.loadAllProblems(page = 1, difficulty = diffStr)
+            val problems = if (uiState is ProblemUiState.Success) {
+                (uiState as ProblemUiState.Success).problems.map { res ->
+                    AllProblemItem(
+                        problemId = res.problemId,
+                        title = res.title,
+                        difficulty = when (res.difficulty) {
+                            "EASY" -> Difficulty.EASY
+                            "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
+                            "HARD" -> Difficulty.HARD
+                            else -> Difficulty.EASY
                         },
-                        onProblemClick = { item ->
-                            navController.navigate(Routes.solve(item.problemId, item.difficulty.name))
-                        },
-                        onBookmarkClick = { problemId ->
-                            val isBookmarked = problems.find { it.problemId == problemId }?.isBookmarked ?: false
-                            viewModel.toggleBookmark(problemId, isBookmarked)
-                        },
-                        onPageChange = { viewModel.loadAllProblems(page = it) },
-                        onNavigate = { route ->
-                            navController.navigate(route) {
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
+                        bookmarkCount = res.bookmarkCount ?: 0,
+                        isBookmarked = res.isBookmark ?: false
                     )
                 }
-            }
+            } else emptyList()
+
+            AllProblemListScreen(
+                problems = problems.filter { it.title.contains(searchQuery, ignoreCase = true) },
+                selectedDifficulty = selectedDifficulty,
+                currentPage = currentPage,
+                totalPages = totalPages,
+                isLoading = uiState is ProblemUiState.Loading,
+                onDifficultySelected = { filter ->
+                    val diffStr = when (filter) {
+                        AllProblemDifficultyFilter.EASY -> "EASY"
+                        AllProblemDifficultyFilter.MEDIUM -> "MEDIUM"
+                        AllProblemDifficultyFilter.HARD -> "HARD"
+                        else -> null
+                    }
+                    viewModel.loadAllProblems(page = 1, difficulty = diffStr)
+                },
+                onProblemClick = { item ->
+                    navController.navigate(Routes.solve(item.problemId, item.difficulty.name))
+                },
+                onBookmarkClick = { problemId ->
+                    val isBookmarked = problems.find { it.problemId == problemId }?.isBookmarked ?: false
+                    viewModel.toggleBookmark(problemId, isBookmarked)
+                },
+                onPageChange = { viewModel.loadAllProblems(page = it) },
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
 
         // 마이페이지
@@ -293,7 +282,9 @@ fun AppNavGraph() {
                 onFavoriteClick = {
                     navController.navigate(Routes.FAVORITE_PROBLEMS)
                 },
-                onSubmissionClick = {},
+                onSubmissionClick = {
+                    navController.navigate(Routes.SUBMISSION_RECORD)
+                },
                 onLogoutClick = {
                     com.example.fe.common.TokenManager.clearAccessToken()
                     navController.navigate(Routes.LOGIN) {
@@ -357,7 +348,29 @@ fun AppNavGraph() {
             )
         }
 
+        // 제출 기록 목록
+        composable(Routes.SUBMISSION_RECORD) {
+            SubmissionRecordScreen(
+                viewModel = submissionViewModel,
+                onBack = { navController.popBackStack() },
+                onEntryClick = { historyId ->
+                    navController.navigate(Routes.submissionDetail(historyId))
+                }
+            )
+        }
 
+        // 제출 상세 / AI 코드 리뷰
+        composable(
+            route = Routes.SUBMISSION_DETAIL_ROUTE,
+            arguments = listOf(navArgument(Routes.HISTORY_ID) { type = NavType.LongType })
+        ) { backStackEntry ->
+            val historyId = backStackEntry.arguments?.getLong(Routes.HISTORY_ID) ?: return@composable
+            LaunchedEffect(historyId) { submissionViewModel.selectEntry(historyId) }
+            SubmissionDetailScreen(
+                viewModel = submissionViewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
 
         composable(route = Routes.TOPIC) {
             TopicListScreen(

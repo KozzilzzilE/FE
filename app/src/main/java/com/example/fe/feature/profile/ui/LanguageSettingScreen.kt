@@ -102,7 +102,7 @@ fun LanguageSettingScreen(
             Text(
                 text = "문제 풀이 시 기본으로 선택될 프로그래밍 언어를 설정해 주세요.",
                 color = TextSecondary,
-                fontSize = 15.sp,
+                fontSize = 13.sp,
                 lineHeight = 22.sp
             )
 
@@ -125,11 +125,9 @@ fun LanguageSettingScreen(
 private fun getLanguageDescription(name: String): String {
     return when (name.uppercase()) {
         "PYTHON" -> "알고리즘 코딩 테스트 추천"
-        "JAVA" -> "엔터프라이즈 환경 추천"
+        "JAVA" -> "다수의 사용자가 선택"
         "C++", "CPP" -> "가장 빠른 실행 속도"
         "JAVASCRIPT" -> "프론트엔드/백엔드 범용"
-        "GO" -> "효율적인 동시성 처리"
-        "KOTLIN" -> "안드로이드 개발 추천"
         else -> "선호 언어로 사용할 수 있어요"
     }
 }

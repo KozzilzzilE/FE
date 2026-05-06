@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.ui.theme.BgDivider
-import com.example.fe.ui.theme.Blue
+import com.example.fe.ui.theme.Primary
 import com.example.fe.ui.theme.TextMuted
 import com.example.fe.ui.theme.TextPrimary
 
@@ -55,7 +55,7 @@ fun PaginationBar(
             Box(
                 modifier = Modifier
                     .background(
-                        if (isSelected) Blue else Color.Transparent,
+                        if (isSelected) Primary else Color.Transparent,
                         shape = CircleShape
                     )
                     .clickable { onPageChange(page) }

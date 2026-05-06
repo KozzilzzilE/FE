@@ -1,55 +1,44 @@
 package com.example.fe.feature.profile.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.fe.common.BottomNavigationBar
 import com.example.fe.common.bottomNavItems
 import com.example.fe.feature.profile.MyPageViewModel
-import com.example.fe.feature.profile.component.LogoutButton
-import com.example.fe.feature.profile.component.MenuItemCard
-import com.example.fe.feature.profile.component.ProfileHeader
-import com.example.fe.feature.profile.component.StatSection
-import com.example.fe.feature.profile.model.ProfileStat
 import com.example.fe.navigation.Routes
-import com.example.fe.ui.theme.BgDivider
-import com.example.fe.ui.theme.BgPrimary
-import com.example.fe.ui.theme.BgSurface
-import com.example.fe.ui.theme.Primary
-import com.example.fe.ui.theme.TextMuted
-import com.example.fe.ui.theme.TextPrimary
-import com.example.fe.ui.theme.TextSecondary
+import com.example.fe.ui.theme.*
 
 @Composable
 fun MyPageScreen(
@@ -75,37 +64,41 @@ fun MyPageScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    MyPageScreenContent(
-        uiState = uiState,
-        onNavigate = onNavigate,
-        onEditProfileClick = onEditProfileClick,
-        onLanguageClick = onLanguageClick,
-        onFavoriteClick = onFavoriteClick,
-        onSubmissionClick = onSubmissionClick,
-        onLogoutClick = onLogoutClick,
-        onSettingsClick = onSettingsClick
-    )
-}
-
-@Composable
-private fun MyPageScreenContent(
-    uiState: MyPageUiState,
-    onNavigate: (String) -> Unit = {},
-    onEditProfileClick: () -> Unit = {},
-    onLanguageClick: () -> Unit = {},
-    onFavoriteClick: () -> Unit = {},
-    onSubmissionClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
-) {
     Scaffold(
         containerColor = BgPrimary,
         bottomBar = {
-            BottomNavigationBar(
-                items = bottomNavItems,
-                currentRoute = Routes.MY,
-                onNavigate = onNavigate
-            )
+            Column {
+                // ─── 로그아웃 ───
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .height(130.dp)
+                        .clickable { onLogoutClick() },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
+                        contentDescription = null,
+                        tint = Color(0xFFFB2C36),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "로그아웃",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFFFB2C36),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                BottomNavigationBar(
+                    items = bottomNavItems,
+                    currentRoute = Routes.MY,
+                    onNavigate = onNavigate
+                )
+            }
         }
     ) { innerPadding ->
         Column(
@@ -114,143 +107,304 @@ private fun MyPageScreenContent(
                 .background(BgPrimary)
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            MyPageTopBar(onSettingsClick = onSettingsClick)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            ProfileHeader(
-                userName = if (uiState.userName.isBlank()) "사용자" else uiState.userName,
-                bio = if (uiState.languageName.isBlank()) "언어 정보 없음" else uiState.languageName,
-                level = uiState.level
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            HorizontalDivider(color = BgDivider, thickness = 1.dp)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            StatSection(
-                streak = uiState.stat.streak,
-                solved = uiState.stat.solved
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            SectionTitle("계정 관리")
-            Spacer(modifier = Modifier.height(10.dp))
-
-            MenuItemCard(
-                title = "개인 정보 수정",
-                iconText = "👤",
-                iconColor = Primary,
-                onClick = onEditProfileClick
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            SectionTitle("학습 관리")
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                color = BgSurface
+            // ─── Top Bar ───
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(modifier = Modifier.padding(vertical = 6.dp)) {
-                    MenuItemCardInner(
-                        title = "선호 언어 설정",
-                        iconText = "🌐",
-                        onClick = onLanguageClick
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = BgDivider,
-                        thickness = 0.5.dp
-                    )
-                    MenuItemCardInner(
-                        title = "내가 찜한 문제",
-                        iconText = "☆",
-                        onClick = onFavoriteClick
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = BgDivider,
-                        thickness = 0.5.dp
-                    )
-                    MenuItemCardInner(
-                        title = "제출 기록 보기",
-                        iconText = "↺",
-                        onClick = onSubmissionClick
+                Text(
+                    text = "마이페이지",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
+                )
+                IconButton(
+                    onClick = onSettingsClick,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = "설정",
+                        tint = TextMuted,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(Modifier.height(16.dp))
 
-            LogoutButton(onClick = onLogoutClick)
+            // ─── myProfileCard ───
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = BgSurface,
+                border = BorderStroke(1.dp, Color(0xFF44403C))
+            ) {
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Avatar (gradient circle)
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFFF59E0B),
+                                        Color(0xFFE8A825)
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.PersonOutline,
+                            contentDescription = null,
+                            tint = Color(0xFF0A0A0A),
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                    // myMeta
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        // myName
+                        Text(
+                            text = uiState.userName.ifBlank { "사용자" },
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFAFAF9)
+                        )
+                        // myEmail
+                        Text(
+                            text = "leech000107107@gmail.com",
+                            fontSize = 12.sp,
+                            color = Color(0xFF78716C)
+                        )
+                        // language tag
+                        Text(
+                            text = uiState.languageName.ifBlank { "java" },
+                            fontSize = 14.sp,
+                            color = Color(0xFF99A1AF)
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(28.dp))
+
+            // ─── myStats (mySt1, mySt2, mySt3) ───
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                StatCard(
+                    value = "23",
+                    label = "학습 일수",
+                    valueColor = Color(0xFF3B82F6),
+                    modifier = Modifier.weight(1f)
+                )
+                StatCard(
+                    value = "47",
+                    label = "풀이 문제",
+                    valueColor = Color(0xFFF59E0B),
+                    modifier = Modifier.weight(1f)
+                )
+                StatCard(
+                    value = "5",
+                    label = "연속 학습",
+                    valueColor = Color(0xFF22C55E),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // ─── 계정 관리 ───
+            Text(
+                text = "계정 관리",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFFD1D5DC),
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // 개인 정보 수정 버튼
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = BgSurface
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onEditProfileClick() }
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.PersonOutline,
+                        contentDescription = null,
+                        tint = Color(0xFFF59E0B),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = "개인 정보 수정",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = TextMuted,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // ─── 학습 관리 ───
+            Text(
+                text = "학습 관리",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFFD1D5DC),
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // Grouped menu card
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = BgSurface
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
+                    GroupMenuItem(
+                        icon = Icons.Outlined.FolderOpen,
+                        title = "문제 제출 기록",
+                        onClick = onSubmissionClick
+                    )
+                    MenuDivider()
+                    GroupMenuItem(
+                        icon = Icons.Outlined.Language,
+                        title = "선호 언어 설정",
+                        onClick = onLanguageClick
+                    )
+                    MenuDivider()
+                    GroupMenuItem(
+                        icon = Icons.Outlined.BookmarkBorder,
+                        title = "내가 찜한 문제",
+                        onClick = onFavoriteClick
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(28.dp))
         }
     }
 }
 
+// ─── Stat Card (mySt1, mySt2, mySt3) ───
 @Composable
-private fun MyPageTopBar(onSettingsClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+private fun StatCard(
+    value: String,
+    label: String,
+    valueColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = BgSurface,
+        border = BorderStroke(1.dp, Color(0xFF44403C))
     ) {
-        Text(
-            text = "마이페이지",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary
-        )
-        IconButton(onClick = onSettingsClick) {
-            Icon(
-                imageVector = Icons.Outlined.Settings,
-                contentDescription = "설정",
-                tint = TextMuted,
-                modifier = Modifier.size(24.dp)
+        Column(
+            modifier = Modifier.padding(vertical = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = value,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = valueColor
+            )
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                color = Color(0xFFA8A29E)
             )
         }
     }
 }
 
+// ─── Group Menu Item ───
 @Composable
-private fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        color = TextSecondary,
-        fontWeight = FontWeight.SemiBold
-    )
-}
-
-@Composable
-private fun MenuItemCardInner(
+private fun GroupMenuItem(
+    icon: ImageVector,
     title: String,
-    iconText: String,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .clip(RoundedCornerShape(14.dp))
             .clickable { onClick() }
-            .padding(horizontal = 18.dp),
+            .padding(horizontal = 12.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = iconText, color = Primary)
-            Spacer(modifier = Modifier.size(12.dp))
-            Text(text = title, color = TextPrimary)
-        }
-        Text(text = ">", color = TextMuted)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color(0xFFF59E0B),
+            modifier = Modifier.size(20.dp)
+        )
+        Text(
+            text = title,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.White,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+            contentDescription = null,
+            tint = TextMuted,
+            modifier = Modifier.size(16.dp)
+        )
     }
+}
+
+// ─── Menu Divider ───
+@Composable
+private fun MenuDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 12.dp),
+        thickness = 1.dp,
+        color = Color(0xFF57534E)
+    )
 }

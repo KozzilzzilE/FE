@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -107,11 +108,7 @@ private fun ProfileImageSection() {
             modifier = Modifier
                 .size(118.dp)
                 .clip(CircleShape)
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(Primary, com.example.fe.ui.theme.Success)
-                    )
-                ),
+                .background(Color(0xFFF59E0B)),
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -124,7 +121,7 @@ private fun ProfileImageSection() {
                 Icon(
                     imageVector = Icons.Outlined.Person,
                     contentDescription = "프로필",
-                    tint = TextMuted,
+                    tint = TextSecondary,
                     modifier = Modifier.size(46.dp)
                 )
             }
@@ -135,13 +132,13 @@ private fun ProfileImageSection() {
                 .offset(x = (-2).dp, y = (-2).dp)
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(BgSurface),
+                .background(Color(0xFFF59E0B)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Outlined.CameraAlt,
                 contentDescription = "프로필 사진 변경",
-                tint = TextSecondary,
+                tint = Color(0xFF0A0A0A),
                 modifier = Modifier.size(18.dp)
             )
         }

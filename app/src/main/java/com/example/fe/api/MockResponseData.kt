@@ -401,7 +401,7 @@ object MockResponseData {
         "result": {
             "topicId": 1,
             "count": 3,
-            "problems": [
+            "problemList": [
                 {
                     "problemId": 1,
                     "title": "두 수의 합",

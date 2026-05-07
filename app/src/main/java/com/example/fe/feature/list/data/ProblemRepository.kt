@@ -14,7 +14,7 @@ class ProblemRepository(private val apiService: ApiService) {
     }
 
     suspend fun getAllProblems(token: String, page: Int, difficulty: String? = null): Response<AllProblemListResponse> {
-        return apiService.getAllProblems("Bearer $token", page, difficulty = difficulty)
+        return apiService.getAllProblems("Bearer $token", page, size = 20, difficulty = difficulty)
     }
 
     suspend fun toggleBookmark(token: String, problemId: Long, isCurrentlyBookmarked: Boolean): Boolean {

@@ -26,7 +26,8 @@ data class ProblemResult(
     @SerializedName("difficulty") val difficulty: String,
     @SerializedName("difficultyDisplayName") val difficultyDisplayName: String,
     @SerializedName("bookmarkCount") val bookmarkCount: Int?,
-    @SerializedName("isBookmark") val isBookmark: Boolean?
+    @SerializedName("isBookmark") val isBookmark: Boolean?,
+    @SerializedName("isCompleted") val isCompleted: Boolean?
 )
 
 /**
@@ -41,8 +42,9 @@ data class AllProblemListResponse(
 )
 
 data class AllProblemListResult(
-    @SerializedName("count") val count: Int,
-    @SerializedName("problems") val problems: List<ProblemResult>
+    @SerializedName("problemList") val problemList: List<ProblemResult>,
+    @SerializedName("totalPage") val totalPage: Int = 1,
+    @SerializedName("totalElements") val totalElements: Int = 0
 )
 
 /**

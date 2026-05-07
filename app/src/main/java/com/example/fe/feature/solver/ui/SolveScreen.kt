@@ -56,7 +56,7 @@ fun SolveScreen(
     onOpenEditorFull: (Long) -> Unit = {}
 ) {
     LaunchedEffect(problemId) {
-        viewModel.loadDraft(problemId)
+        viewModel.loadProblemDetail(problemId)
     }
 
     val uiState by viewModel.uiState.collectAsState()
@@ -217,7 +217,7 @@ fun SolveScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = uiState.language.replaceFirstChar { it.uppercaseChar() },
+                                        text = uiState.language,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = TextSecondary

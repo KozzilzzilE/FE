@@ -57,15 +57,21 @@ class SolverViewModel(
     /**
      * 문제 상세 조회
      */
-    fun loadProblemDetail(problemId: Long, language: String = _uiState.value.language, difficultyLabel: String? = null) {
+    fun loadProblemDetail(problemId: Long, language: String? = null, difficultyLabel: String? = null) {
         val oldState = _uiState.value
         val preservedDifficulty = difficultyLabel ?: if (oldState.problemId == problemId) oldState.problemDetail?.difficultyLabel else null
 
         viewModelScope.launch {
+            // 1. 사용할 언어 결정 (전달받은 값 -> 기존 상태 값 -> 선호 언어)
+            val finalLanguage = language 
+                ?: oldState.language.takeIf { it.isNotBlank() } 
+                ?: TokenManager.getPreferredLanguage() // 새로 추가될 메서드
+                ?: "JAVA"
+
             _uiState.update {
                 it.copy(
                     problemId = problemId,
-                    language = language,
+                    language = finalLanguage,
                     isLoadingProblem = true
                 )
             }
@@ -74,17 +80,25 @@ class SolverViewModel(
                 val token = TokenManager.getAccessToken()
                     ?: throw Exception("로그인 토큰이 없습니다.")
 
-                val detail = repository.loadProblemDetail(token, problemId, language, preservedDifficulty)
+                // 문제 상세 정보 로드
+                val detail = repository.loadProblemDetail(token, problemId, finalLanguage, preservedDifficulty)
 
-                // 서버에서 임시 저장된 코드 가져오기 시도
-                val serverDraft = repository.loadDraftCode(token, problemId, language)
+                // 서버에서 임시 저장된 코드 가져오기 (실패해도 문제 로드는 계속 진행)
+                val serverDraft = try {
+                    repository.loadDraftCode(token, problemId, finalLanguage)
+                } catch (e: Exception) {
+                    Log.e("SolverViewModel", "임시 코드 로드 실패", e)
+                    null
+                }
 
                 _uiState.update { state ->
+                    val isLanguageChanged = oldState.language != finalLanguage && oldState.language.isNotBlank()
+
                     state.copy(
                         isLoadingProblem = false,
                         problemDetail = detail,
                         testCases = detail.testCases,
-                        code = serverDraft ?: if (state.code.isBlank() || state.code == detail.initialCode) {
+                        code = serverDraft ?: if (isLanguageChanged || state.code.isBlank() || state.code == detail.initialCode) {
                             detail.initialCode
                         } else {
                             state.code

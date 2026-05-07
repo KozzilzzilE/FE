@@ -214,6 +214,25 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("problemId") problemId: Long
     ): Response<com.example.fe.data.dto.BookmarkResponse>
+
+    // --- [임시 저장] ---
+
+    // 문제별 임시 코드 저장
+    @retrofit2.http.PUT("api/v1/problems/{problemId}/temp-storages")
+    suspend fun saveTempCode(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("problemId") problemId: Long,
+        @Query("language") language: String,
+        @Body request: com.example.fe.data.dto.TempSaveRequestDto
+    ): Response<com.example.fe.data.dto.TempSaveResponseDto>
+
+    // 문제별 임시 코드 조회
+    @GET("api/v1/problems/{problemId}/temp-storages")
+    suspend fun getTempCode(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("problemId") problemId: Long,
+        @Query("language") language: String
+    ): Response<com.example.fe.data.dto.TempSaveResponseDto>
 }
 
 

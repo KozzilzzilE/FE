@@ -57,7 +57,6 @@ import com.example.fe.feature.list.ProblemListViewModel
 import com.example.fe.feature.list.ProblemListViewModelFactory
 import com.example.fe.feature.list.ProblemUiState
 import com.example.fe.feature.list.data.ProblemRepository
-import com.example.fe.feature.solver.data.SolverDraftDataStore
 import com.example.fe.feature.profile.BookmarkViewModel
 import com.example.fe.feature.profile.BookmarkViewModelFactory
 import com.example.fe.feature.profile.data.BookmarkRepository
@@ -80,9 +79,8 @@ fun AppNavGraph() {
     val authState by authViewModel.authState.collectAsState()
 
     val solverRepository = remember { SolverRepository(RetrofitClient.instance) }
-    val solverDraftDataStore = remember(context) { SolverDraftDataStore(context) }
-    val solverViewModelFactory = remember(solverRepository, solverDraftDataStore) {
-        SolverViewModelFactory(solverRepository, solverDraftDataStore)
+    val solverViewModelFactory = remember(solverRepository) {
+        SolverViewModelFactory(solverRepository)
     }
     val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
 

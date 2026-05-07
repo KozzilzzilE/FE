@@ -338,4 +338,52 @@ public class Solution {
             )
         }
     }
+
+    /**
+     * 임시 코드 저장 (Draft)
+     */
+    suspend fun saveDraftCode(
+        token: String,
+        problemId: Long,
+        language: String,
+        code: String
+    ) {
+        val response = apiService.saveTempCode(
+            token = "Bearer $token",
+            problemId = problemId,
+            language = language,
+            request = com.example.fe.data.dto.TempSaveRequestDto(sourceCode = code)
+        )
+
+        if (!response.isSuccessful) {
+            throw Exception("임시 저장 실패: ${response.code()}")
+        }
+
+        val body = response.body() ?: throw Exception("응답 데이터가 없습니다.")
+        if (!body.isSuccess) {
+            throw Exception(body.message)
+        }
+    }
+
+    /**
+     * 임시 코드 조회 (Draft)
+     */
+    suspend fun loadDraftCode(
+        token: String,
+        problemId: Long,
+        language: String
+    ): String? {
+        val response = apiService.getTempCode(
+            token = "Bearer $token",
+            problemId = problemId,
+            language = language
+        )
+
+        if (!response.isSuccessful) return null
+
+        val body = response.body() ?: return null
+        if (!body.isSuccess) return null
+
+        return body.result?.sourceCode
+    }
 }

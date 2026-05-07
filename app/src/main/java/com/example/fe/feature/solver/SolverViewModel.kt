@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.util.Log
 import com.example.fe.common.TokenManager
-import com.example.fe.feature.solver.data.SolverDraftDataStore
 import com.example.fe.feature.solver.data.SolverRepository
 import com.example.fe.feature.solver.model.SolverUiState
 import com.example.fe.feature.solver.model.SubmissionRecord
@@ -21,8 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SolverViewModel(
-    private val repository: SolverRepository,
-    private val draftDataStore: SolverDraftDataStore
+    private val repository: SolverRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -78,12 +76,15 @@ class SolverViewModel(
 
                 val detail = repository.loadProblemDetail(token, problemId, language, preservedDifficulty)
 
+                // 서버에서 임시 저장된 코드 가져오기 시도
+                val serverDraft = repository.loadDraftCode(token, problemId, language)
+
                 _uiState.update { state ->
                     state.copy(
                         isLoadingProblem = false,
                         problemDetail = detail,
                         testCases = detail.testCases,
-                        code = if (state.code.isBlank() || state.code == detail.initialCode) {
+                        code = serverDraft ?: if (state.code.isBlank() || state.code == detail.initialCode) {
                             detail.initialCode
                         } else {
                             state.code
@@ -147,41 +148,12 @@ class SolverViewModel(
         }
     }
 
-    /**
-     * 기존 코드 불러오기
-     */
-    fun loadDraft(problemId: Long) {
-        viewModelScope.launch {
-            val draft = draftDataStore.loadDraft(problemId.toInt())
-
-            draft?.let {
-                _uiState.update { current ->
-                    current.copy(
-                        code = it.code,
-                        language = it.language
-                    )
-                }
-            }
-        }
-    }
 
     /**
      * 코드 수정 (임시 저장)
      */
     fun updateCode(newCode: String) {
         _uiState.update { it.copy(code = newCode) }
-
-        viewModelScope.launch {
-            val problemId = _uiState.value.problemId
-
-            if (problemId == 0L) return@launch
-
-            draftDataStore.saveDraft(
-                problemId = problemId.toInt(),
-                language = _uiState.value.language,
-                code = newCode
-            )
-        }
     }
 
     /**
@@ -193,11 +165,19 @@ class SolverViewModel(
         viewModelScope.launch {
             if (state.problemId == 0L) return@launch
 
-            draftDataStore.saveDraft(
-                problemId = state.problemId.toInt(),
-                language = state.language,
-                code = state.code
-            )
+            // 서버 API로 저장
+            try {
+                val token = TokenManager.getAccessToken() ?: ""
+                repository.saveDraftCode(
+                    token = token,
+                    problemId = state.problemId,
+                    language = state.language,
+                    code = state.code
+                )
+                Log.d("SolverViewModel", "서버 임시 저장 성공")
+            } catch (e: Exception) {
+                Log.e("SolverViewModel", "서버 임시 저장 실패", e)
+            }
         }
     }
 

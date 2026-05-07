@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.util.Log
 import com.example.fe.common.TokenManager
-import com.example.fe.feature.solver.data.SolverDraftDataStore
 import com.example.fe.feature.solver.data.SolverRepository
 import com.example.fe.feature.solver.model.SolverUiState
 import com.example.fe.feature.solver.model.SubmissionRecord
@@ -21,8 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SolverViewModel(
-    private val repository: SolverRepository,
-    private val draftDataStore: SolverDraftDataStore
+    private val repository: SolverRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -150,41 +148,12 @@ class SolverViewModel(
         }
     }
 
-    /**
-     * 기존 코드 불러오기
-     */
-    fun loadDraft(problemId: Long) {
-        viewModelScope.launch {
-            val draft = draftDataStore.loadDraft(problemId.toInt())
-
-            draft?.let {
-                _uiState.update { current ->
-                    current.copy(
-                        code = it.code,
-                        language = it.language
-                    )
-                }
-            }
-        }
-    }
 
     /**
      * 코드 수정 (임시 저장)
      */
     fun updateCode(newCode: String) {
         _uiState.update { it.copy(code = newCode) }
-
-        viewModelScope.launch {
-            val problemId = _uiState.value.problemId
-
-            if (problemId == 0L) return@launch
-
-            draftDataStore.saveDraft(
-                problemId = problemId.toInt(),
-                language = _uiState.value.language,
-                code = newCode
-            )
-        }
     }
 
     /**
@@ -195,13 +164,6 @@ class SolverViewModel(
 
         viewModelScope.launch {
             if (state.problemId == 0L) return@launch
-
-            // 로컬 저장소에 저장
-            draftDataStore.saveDraft(
-                problemId = state.problemId.toInt(),
-                language = state.language,
-                code = state.code
-            )
 
             // 서버 API로 저장
             try {

@@ -18,17 +18,9 @@ class SolverRepository(
 ) {
 
     companion object {
-        // 문제 상세 진입 시 기본으로 보여줄 Java 템플릿
-        private val DEFAULT_JAVA_TEMPLATE = """
-import java.util.*;
-
-public class Solution {
-    public int[] solution(int[] nums) {
-        // 여기에 코드를 작성하세요...
-        return new int[] {};
-    }
-}
-        """.trimIndent()
+        fun getInitialCode(language: String): String {
+            return CodeTemplates.getInitialCode(language)
+        }
     }
 
     /**
@@ -73,7 +65,7 @@ public class Solution {
             constraints = result.constraint
                 .split("\n")
                 .filter { it.isNotBlank() },
-            initialCode = DEFAULT_JAVA_TEMPLATE,
+            initialCode = getInitialCode(language),
             testCases = mappedTestCases,
             isBookmarked = result.isBookmark ?: false,
             bookmarkCount = result.bookmarkCount ?: 0

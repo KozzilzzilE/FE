@@ -10,6 +10,7 @@ import android.content.SharedPreferences
 object TokenManager {
     private const val PREF_NAME = "FeAppPrefs"
     private const val KEY_ACCESS_TOKEN = "server_access_token"
+    private const val KEY_PREFERRED_LANGUAGE = "preferred_language"
 
     private var prefs: SharedPreferences? = null
 
@@ -34,5 +35,15 @@ object TokenManager {
     // 서버 토큰 삭제 (로그아웃용)
     fun clearAccessToken() {
         prefs?.edit()?.remove(KEY_ACCESS_TOKEN)?.apply()
+    }
+
+    // 선호 언어 저장
+    fun savePreferredLanguage(language: String) {
+        prefs?.edit()?.putString(KEY_PREFERRED_LANGUAGE, language)?.apply()
+    }
+
+    // 선호 언어 조회
+    fun getPreferredLanguage(): String? {
+        return prefs?.getString(KEY_PREFERRED_LANGUAGE, null)
     }
 }

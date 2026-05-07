@@ -715,6 +715,26 @@ fun AppNavGraph() {
                 solverViewModel.loadProblemDetail(problemId, preferredLanguage, difficulty)
             }
 
+            // 마이페이지에서 돌아왔을 때 언어 변경 감지를 위한 Observer 추가
+            val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner, problemId) {
+                val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+                    if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                        val currentLang = com.example.fe.common.LanguagePreferenceManager
+                            .getLanguage(context)
+                            .ifBlank { "JAVA" }
+                        // 현재 ViewModel의 언어와 다르면 다시 로드
+                        if (solverViewModel.uiState.value.language != currentLang) {
+                            solverViewModel.loadProblemDetail(problemId, currentLang, difficulty)
+                        }
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
+            }
+
             SolveScreen(
                 problemId = problemId,
                 viewModel = solverViewModel,

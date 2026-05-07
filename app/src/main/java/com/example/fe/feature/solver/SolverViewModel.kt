@@ -78,12 +78,15 @@ class SolverViewModel(
 
                 val detail = repository.loadProblemDetail(token, problemId, language, preservedDifficulty)
 
+                // 서버에서 임시 저장된 코드 가져오기 시도
+                val serverDraft = repository.loadDraftCode(token, problemId, language)
+
                 _uiState.update { state ->
                     state.copy(
                         isLoadingProblem = false,
                         problemDetail = detail,
                         testCases = detail.testCases,
-                        code = if (state.code.isBlank() || state.code == detail.initialCode) {
+                        code = serverDraft ?: if (state.code.isBlank() || state.code == detail.initialCode) {
                             detail.initialCode
                         } else {
                             state.code
@@ -193,11 +196,26 @@ class SolverViewModel(
         viewModelScope.launch {
             if (state.problemId == 0L) return@launch
 
+            // 로컬 저장소에 저장
             draftDataStore.saveDraft(
                 problemId = state.problemId.toInt(),
                 language = state.language,
                 code = state.code
             )
+
+            // 서버 API로 저장
+            try {
+                val token = TokenManager.getAccessToken() ?: ""
+                repository.saveDraftCode(
+                    token = token,
+                    problemId = state.problemId,
+                    language = state.language,
+                    code = state.code
+                )
+                Log.d("SolverViewModel", "서버 임시 저장 성공")
+            } catch (e: Exception) {
+                Log.e("SolverViewModel", "서버 임시 저장 실패", e)
+            }
         }
     }
 

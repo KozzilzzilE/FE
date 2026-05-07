@@ -27,7 +27,7 @@ import com.example.fe.feature.auth.ui.SignUpScreen
 import com.example.fe.feature.list.ui.DetailListScreen
 import com.example.fe.feature.list.ui.AllProblemListScreen
 import com.example.fe.feature.list.ui.AllProblemDifficultyFilter
-import com.example.fe.feature.list.ui.AllProblemItem
+import com.example.fe.feature.list.model.AllProblemItem
 import com.example.fe.feature.step.ui.StepSelectionScreen
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.ui.HomeScreen
@@ -194,19 +194,16 @@ fun AppNavGraph() {
             val viewModel: AllProblemListViewModel = viewModel(factory = factory)
             val uiState by viewModel.uiState.collectAsState()
             val currentPage by viewModel.currentPage.collectAsState()
+            val totalPages by viewModel.totalPages.collectAsState()
             val selectedDifficultyStr by viewModel.selectedDifficulty.collectAsState()
 
-            var searchQuery by remember { mutableStateOf("") }
-            
             // ViewModel의 문자열 난이도 상태를 UI용 Enum으로 변환
             val selectedDifficulty = when (selectedDifficultyStr) {
                 "EASY" -> AllProblemDifficultyFilter.EASY
-                "MEDIUM" -> AllProblemDifficultyFilter.MEDIUM
+                "NORMAL", "MEDIUM" -> AllProblemDifficultyFilter.MEDIUM
                 "HARD" -> AllProblemDifficultyFilter.HARD
                 else -> AllProblemDifficultyFilter.ALL
             }
-            
-            val totalPages = 5 // Mock용
 
             LaunchedEffect(Unit) {
                 viewModel.loadAllProblems()
@@ -224,13 +221,14 @@ fun AppNavGraph() {
                             else -> Difficulty.EASY
                         },
                         bookmarkCount = res.bookmarkCount ?: 0,
-                        isBookmarked = res.isBookmark ?: false
+                        isBookmarked = res.isBookmark ?: false,
+                        isCompleted = res.isCompleted ?: false
                     )
                 }
             } else emptyList()
 
             AllProblemListScreen(
-                problems = problems.filter { it.title.contains(searchQuery, ignoreCase = true) },
+                problems = problems,
                 selectedDifficulty = selectedDifficulty,
                 currentPage = currentPage,
                 totalPages = totalPages,
@@ -238,7 +236,7 @@ fun AppNavGraph() {
                 onDifficultySelected = { filter ->
                     val diffStr = when (filter) {
                         AllProblemDifficultyFilter.EASY -> "EASY"
-                        AllProblemDifficultyFilter.MEDIUM -> "MEDIUM"
+                        AllProblemDifficultyFilter.MEDIUM -> "NORMAL"
                         AllProblemDifficultyFilter.HARD -> "HARD"
                         else -> null
                     }

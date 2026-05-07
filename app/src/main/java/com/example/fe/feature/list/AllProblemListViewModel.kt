@@ -23,6 +23,10 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
     private val _currentPage = MutableStateFlow(1)
     val currentPage: StateFlow<Int> = _currentPage.asStateFlow()
 
+    // 전체 페이지 수
+    private val _totalPages = MutableStateFlow(1)
+    val totalPages: StateFlow<Int> = _totalPages.asStateFlow()
+
     // 현재 선택된 난이도 필터 상태 (null이면 전체)
     private val _selectedDifficulty = MutableStateFlow<String?>(null)
     val selectedDifficulty: StateFlow<String?> = _selectedDifficulty.asStateFlow()
@@ -42,27 +46,24 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
             }
 
             try {
-                val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
+                val token = TokenManager.getAccessToken() 
+                    ?: throw Exception("로그인 토큰이 없습니다.")
                 
-                // 한 페이지에 20개씩, 난이도 필터 적용하여 요청
-                val response = repository.getAllProblems(token, page, difficulty)
+                val response = repository.getAllProblems(token, page - 1, difficulty)
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body != null && body.isSuccess && body.result != null) {
-                        _uiState.value = ProblemUiState.Success(body.result.problems)
+                        _uiState.value = ProblemUiState.Success(body.result.problemList)
+                        _totalPages.value = body.result.totalPage
                     } else {
-                        _uiState.value = ProblemUiState.Error(body?.message ?: "데이터를 불러올 수 없습니다")
+                        _uiState.value = ProblemUiState.Error(body?.message ?: "데이터를 불러올 수 없습니다.")
                     }
                 } else {
                     _uiState.value = ProblemUiState.Error("서버 응답 오류 (${response.code()})")
                 }
             } catch (e: Exception) {
-                Log.e("AllProblemListVM", "예외 발생 — 더미 데이터 사용", e)
-                val dummy = com.example.fe.feature.list.data.ProblemDummyData.problems
-                val filtered = if (difficulty != null)
-                    dummy.filter { it.difficulty.equals(difficulty, ignoreCase = true) }
-                else dummy
-                _uiState.value = ProblemUiState.Success(filtered)
+                Log.e("AllProblemListVM", "데이터 로드 실패", e)
+                _uiState.value = ProblemUiState.Error("네트워크 오류: ${e.message}")
             }
         }
     }
@@ -76,7 +77,8 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
 
         viewModelScope.launch {
             try {
-                val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
+                val token = TokenManager.getAccessToken() 
+                    ?: throw Exception("로그인 토큰이 없습니다.")
                 
                 val optimisticProblems = currentState.problems.map {
                     if (it.problemId == problemId) {
@@ -90,15 +92,25 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
 
                 val resultBookmarked = repository.toggleBookmark(token, problemId, isCurrentlyBookmarked)
                 
-                val verifiedProblems = optimisticProblems.map {
+                // 실제 서버 결과로 최종 보정
+                val verifiedProblems = currentState.problems.map {
                     if (it.problemId == problemId) {
-                        it.copy(isBookmark = resultBookmarked)
+                        val newCount = (it.bookmarkCount ?: 0) + when {
+                            resultBookmarked && !isCurrentlyBookmarked -> 1
+                            !resultBookmarked && isCurrentlyBookmarked -> -1
+                            else -> 0
+                        }
+                        it.copy(
+                            isBookmark = resultBookmarked,
+                            bookmarkCount = newCount
+                        )
                     } else it
                 }
                 _uiState.value = ProblemUiState.Success(verifiedProblems)
                 
             } catch (e: Exception) {
-                _uiState.value = currentState
+                Log.e("AllProblemListVM", "찜하기 실패: ${e.message}", e)
+                _uiState.value = currentState // 실패 시 원래 상태로 복구
             }
         }
     }

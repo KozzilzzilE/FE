@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.list.model.Difficulty
-import com.example.fe.feature.list.ui.AllProblemItem
+import com.example.fe.feature.list.model.AllProblemItem
 import com.example.fe.ui.theme.*
 
 @Composable
@@ -75,7 +73,7 @@ fun ProblemListCard(
                 Text(
                     text = "${problem.bookmarkCount}",
                     fontSize = 13.sp,
-                    color = BgElevated
+                    color = if (problem.isBookmarked) Primary else BgElevated
                 )
             }
 

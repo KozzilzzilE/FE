@@ -38,20 +38,14 @@ import com.example.fe.feature.list.component.PaginationBar
 import com.example.fe.feature.list.model.Difficulty
 import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.feature.list.model.AllProblemItem
 
 
 enum class AllProblemDifficultyFilter {
     ALL, EASY, MEDIUM, HARD
 }
 
-data class AllProblemItem(
-    val problemId: Long,
-    val title: String,
-    val difficulty: Difficulty,
-    val bookmarkCount: Int = 0,
-    val isBookmarked: Boolean = false,
-    val isCompleted: Boolean = false
-)
+
 
 
 @Composable
@@ -178,11 +172,11 @@ private fun AllProblemListScreenPreview() {
     var sampleProblems by remember {
         mutableStateOf(
             listOf(
-                AllProblemItem(1, "배열 두 배 만들기", Difficulty.EASY, 120, false),
-                AllProblemItem(2, "최빈값 구하기", Difficulty.MEDIUM, 85, false),
-                AllProblemItem(3, "문자열 뒤집기", Difficulty.EASY, 210, true),
-                AllProblemItem(4, "특정 문자 제거하기", Difficulty.HARD, 45, false),
-                AllProblemItem(5, "다음에 올 숫자", Difficulty.HARD, 310, true)
+                AllProblemItem(1, "배열 두 배 만들기", Difficulty.EASY, 120, false, false),
+                AllProblemItem(2, "최빈값 구하기", Difficulty.MEDIUM, 85, false, true),
+                AllProblemItem(3, "문자열 뒤집기", Difficulty.EASY, 210, true, false),
+                AllProblemItem(4, "특정 문자 제거하기", Difficulty.HARD, 45, false, false),
+                AllProblemItem(5, "다음에 올 숫자", Difficulty.HARD, 310, true, true)
             )
         )
     }

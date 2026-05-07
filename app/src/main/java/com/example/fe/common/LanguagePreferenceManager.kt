@@ -7,14 +7,10 @@ object LanguagePreferenceManager {
     private const val KEY_LANGUAGE = "preferred_language"
 
     fun saveLanguage(context: Context, language: String) {
-        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_LANGUAGE, language)
-            .apply()
+        TokenManager.savePreferredLanguage(language)
     }
 
     fun getLanguage(context: Context): String {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            .getString(KEY_LANGUAGE, "JAVA") ?: "JAVA"
+        return TokenManager.getPreferredLanguage() ?: "JAVA"
     }
-}
+}

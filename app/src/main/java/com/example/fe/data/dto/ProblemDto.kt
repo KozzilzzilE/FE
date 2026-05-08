@@ -179,6 +179,7 @@ data class SubmissionResultDto(
 
 /**
  * [문제별 사용자 제출 기록 조회 API]
+ * GET /api/v1/problems/{problemId}/histories
  */
 
 data class SubmissionHistoryResponseDto(
@@ -189,6 +190,27 @@ data class SubmissionHistoryResponseDto(
 )
 
 data class SubmissionHistoryItem(
+    @SerializedName("sourceCode") val sourceCode: String,
+    @SerializedName("status") val status: String,
+    @SerializedName("language") val language: String,
+    @SerializedName("createdAt") val createdAt: String
+)
+
+/**
+ * [사용자 전체 최근 제출 기록 조회 API]
+ * GET /api/v1/problems/recent-histories
+ */
+data class RecentHistoryResponseDto(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: List<RecentHistoryItem>?
+)
+
+data class RecentHistoryItem(
+    @SerializedName("historyId") val historyId: Long,
+    @SerializedName("problemId") val problemId: Long,
+    @SerializedName("title") val title: String,
     @SerializedName("sourceCode") val sourceCode: String,
     @SerializedName("status") val status: String,
     @SerializedName("language") val language: String,

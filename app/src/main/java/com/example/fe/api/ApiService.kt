@@ -157,12 +157,20 @@ interface ApiService {
         @Path("historyId") historyId: Long
     ): Response<com.example.fe.data.dto.SubmissionResultResponseDto>
 
+    // --- [제출 기록 조회] ---
+
     // 문제별 사용자 제출 기록 조회
     @GET("api/v1/problems/{problemId}/histories")
     suspend fun getSubmissionHistories(
         @retrofit2.http.Header("Authorization") token: String,
         @Path("problemId") problemId: Long
     ): Response<com.example.fe.data.dto.SubmissionHistoryResponseDto>
+
+    // 사용자 전체 최근 제출 기록 조회
+    @GET("api/v1/problems/recent-histories")
+    suspend fun getRecentHistories(
+        @retrofit2.http.Header("Authorization") token: String
+    ): Response<com.example.fe.data.dto.RecentHistoryResponseDto>
 
     // --- [언어] ---
     

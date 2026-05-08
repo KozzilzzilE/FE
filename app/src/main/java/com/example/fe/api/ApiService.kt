@@ -240,6 +240,22 @@ interface ApiService {
         @Path("problemId") problemId: Long,
         @Query("language") language: String
     ): Response<com.example.fe.data.dto.TempSaveResponseDto>
+
+    // --- [AI 리뷰] ---
+
+    // AI 코드 리뷰 결과 조회
+    @GET("api/v1/histories/{historyId}/ai-review")
+    suspend fun getAiReview(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("historyId") historyId: Long
+    ): Response<com.example.fe.data.dto.AiCodeReviewResponseDto>
+
+    // AI 코드 리뷰 요청
+    @POST("api/v1/histories/{historyId}/ai-review")
+    suspend fun requestAiReview(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("historyId") historyId: Long
+    ): Response<com.example.fe.data.dto.AiCodeReviewResponseDto>
 }
 
 

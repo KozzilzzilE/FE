@@ -16,5 +16,6 @@ data class AiCodeReviewResponseDto(
 data class AiCodeReviewResultDto(
     @SerializedName("aiStatus") val aiStatus: String,
     @SerializedName("aiReview") val aiReview: String?,
-    @SerializedName("aiImprovement") val aiImprovement: String?
+    @SerializedName("aiImprovement") val aiImprovement: String?,
+    @SerializedName("aiCode") val aiCode: String?
 )

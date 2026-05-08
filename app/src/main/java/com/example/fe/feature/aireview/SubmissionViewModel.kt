@@ -9,6 +9,7 @@ import com.example.fe.feature.aireview.model.SubmissionEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SubmissionViewModel(private val apiService: ApiService) : ViewModel() {
@@ -99,12 +100,41 @@ class SubmissionViewModel(private val apiService: ApiService) : ViewModel() {
                 val response = apiService.requestAiReview("Bearer $token", historyId)
                 if (response.isSuccessful) {
                     _aiReview.value = response.body()?.result
+                    // 폴링 시작!
+                    startPollingAiReview(historyId)
+                } else {
+                    _isReviewLoading.value = false
                 }
             } catch (e: Exception) {
                 android.util.Log.e("SubmissionViewModel", "Failed to request AI review", e)
-            } finally {
                 _isReviewLoading.value = false
             }
+        }
+    }
+
+    private fun startPollingAiReview(historyId: Long) {
+        viewModelScope.launch {
+            val token = TokenManager.getAccessToken()
+            if (token.isNullOrEmpty()) return@launch
+
+            while (true) {
+                try {
+                    val response = apiService.getAiReview("Bearer $token", historyId)
+                    if (response.isSuccessful) {
+                        val result = response.body()?.result
+                        _aiReview.value = result
+                        
+                        // 성공적으로 완료되었거나 시스템 에러가 나면 폴링 중단
+                        if (result?.aiStatus == "ACCEPTED" || result?.aiStatus == "SYSTEM_ERROR") {
+                            break
+                        }
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("SubmissionViewModel", "Polling failed", e)
+                }
+                delay(2000) // 2초마다 확인
+            }
+            _isReviewLoading.value = false
         }
     }
 }

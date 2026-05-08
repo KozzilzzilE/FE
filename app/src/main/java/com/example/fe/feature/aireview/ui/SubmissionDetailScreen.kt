@@ -35,6 +35,8 @@ fun SubmissionDetailScreen(
     onBack: () -> Unit
 ) {
     val entry = viewModel.selectedEntry.collectAsState().value ?: return
+    val aiReviewState by viewModel.aiReview.collectAsState()
+    val isReviewLoading by viewModel.isReviewLoading.collectAsState()
 
     val problemTitle = entry.problemTitle
     val language = entry.language
@@ -42,23 +44,12 @@ fun SubmissionDetailScreen(
     val isCorrect = entry.isCorrect
     val sourceCode = entry.sourceCode
 
-    var reviewState by remember { mutableStateOf(AiReviewState.IDLE) }
-
-    // TODO: API 연동 시 이 블록을 ViewModel Polling 로직으로 교체
-    LaunchedEffect(reviewState) {
-        if (reviewState == AiReviewState.LOADING) {
-            delay(2000)
-            reviewState = AiReviewState.DONE
-        }
-    }
-
-    // TODO: API 연동 시 ViewModel StateFlow로 교체
-    val mockReview = remember {
-        AiReviewResult(
-            review = "코드 내에서 불필요한 중복 연산이 발생하고 있습니다.\n시간 복잡도 측면에서 개선이 필요합니다.",
-            improvement = "enumerate()를 사용해 인덱스를 직접 추적하면\n불필요한 호출을 제거할 수 있습니다.\nseen에 값 대신 인덱스를 저장해 보세요.",
-            improvedCode = "def solution(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        if target - num in seen:\n            return [seen[target - num], i]\n        seen[num] = i\n    return []"
-        )
+    val reviewState = when {
+        isReviewLoading -> AiReviewState.LOADING
+        aiReviewState == null -> AiReviewState.IDLE
+        aiReviewState?.aiStatus == "PROCESSING" -> AiReviewState.LOADING
+        aiReviewState?.aiStatus == "ACCEPTED" -> AiReviewState.DONE
+        else -> AiReviewState.IDLE
     }
 
     Box(
@@ -99,42 +90,43 @@ fun SubmissionDetailScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         ReviewTextCard(
                             dotColor = Primary,
-                            title = "아쉬운점",
-                            content = mockReview.review
+                            title = "AI 코드 리뷰",
+                            content = aiReviewState?.aiReview ?: ""
                         )
                         ReviewTextCard(
                             dotColor = Cyan,
-                            title = "개선할점",
-                            content = mockReview.improvement
+                            title = "개선할 점",
+                            content = aiReviewState?.aiImprovement ?: ""
                         )
-                        CodeCard(
-                            dotColor = Success,
-                            title = "개선된 코드 주요 로직",
-                            code = mockReview.improvedCode
-                        )
+                        aiReviewState?.aiCode?.let { code ->
+                            if (code.isNotEmpty()) {
+                                CodeCard(
+                                    dotColor = Success,
+                                    title = "개선된 코드 주요 로직",
+                                    code = code
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
 
-        // 하단 AI 리뷰 버튼 (DONE 이후엔 숨김)
-        if (reviewState != AiReviewState.DONE) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .background(BgPrimary)
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
-                    .navigationBarsPadding()
-            ) {
-                AiReviewButton(
-                    state = reviewState,
-                    onClick = {
-                        reviewState = AiReviewState.LOADING
-                        // TODO: API 연동 시 ViewModel.requestAiReview() 호출로 교체
-                    }
-                )
-            }
+        // 하단 AI 리뷰 버튼
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(BgPrimary)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .navigationBarsPadding()
+        ) {
+            AiReviewButton(
+                state = reviewState,
+                onClick = {
+                    viewModel.requestAiReview(entry.historyId)
+                }
+            )
         }
     }
 }
@@ -359,7 +351,14 @@ private fun AiReviewButton(
                     color = BgPrimary
                 )
             }
-            AiReviewState.DONE -> {}
+            AiReviewState.DONE -> {
+                Text(
+                    text = "AI 리뷰 도착",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = BgPrimary
+                )
+            }
         }
     }
 }

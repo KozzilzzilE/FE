@@ -154,9 +154,10 @@ interface ApiService {
     @GET("api/v1/problems/submissions/{historyId}/results")
     suspend fun getSubmissionResult(
         @retrofit2.http.Header("Authorization") token: String,
-        @Path("historyId") historyId: Long,
-        @Query("submissionId") submissionId: String
+        @Path("historyId") historyId: Long
     ): Response<com.example.fe.data.dto.SubmissionResultResponseDto>
+
+    // --- [제출 기록 조회] ---
 
     // 문제별 사용자 제출 기록 조회
     @GET("api/v1/problems/{problemId}/histories")
@@ -164,6 +165,12 @@ interface ApiService {
         @retrofit2.http.Header("Authorization") token: String,
         @Path("problemId") problemId: Long
     ): Response<com.example.fe.data.dto.SubmissionHistoryResponseDto>
+
+    // 사용자 전체 최근 제출 기록 조회
+    @GET("api/v1/problems/recent-histories")
+    suspend fun getRecentHistories(
+        @retrofit2.http.Header("Authorization") token: String
+    ): Response<com.example.fe.data.dto.RecentHistoryResponseDto>
 
     // --- [언어] ---
     
@@ -233,6 +240,22 @@ interface ApiService {
         @Path("problemId") problemId: Long,
         @Query("language") language: String
     ): Response<com.example.fe.data.dto.TempSaveResponseDto>
+
+    // --- [AI 리뷰] ---
+
+    // AI 코드 리뷰 결과 조회
+    @GET("api/v1/histories/{historyId}/ai-review")
+    suspend fun getAiReview(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("historyId") historyId: Long
+    ): Response<com.example.fe.data.dto.AiCodeReviewResponseDto>
+
+    // AI 코드 리뷰 요청
+    @POST("api/v1/histories/{historyId}/ai-review")
+    suspend fun requestAiReview(
+        @retrofit2.http.Header("Authorization") token: String,
+        @Path("historyId") historyId: Long
+    ): Response<com.example.fe.data.dto.AiCodeReviewResponseDto>
 }
 
 

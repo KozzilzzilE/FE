@@ -319,7 +319,6 @@ class SolverViewModel(
                 pollSubmitResult(
                     accessToken = token,
                     historyId = submitInfo.historyId,
-                    submissionId = submitInfo.submissionId,
                     language = state.language
                 )
             } catch (e: Exception) {
@@ -339,14 +338,12 @@ class SolverViewModel(
     private suspend fun pollSubmitResult(
         accessToken: String,
         historyId: Long,
-        submissionId: String,
         language: String
     ) {
         repeat(15) {
             val (isCorrect, status) = repository.getSubmissionResult(
                 token = accessToken,
-                historyId = historyId,
-                submissionId = submissionId
+                historyId = historyId
             )
 
             if (status == "PROCESSING") {

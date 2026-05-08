@@ -37,6 +37,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import com.example.fe.feature.solver.SolveTab
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.DraftSaveButton
@@ -53,14 +55,24 @@ fun SolveScreen(
     viewModel: SolverViewModel,
     onBack: () -> Unit = {},
     onHome: () -> Unit = {},
-    onOpenEditorFull: (Long) -> Unit = {}
+    onOpenEditorFull: (Long) -> Unit = {},
+    onNextProblem: (Long) -> Unit = {}
 ) {
     LaunchedEffect(problemId) {
         viewModel.loadProblemDetail(problemId)
+        viewModel.loadSubmissionHistory(problemId)
     }
 
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by rememberSaveable { mutableStateOf(SolveTab.PROBLEM) }
+
+    val context = LocalContext.current
+    LaunchedEffect(uiState.errorToast) {
+        uiState.errorToast?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.clearErrorToast()
+        }
+    }
 
     val codeFromVm = uiState.code
     var tfv by remember {
@@ -171,7 +183,8 @@ fun SolveScreen(
                 // 탭바
                 SolveTabBar(
                     selectedTab = selectedTab,
-                    onTabSelected = { selectedTab = it }
+                    onTabSelected = { selectedTab = it },
+                    isSubmitEnabled = uiState.submissions.isNotEmpty()
                 )
 
                 // 컨텐츠
@@ -323,7 +336,10 @@ fun SolveScreen(
                         }
 
                         SolveTab.SUBMIT -> {
-                            SubmitTabContent(viewModel = viewModel)
+                            SubmitTabContent(
+                                viewModel = viewModel,
+                                onNextProblem = { onNextProblem(problemId + 1) }
+                            )
                         }
                     }
                 }
@@ -369,7 +385,8 @@ fun SolveScreen(
 @Composable
 private fun SolveTabBar(
     selectedTab: SolveTab,
-    onTabSelected: (SolveTab) -> Unit
+    onTabSelected: (SolveTab) -> Unit,
+    isSubmitEnabled: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -380,16 +397,25 @@ private fun SolveTabBar(
     ) {
         SolveTab.values().forEach { tab ->
             val selected = tab == selectedTab
+            val context = androidx.compose.ui.platform.LocalContext.current
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable { onTabSelected(tab) },
+                    .clickable { 
+                        if (tab == SolveTab.SUBMIT && !isSubmitEnabled) {
+                            android.widget.Toast.makeText(context, "코드를 제출해야 제출 기록을 볼 수 있습니다.", android.widget.Toast.LENGTH_SHORT).show()
+                        } else {
+                            onTabSelected(tab)
+                        }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = tab.label,
-                    color = if (selected) Primary else TextMuted,
+                    color = if (selected) Primary 
+                            else if (tab == SolveTab.SUBMIT && !isSubmitEnabled) TextMuted.copy(alpha = 0.5f) 
+                            else TextMuted,
                     fontSize = 14.sp,
                     fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
                 )

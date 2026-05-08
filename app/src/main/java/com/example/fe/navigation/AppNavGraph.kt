@@ -85,7 +85,9 @@ fun AppNavGraph() {
     val solverViewModel: SolverViewModel = viewModel(factory = solverViewModelFactory)
 
     // 제출 기록 / AI 리뷰 ViewModel
-    val submissionViewModel: SubmissionViewModel = viewModel()
+    val submissionViewModel: SubmissionViewModel = viewModel(
+        factory = remember { com.example.fe.feature.aireview.SubmissionViewModelFactory(RetrofitClient.instance) }
+    )
 
     // 마이페이지 ViewModel은 여기서 1번만 생성해서 공유
     val profileRepository = remember { ProfileRepository(RetrofitClient.instance) }
@@ -745,6 +747,9 @@ fun AppNavGraph() {
                 },
                 onOpenEditorFull = { id ->
                     navController.navigate(Routes.editorFull(id))
+                },
+                onNextProblem = { nextId ->
+                    navController.navigate(Routes.solve(nextId))
                 }
             )
         }

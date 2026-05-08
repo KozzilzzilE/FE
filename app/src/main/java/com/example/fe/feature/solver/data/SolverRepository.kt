@@ -56,7 +56,7 @@ class SolverRepository(
         val firstTest = mappedTestCases.firstOrNull()
 
         return ProblemDetail(
-            problemId = result.exerciseId,
+            problemId = result.problemId,
             title = result.title,
             difficultyLabel = difficultyLabel ?: "-",
             description = result.description,

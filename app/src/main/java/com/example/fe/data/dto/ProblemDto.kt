@@ -60,7 +60,7 @@ data class ProblemDetailResponse(
 )
 
 data class ProblemDetailResult(
-    @SerializedName("exerciseId") val exerciseId: Long,
+    @SerializedName("problemId") val problemId: Long,
     @SerializedName("title") val title: String,
     @SerializedName("description") val description: String,
     @SerializedName("constraint") val constraint: String,

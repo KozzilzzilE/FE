@@ -745,6 +745,9 @@ fun AppNavGraph() {
                 },
                 onOpenEditorFull = { id ->
                     navController.navigate(Routes.editorFull(id))
+                },
+                onNextProblem = { nextId ->
+                    navController.navigate(Routes.solve(nextId))
                 }
             )
         }

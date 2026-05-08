@@ -41,7 +41,8 @@ private enum class SubmitSubScreen {
 
 @Composable
 fun SubmitTabContent(
-    viewModel: SolverViewModel
+    viewModel: SolverViewModel,
+    onNextProblem: () -> Unit
 ) {
     var currentSubScreen by remember { mutableStateOf(SubmitSubScreen.MAIN) }
     val uiState by viewModel.uiState.collectAsState()
@@ -62,7 +63,9 @@ fun SubmitTabContent(
             when (currentSubScreen) {
                 SubmitSubScreen.MAIN -> SubmitResultView(
                     viewModel = viewModel,
-                    isSubmitting = uiState.isSubmitting
+                    isSubmitting = uiState.isSubmitting,
+                    onViewSolution = { currentSubScreen = SubmitSubScreen.SOLUTION },
+                    onNextProblem = onNextProblem
                 )
                 SubmitSubScreen.TESTCASE -> TestCaseTabContent(viewModel)
                 SubmitSubScreen.RESULT -> ExecutionResultView(viewModel)
@@ -118,7 +121,9 @@ private fun ErsPills(
 @Composable
 private fun SubmitResultView(
     viewModel: SolverViewModel,
-    isSubmitting: Boolean
+    isSubmitting: Boolean,
+    onViewSolution: () -> Unit,
+    onNextProblem: () -> Unit
 ) {
     val submissions by viewModel.submissions.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -250,7 +255,10 @@ private fun SubmitResultView(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
-                    onClick = { viewModel.loadSolution() },
+                    onClick = { 
+                        viewModel.loadSolution()
+                        onViewSolution()
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp),
@@ -261,7 +269,7 @@ private fun SubmitResultView(
                     Text("해설 보기", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Button(
-                    onClick = { if (!isSubmitting) viewModel.submitCode() },
+                    onClick = { onNextProblem() },
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp),
@@ -308,7 +316,9 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
     } else {
         "출력 없음"
     }
-    val passed = if (hasResult) inferPassed(executionResult!!) else null
+    val passed = if (hasResult) {
+        myOutputText.trim() == expectedText.trim()
+    } else null
 
     Column(
         modifier = Modifier

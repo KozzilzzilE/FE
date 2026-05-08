@@ -21,6 +21,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +55,7 @@ fun MyPageScreen(
     onSettingsClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showLogoutDialog by remember { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner) {
@@ -64,6 +68,40 @@ fun MyPageScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            containerColor = BgSurface,
+            title = {
+                Text(
+                    text = "로그아웃",
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = "로그아웃 하시겠습니까?",
+                    color = TextSecondary,
+                    fontSize = 14.sp
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showLogoutDialog = false
+                    onLogoutClick()
+                }) {
+                    Text("예", color = Color(0xFFFB2C36), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("아니오", color = TextMuted)
+                }
+            }
+        )
+    }
+
     Scaffold(
         containerColor = BgPrimary,
         bottomBar = {
@@ -74,7 +112,7 @@ fun MyPageScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
                         .height(130.dp)
-                        .clickable { onLogoutClick() },
+                        .clickable { showLogoutDialog = true },
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {

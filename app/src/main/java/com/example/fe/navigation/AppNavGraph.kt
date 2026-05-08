@@ -113,6 +113,12 @@ fun AppNavGraph() {
             is AuthState.NeedsExtraInfo -> {
                 navController.navigate(Routes.SOCIAL_SIGNUP)
             }
+            is AuthState.LoggedOut -> {
+                navController.navigate(Routes.LOGIN) {
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
             is AuthState.Error -> {
                 Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
             }
@@ -284,11 +290,7 @@ fun AppNavGraph() {
                     navController.navigate(Routes.SUBMISSION_RECORD)
                 },
                 onLogoutClick = {
-                    com.example.fe.common.TokenManager.clearAccessToken()
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    authViewModel.logout()
                 },
                 onSettingsClick = {}
             )

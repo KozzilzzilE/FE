@@ -92,10 +92,14 @@ class AuthViewModel(
     }
 
     /**
-     * 로그아웃 처리
+     * 로그아웃 처리 (서버 토큰 블랙리스트 등록 후 로컬 정리)
      */
     fun logout() {
-        repository.logout() // 로컬에 저장된 정보(토큰 등)를 삭제
-        _authState.value = AuthState.Idle // 인증 상태를 아무 작업도 안 하는 '유휴 상태(Idle)'로 초기화
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            val token = com.example.fe.common.TokenManager.getAccessToken() ?: ""
+            repository.logout(token)
+            _authState.value = AuthState.LoggedOut
+        }
     }
 }

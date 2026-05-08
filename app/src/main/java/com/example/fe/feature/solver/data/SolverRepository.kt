@@ -9,8 +9,7 @@ import com.example.fe.feature.solver.model.SolutionDetail
 import com.example.fe.feature.solver.model.TestCase
 
 data class SubmitInfo(
-    val historyId: Long,
-    val submissionId: String
+    val historyId: Long
 )
 
 class SolverRepository(
@@ -219,12 +218,8 @@ class SolverRepository(
         val historyId = result.historyId
             ?: throw Exception("historyId가 없습니다.")
 
-        val submissionId = result.submissionId
-            ?: throw Exception("submissionId가 없습니다.")
-
         return SubmitInfo(
-            historyId = historyId,
-            submissionId = submissionId
+            historyId = historyId
         )
     }
 
@@ -261,13 +256,11 @@ class SolverRepository(
      */
     suspend fun getSubmissionResult(
         token: String,
-        historyId: Long,
-        submissionId: String
+        historyId: Long
     ): Pair<Boolean, String> {
         val response = apiService.getSubmissionResult(
             token = "Bearer $token",
-            historyId = historyId,
-            submissionId = submissionId
+            historyId = historyId
         )
 
         if (!response.isSuccessful) {
@@ -312,10 +305,11 @@ class SolverRepository(
         val result = body.result ?: emptyList()
 
         return result.map {
-            val isCorrect = it.status == "ACCEPTED"
+            val statusUpper = it.status.uppercase().replace(" ", "_")
+            val isCorrect = statusUpper == "ACCEPTED" || statusUpper == "SUCCESS"
 
-            val resultText = when (it.status) {
-                "ACCEPTED" -> "정답"
+            val resultText = when (statusUpper) {
+                "ACCEPTED", "SUCCESS" -> "정답"
                 "WRONG_ANSWER" -> "오답"
                 "COMPILATION_ERROR" -> "컴파일 에러"
                 "RUNTIME_ERROR" -> "런타임 에러"

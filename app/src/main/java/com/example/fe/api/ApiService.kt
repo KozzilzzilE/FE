@@ -154,8 +154,7 @@ interface ApiService {
     @GET("api/v1/problems/submissions/{historyId}/results")
     suspend fun getSubmissionResult(
         @retrofit2.http.Header("Authorization") token: String,
-        @Path("historyId") historyId: Long,
-        @Query("submissionId") submissionId: String
+        @Path("historyId") historyId: Long
     ): Response<com.example.fe.data.dto.SubmissionResultResponseDto>
 
     // 문제별 사용자 제출 기록 조회

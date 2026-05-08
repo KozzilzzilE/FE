@@ -1,15 +1,11 @@
 package com.example.fe.common
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,16 +13,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.R
 import com.example.fe.ui.theme.*
 
 data class BottomNavItem(
     val title: String,
-    val icon: ImageVector,
+    @DrawableRes val icon: Int,
     val route: String
 )
 
@@ -71,7 +68,7 @@ fun BottomNavigationBar(
                         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
                     ) {
                         Icon(
-                            imageVector = item.icon,
+                            painter = painterResource(id = item.icon),
                             contentDescription = item.title,
                             tint = if (selected) BgPrimary else TextMuted,
                             modifier = Modifier.size(18.dp)
@@ -90,10 +87,10 @@ fun BottomNavigationBar(
 }
 
 val bottomNavItems = listOf(
-    BottomNavItem("홈", Icons.Default.Home, "home"),
-    BottomNavItem("학습", Icons.Default.MenuBook, "topic"),
-    BottomNavItem("문제", Icons.Default.List, "problem"),
-    BottomNavItem("MY", Icons.Default.Person, "my"),
+    BottomNavItem("홈", R.drawable.ic_home, "home"),
+    BottomNavItem("학습", R.drawable.ic_book, "topic"),
+    BottomNavItem("문제", R.drawable.ic_list, "problem"),
+    BottomNavItem("MY", R.drawable.ic_user, "my"),
 )
 
 @Preview(showBackground = true, backgroundColor = 0xFF1C1917)

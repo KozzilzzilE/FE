@@ -41,6 +41,12 @@ interface ApiService {
     @POST("api/v1/auths/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<LoginResponse>
 
+    // 로그아웃 : AccessToken을 서버 BlackList에 등록
+    @POST("api/v1/auths/logout")
+    suspend fun logout(
+        @Header("Authorization") token: String
+    ): Response<com.example.fe.data.dto.LogoutResponse>
+
     // --- [메인화면] ---
 
     // 메인화면 : 홈 화면 데이터 가져오기

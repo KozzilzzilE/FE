@@ -203,8 +203,21 @@ class AuthRepository(
         }
     }
     
-    fun logout() {
-        auth.signOut()
-        TokenManager.clearAccessToken()
+    suspend fun logout(token: String): Boolean {
+        return try {
+            val response = apiService.logout("Bearer $token")
+            if (response.isSuccessful) {
+                Log.d("AuthRepository", "로그아웃 성공: code=${response.body()?.code}")
+            } else {
+                Log.e("AuthRepository", "로그아웃 API 에러: ${response.code()}")
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "로그아웃 네트워크 예외: ${e.message}", e)
+            true // API 실패여도 로컬 로그아웃은 진행
+        } finally {
+            auth.signOut()
+            TokenManager.clearAccessToken()
+        }
     }
 }

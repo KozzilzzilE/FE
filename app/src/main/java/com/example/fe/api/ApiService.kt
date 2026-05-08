@@ -256,6 +256,15 @@ interface ApiService {
         @retrofit2.http.Header("Authorization") token: String,
         @Path("historyId") historyId: Long
     ): Response<com.example.fe.data.dto.AiCodeReviewResponseDto>
+
+    // --- [CS 퀴즈] ---
+
+    // 랜덤 CS 문제 조회
+    @GET("api/v1/cs-problems/random")
+    suspend fun getRandomCsProblems(
+        @Header("Authorization") token: String,
+        @Query("count") count: Int = 5
+    ): Response<com.example.fe.data.dto.CsQuizResponse>
 }
 
 

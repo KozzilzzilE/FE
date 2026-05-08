@@ -23,3 +23,5 @@ local.properties
 /.claude/claude.toml
 /.claude/agents
 .claude/playwright-browsers
+DESIGN_PROGRESS.md
+API_GUIDE.md

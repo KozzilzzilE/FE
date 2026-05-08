@@ -37,6 +37,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import com.example.fe.feature.solver.SolveTab
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.DraftSaveButton
@@ -61,6 +63,14 @@ fun SolveScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by rememberSaveable { mutableStateOf(SolveTab.PROBLEM) }
+
+    val context = LocalContext.current
+    LaunchedEffect(uiState.errorToast) {
+        uiState.errorToast?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.clearErrorToast()
+        }
+    }
 
     val codeFromVm = uiState.code
     var tfv by remember {

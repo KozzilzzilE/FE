@@ -26,6 +26,7 @@ import java.util.Locale
 @Composable
 fun ContributionGraph(
     contributions: Map<LocalDate, Int>,
+    streakDays: Int,
     modifier: Modifier = Modifier
 ) {
     val today = LocalDate.now()
@@ -38,20 +39,6 @@ fun ContributionGraph(
         (0..6).map { dayIndex ->
             firstMonday.plusWeeks(weekIndex.toLong()).plusDays(dayIndex.toLong())
         }
-    }
-
-    // 연속 학습 스트릭 계산 (팀원 로직 반영: 오늘 데이터 없으면 어제부터 체크)
-    val streakCount = remember(contributions) {
-        var count = 0
-        var checkDate = today
-        if ((contributions[today] ?: 0) == 0) {
-            checkDate = today.minusDays(1)
-        }
-        while ((contributions[checkDate] ?: 0) > 0) {
-            count++
-            checkDate = checkDate.minusDays(1)
-        }
-        count
     }
 
     Column(
@@ -74,13 +61,13 @@ fun ContributionGraph(
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = streakCount.toString(),
+                    text = streakDays.toString(),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Primary
                 )
                 Text(
-                    text = "일 연속 학습 중",
+                    text = "일째 연속 학습 중",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = TextPrimary
@@ -115,7 +102,16 @@ fun ContributionGraph(
                     DayLabel("")
                 }
 
+                val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+                androidx.compose.runtime.LaunchedEffect(weeks.size) {
+                    if (weeks.isNotEmpty()) {
+                        listState.scrollToItem(weeks.size - 1)
+                    }
+                }
+
                 LazyRow(
+                    state = listState,
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -138,7 +134,8 @@ fun ContributionGraph(
                             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                 for (date in weekDays) {
                                     val count = contributions[date] ?: 0
-                                    GrassCell(count = count)
+                                    val isToday = (date == today)
+                                    GrassCell(count = count, isToday = isToday)
                                 }
                             }
                         }
@@ -182,7 +179,7 @@ private fun DayLabel(text: String) {
 }
 
 @Composable
-private fun GrassCell(count: Int) {
+private fun GrassCell(count: Int, isToday: Boolean = false) {
     val color = when {
         count == 0    -> BgElevated
         count in 1..3 -> Color(0x40F59E0B)
@@ -194,6 +191,15 @@ private fun GrassCell(count: Int) {
     Box(
         modifier = Modifier
             .size(18.dp)
-            .background(color, shape = RoundedCornerShape(3.dp))
-    )
+            .background(color, shape = RoundedCornerShape(3.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isToday) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(Color.White, shape = androidx.compose.foundation.shape.CircleShape)
+            )
+        }
+    }
 }

@@ -17,5 +17,12 @@ data class HomeResponse(
 data class HomeResult(
     @SerializedName("nickname") val name: String,
     @SerializedName("languageId") val languageId: Int,
-    @SerializedName("languageName") val languageName: String
+    @SerializedName("languageName") val languageName: String,
+    @SerializedName("totalSolvedDetails") val totalSolvedDetails: List<SolvedDetail> = emptyList(),
+    @SerializedName("thisMonthSolvedCount") val thisMonthSolvedCount: Int = 0
+)
+
+data class SolvedDetail(
+    @SerializedName("date") val date: String,
+    @SerializedName("count") val count: Int
 )

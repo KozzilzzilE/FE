@@ -5,6 +5,7 @@ import com.example.fe.api.ApiService
 import com.example.fe.feature.home.HomeUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 
 class HomeRepository(private val apiService: ApiService) {
 
@@ -23,9 +24,34 @@ class HomeRepository(private val apiService: ApiService) {
                     if (body != null && body.isSuccess) {
                         val result = body.result
                         if (result != null) {
+                            val contributionData = result.totalSolvedDetails
+                                .mapNotNull { detail ->
+                                    runCatching { LocalDate.parse(detail.date) to detail.count }.getOrNull()
+                                }
+                                .toMap()
+
+                            // 연속 학습 일수(스트릭) 계산 로직
+                            val today = LocalDate.now()
+                            var streakCount = 0
+                            var checkDate = today
+                            if ((contributionData[today] ?: 0) == 0) {
+                                checkDate = today.minusDays(1)
+                            }
+                            while ((contributionData[checkDate] ?: 0) > 0) {
+                                streakCount++
+                                checkDate = checkDate.minusDays(1)
+                            }
+
+                            // 총 학습 일수 계산 로직
+                            val totalStudyDays = contributionData.count { it.value > 0 }
+
                             return@withContext HomeUiState.Success(
                                 name = result.name,
-                                languageName = result.languageName
+                                languageName = result.languageName,
+                                contributionData = contributionData,
+                                thisMonthSolvedCount = result.thisMonthSolvedCount,
+                                streakDays = streakCount,
+                                totalStudyDays = totalStudyDays
                             )
                         } else {
                             Log.e("HomeRepository", "홈 화면 파싱 오류: result가 null")

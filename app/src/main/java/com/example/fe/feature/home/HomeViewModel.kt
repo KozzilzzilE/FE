@@ -8,10 +8,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 sealed class HomeUiState {
     object Loading : HomeUiState()
-    data class Success(val name: String, val languageName: String) : HomeUiState()
+    data class Success(
+        val name: String,
+        val languageName: String,
+        val contributionData: Map<LocalDate, Int> = emptyMap(),
+        val thisMonthSolvedCount: Int = 0,
+        val streakDays: Int = 0,
+        val totalStudyDays: Int = 0
+    ) : HomeUiState()
     data class Error(val message: String) : HomeUiState()
 }
 

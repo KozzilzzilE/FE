@@ -14,7 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import java.time.LocalDate
 import com.example.fe.api.RetrofitClient
 import com.example.fe.common.BottomNavigationBar
 import com.example.fe.common.bottomNavItems
@@ -72,19 +71,7 @@ fun HomeScreen(
                 // 에러 처리
             }
             is HomeUiState.Success -> {
-                val dummyContributions = remember {
-                    val map = mutableMapOf<LocalDate, Int>()
-                    val today = LocalDate.now()
-                    for (i in 0..13) {
-                        val date = today.minusDays(i.toLong())
-                        map[date] = (5..15).random()
-                    }
-                    for (i in 14..120) {
-                        val date = today.minusDays(i.toLong())
-                        if (i % 2 == 0) map[date] = (0..20).random()
-                    }
-                    map
-                }
+                val successState = uiState as HomeUiState.Success
 
                 Column(
                     modifier = Modifier
@@ -124,7 +111,8 @@ fun HomeScreen(
 
                     // 5. 학습 기록 잔디 (카드 안에)
                     ContributionGraph(
-                        contributions = dummyContributions
+                        contributions = successState.contributionData,
+                        streakDays = successState.streakDays
                     )
 
                     // 6. 명언 카드 (Amber 테두리)

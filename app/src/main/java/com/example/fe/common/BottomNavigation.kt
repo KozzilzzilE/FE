@@ -65,7 +65,7 @@ fun BottomNavigationBar(
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+                        verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically)
                     ) {
                         Icon(
                             painter = painterResource(id = item.icon),
@@ -75,7 +75,7 @@ fun BottomNavigationBar(
                         )
                         Text(
                             text = item.title,
-                            fontSize = 10.sp,
+                            fontSize = 12.sp,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                             color = if (selected) BgPrimary else TextMuted
                         )

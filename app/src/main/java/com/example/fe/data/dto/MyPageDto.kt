@@ -16,7 +16,9 @@ data class MyPageResponse(
 data class MyPageResult(
     @SerializedName("nickname") val nickname: String,
     @SerializedName("languageId") val languageId: Int,
-    @SerializedName("languageName") val languageName: String
+    @SerializedName("languageName") val languageName: String,
+    @SerializedName("totalSolvedDetails") val totalSolvedDetails: List<SolvedDetail> = emptyList(),
+    @SerializedName("thisMonthSolvedCount") val thisMonthSolvedCount: Int = 0
 )
 
 /**

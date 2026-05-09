@@ -44,11 +44,35 @@ class MyPageViewModel(
                     else -> "JAVA"
                 }
 
+                val contributionData = result?.totalSolvedDetails
+                    ?.mapNotNull { detail ->
+                        runCatching { java.time.LocalDate.parse(detail.date) to detail.count }.getOrNull()
+                    }
+                    ?.toMap() ?: emptyMap()
+
+                val today = java.time.LocalDate.now()
+                var streakCount = 0
+                var checkDate = today
+                if ((contributionData[today] ?: 0) == 0) {
+                    checkDate = today.minusDays(1)
+                }
+                while ((contributionData[checkDate] ?: 0) > 0) {
+                    streakCount++
+                    checkDate = checkDate.minusDays(1)
+                }
+
+                val totalStudyDays = contributionData.count { it.value > 0 }
+
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     userName = result?.nickname ?: "사용자",
                     languageName = finalLanguage,
                     languageOptions = languageList,
+                    stat = com.example.fe.feature.profile.model.ProfileStat(
+                        streak = streakCount.toString(),
+                        solved = (result?.thisMonthSolvedCount ?: 0).toString(),
+                        studyDays = totalStudyDays.toString()
+                    ),
                     error = null
                 )
             } catch (e: Exception) {

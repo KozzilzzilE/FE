@@ -358,11 +358,7 @@ private fun SolveTabBar(
                     .weight(1f)
                     .fillMaxHeight()
                     .clickable { 
-                        if (tab == SolveTab.SUBMIT && !isSubmitEnabled) {
-                            android.widget.Toast.makeText(context, "코드를 제출해야 제출 기록을 볼 수 있습니다.", android.widget.Toast.LENGTH_SHORT).show()
-                        } else {
-                            onTabSelected(tab)
-                        }
+                        onTabSelected(tab)
                     },
                 contentAlignment = Alignment.Center
             ) {

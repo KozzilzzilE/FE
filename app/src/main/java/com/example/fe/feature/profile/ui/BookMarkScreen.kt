@@ -126,20 +126,15 @@ private fun BookmarkCard(
     onClick: () -> Unit,
     onBookmarkClick: () -> Unit
 ) {
-    val badgeBg = when (item.difficulty) {
-        "EASY"             -> Color(0x1A22C55E)
-        "HARD"             -> Color(0x1AEF4444)
-        else               -> Color(0x1AF59E0B)
-    }
-    val badgeTextColor = when (item.difficulty) {
-        "EASY"             -> Success
-        "HARD"             -> Error
-        else               -> Primary
-    }
-    val badgeLabel = when (item.difficulty) {
-        "EASY"             -> "쉬움"
-        "HARD"             -> "어려움"
-        else               -> "보통"
+    val difficultyEnum = when (item.difficultyDisplayName) {
+        "쉬움" -> com.example.fe.feature.list.model.Difficulty.EASY
+        "보통", "중간" -> com.example.fe.feature.list.model.Difficulty.MEDIUM
+        "어려움" -> com.example.fe.feature.list.model.Difficulty.HARD
+        else -> when (item.difficulty) {
+            "EASY"             -> com.example.fe.feature.list.model.Difficulty.EASY
+            "HARD"             -> com.example.fe.feature.list.model.Difficulty.HARD
+            else               -> com.example.fe.feature.list.model.Difficulty.MEDIUM
+        }
     }
 
     Card(
@@ -158,21 +153,7 @@ private fun BookmarkCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .height(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(badgeBg)
-                    .padding(horizontal = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = badgeLabel,
-                    color = badgeTextColor,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            com.example.fe.common.DifficultyBadge(difficulty = difficultyEnum)
 
             Text(
                 text = item.title,

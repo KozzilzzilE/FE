@@ -222,11 +222,16 @@ fun AppNavGraph() {
                     AllProblemItem(
                         problemId = res.problemId,
                         title = res.title,
-                        difficulty = when (res.difficulty) {
-                            "EASY" -> Difficulty.EASY
-                            "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
-                            "HARD" -> Difficulty.HARD
-                            else -> Difficulty.EASY
+                        difficulty = when (res.difficultyDisplayName) {
+                            "쉬움" -> Difficulty.EASY
+                            "보통", "중간" -> Difficulty.MEDIUM
+                            "어려움" -> Difficulty.HARD
+                            else -> when (res.difficulty) {
+                                "EASY" -> Difficulty.EASY
+                                "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
+                                "HARD" -> Difficulty.HARD
+                                else -> Difficulty.EASY
+                            }
                         },
                         bookmarkCount = res.bookmarkCount ?: 0,
                         isBookmarked = res.isBookmark ?: false,

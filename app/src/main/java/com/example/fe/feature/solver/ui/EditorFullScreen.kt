@@ -1,163 +1,121 @@
 package com.example.fe.feature.solver.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloseFullscreen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
-import com.example.fe.ui.theme.BgDivider
-import com.example.fe.ui.theme.BgPrimary
-import com.example.fe.ui.theme.BgSurface
-import com.example.fe.ui.theme.CodeBgDark
-import com.example.fe.ui.theme.Primary
-import com.example.fe.ui.theme.TextPrimary
-import com.example.fe.ui.theme.TextSecondary
+import com.example.fe.feature.solver.component.SoraCodeEditor
+import com.example.fe.ui.theme.*
 
 @Composable
 fun EditorFullScreen(
     problemId: Long,
     viewModel: SolverViewModel,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onGoSubmit: () -> Unit = {}
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
-    val codeFromVm = uiState.code
-
-    var tfv by remember {
-        mutableStateOf(TextFieldValue(codeFromVm, selection = TextRange(codeFromVm.length)))
-    }
-
-    LaunchedEffect(codeFromVm) {
-        if (codeFromVm != tfv.text) {
-            tfv = tfv.copy(text = codeFromVm, selection = TextRange(codeFromVm.length))
-        }
-    }
-
-    var editorFocused by remember { mutableStateOf(false) }
+    var codeEditor by remember { mutableStateOf<io.github.rosemoe.sora.widget.CodeEditor?>(null) }
+    var bottomBarExpanded by remember { mutableStateOf(true) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BgPrimary)
+            .background(CodeBgDark)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box(
+        Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+            SoraCodeEditor(
+                code = uiState.code,
+                onCodeChange = { viewModel.updateCode(it) },
+                language = uiState.language.ifBlank { "JAVA" },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                onEditorReady = { editor -> codeEditor = editor }
+            )
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(BgSurface)
-                    .padding(top = 10.dp, end = 16.dp),
-                contentAlignment = Alignment.TopEnd
+                    .navigationBarsPadding()
             ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Default.CloseFullscreen,
-                        contentDescription = "닫기",
-                        tint = TextSecondary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
+                HorizontalDivider(color = BgDivider)
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = RoundedCornerShape(18.dp),
-                    color = CodeBgDark
+                // 드래그 핸들 — 탭하면 패널 접기/펼치기
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(24.dp)
+                        .clickable { bottomBarExpanded = !bottomBarExpanded },
+                    contentAlignment = Alignment.Center
                 ) {
-                    BasicTextField(
-                        value = tfv,
-                        onValueChange = { newValue ->
-                            tfv = newValue
-                            viewModel.updateCode(newValue.text)
-                        },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(14.dp)
-                            .onFocusChanged { editorFocused = it.isFocused },
-                        textStyle = TextStyle(
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 14.sp,
-                            color = TextPrimary,
-                            lineHeight = 20.sp
-                        ),
-                        cursorBrush = SolidColor(Primary),
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.None,
-                            autoCorrect = false,
-                            keyboardType = KeyboardType.Ascii,
-                            imeAction = ImeAction.None
-                        )
+                    Box(
+                        Modifier
+                            .width(36.dp)
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(TextMuted.copy(alpha = 0.4f))
                     )
                 }
-            }
-        }
 
-        AnimatedVisibility(
-            visible = editorFocused,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .imePadding()
-        ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = BgSurface,
-                shadowElevation = 8.dp
-            ) {
-                Column {
-                    HorizontalDivider(color = BgDivider)
+                AnimatedVisibility(
+                    visible = bottomBarExpanded,
+                    enter = expandVertically(animationSpec = tween(180)),
+                    exit = shrinkVertically(animationSpec = tween(180))
+                ) {
                     SmartKeyboardPanel(
-                        onInsert = { insert ->
-                            val updated = insertIntoTextFieldValue(tfv, insert)
-                            tfv = updated
-                            viewModel.updateCode(updated.text)
+                        onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
+                        onRun = {
+                            viewModel.pendingNavigationTarget = "RESULT"
+                            viewModel.runCode()
+                            onGoSubmit()
+                        },
+                        onSubmit = {
+                            viewModel.pendingNavigationTarget = "MAIN"
+                            viewModel.submitCode()
+                            onGoSubmit()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                            .padding(horizontal = 8.dp, vertical = 8.dp)
                     )
                 }
             }
         }
+
+        // 닫기 버튼 플로팅 (에디터 우상단)
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(8.dp)
+                .size(36.dp)
+                .background(BgSurface.copy(alpha = 0.75f), RoundedCornerShape(8.dp))
+                .zIndex(2f)
+        ) {
+            Icon(
+                imageVector = Icons.Default.CloseFullscreen,
+                contentDescription = "전체화면 닫기",
+                tint = TextMuted,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
-}
-
-private fun insertIntoTextFieldValue(value: TextFieldValue, insert: String): TextFieldValue {
-    val text = value.text
-    val start = value.selection.start.coerceIn(0, text.length)
-    val end = value.selection.end.coerceIn(0, text.length)
-
-    val newText = buildString(text.length + insert.length) {
-        append(text.substring(0, start))
-        append(insert)
-        append(text.substring(end))
-    }
-
-    val newCursor = start + insert.length
-    return value.copy(text = newText, selection = TextRange(newCursor))
 }

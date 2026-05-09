@@ -1,6 +1,9 @@
 package com.example.fe.feature.solver.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,8 +13,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -23,18 +24,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.widget.Toast
@@ -43,7 +36,9 @@ import com.example.fe.feature.solver.SolveTab
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.DraftSaveButton
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
+import com.example.fe.feature.solver.component.SoraCodeEditor
 import com.example.fe.feature.solver.component.SubmitTabContent
+import com.example.fe.feature.solver.component.SubmitSubScreen
 import com.example.fe.feature.solver.model.ProblemDetail
 import com.example.fe.feature.solver.model.TestCase
 import com.example.fe.ui.theme.*
@@ -65,6 +60,21 @@ fun SolveScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by rememberSaveable { mutableStateOf(SolveTab.PROBLEM) }
+    var selectedSubmitSubScreen by rememberSaveable { mutableStateOf(SubmitSubScreen.MAIN) }
+
+    LaunchedEffect(viewModel.pendingNavigationTarget) {
+        when (viewModel.pendingNavigationTarget) {
+            "RESULT" -> {
+                selectedTab = SolveTab.SUBMIT
+                selectedSubmitSubScreen = SubmitSubScreen.RESULT
+            }
+            "MAIN" -> {
+                selectedTab = SolveTab.SUBMIT
+                selectedSubmitSubScreen = SubmitSubScreen.MAIN
+            }
+        }
+        viewModel.pendingNavigationTarget = null
+    }
 
     val context = LocalContext.current
     LaunchedEffect(uiState.errorToast) {
@@ -75,17 +85,8 @@ fun SolveScreen(
     }
 
     val codeFromVm = uiState.code
-    var tfv by remember {
-        mutableStateOf(TextFieldValue(text = codeFromVm, selection = TextRange(codeFromVm.length)))
-    }
-
-    LaunchedEffect(codeFromVm) {
-        if (codeFromVm != tfv.text) {
-            tfv = tfv.copy(text = codeFromVm, selection = TextRange(codeFromVm.length))
-        }
-    }
-
-    var editorFocused by remember { mutableStateOf(false) }
+    var codeEditor by remember { mutableStateOf<io.github.rosemoe.sora.widget.CodeEditor?>(null) }
+    var smartPanelExpanded by remember { mutableStateOf(true) }
 
     val executionLines = uiState.runResult?.terminalLines
     val testCases = uiState.testCases
@@ -218,118 +219,103 @@ fun SolveScreen(
                         }
 
                         SolveTab.EDITOR -> {
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                // edtStrip
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(40.dp)
-                                        .background(BgSurface)
-                                        .padding(horizontal = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = uiState.language,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = TextSecondary
-                                    )
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        DraftSaveButton(onClick = { viewModel.saveDraft() })
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        IconButton(
-                                            onClick = { onOpenEditorFull(problemId) },
-                                            modifier = Modifier.size(28.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.OpenInFull,
-                                                contentDescription = "전체화면",
-                                                tint = TextSecondary,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                // 코드에디터 (남은 공간 전체)
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
-                                        .background(Color(0xFF1A1A1A))
-                                ) {
-                                    BasicTextField(
-                                        value = tfv,
-                                        onValueChange = { newValue ->
-                                            tfv = newValue
-                                            viewModel.updateCode(newValue.text)
-                                        },
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                // 스트립 + 에디터
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    Row(
                                         modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(16.dp)
-                                            .onFocusChanged { editorFocused = it.isFocused },
-                                        textStyle = TextStyle(
-                                            color = TextPrimary,
-                                            fontFamily = FontFamily.Monospace,
-                                            fontSize = 14.sp,
-                                            lineHeight = 24.sp
-                                        ),
-                                        cursorBrush = SolidColor(Primary),
-                                        keyboardOptions = KeyboardOptions(
-                                            capitalization = KeyboardCapitalization.None,
-                                            autoCorrect = false,
-                                            keyboardType = KeyboardType.Ascii,
-                                            imeAction = ImeAction.None
+                                            .fillMaxWidth()
+                                            .height(40.dp)
+                                            .background(BgSurface)
+                                            .padding(horizontal = 16.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = uiState.language,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = TextSecondary
                                         )
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            DraftSaveButton(onClick = { viewModel.saveDraft() })
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            IconButton(
+                                                onClick = { onOpenEditorFull(problemId) },
+                                                modifier = Modifier.size(28.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.OpenInFull,
+                                                    contentDescription = "전체화면",
+                                                    tint = TextSecondary,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                    SoraCodeEditor(
+                                        code = codeFromVm,
+                                        onCodeChange = { viewModel.updateCode(it) },
+                                        language = uiState.language.ifBlank { "JAVA" },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .weight(1f),
+                                        onEditorReady = { editor -> codeEditor = editor }
                                     )
                                 }
 
-                                // 하단 고정 버튼 (실행하기 + 제출하기)
-                                Row(
+                                // 하단 바 — 항상 표시, 드래그 핸들로 접기/펼치기
+                                Column(
                                     modifier = Modifier
+                                        .align(Alignment.BottomCenter)
                                         .fillMaxWidth()
-                                        .background(BgPrimary)
-                                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        .imePadding()
                                 ) {
-                                    Button(
-                                        onClick = {
-                                            viewModel.runCode()
-                                            selectedTab = SolveTab.SUBMIT
-                                        },
-                                        enabled = !uiState.isRunning,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(44.dp),
-                                        shape = RoundedCornerShape(8.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = BgSurface,
+                                        shadowElevation = 8.dp
                                     ) {
-                                        if (uiState.isRunning) {
-                                            CircularProgressIndicator(
-                                                strokeWidth = 2.dp,
-                                                modifier = Modifier.size(16.dp),
-                                                color = BgPrimary
-                                            )
-                                        } else {
-                                            Text("▶  실행하기", color = BgPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                        Column {
+                                            HorizontalDivider(color = BgDivider)
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(24.dp)
+                                                    .clickable { smartPanelExpanded = !smartPanelExpanded },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Box(
+                                                    Modifier
+                                                        .width(36.dp)
+                                                        .height(4.dp)
+                                                        .clip(RoundedCornerShape(2.dp))
+                                                        .background(TextMuted.copy(alpha = 0.4f))
+                                                )
+                                            }
+                                            AnimatedVisibility(
+                                                visible = smartPanelExpanded,
+                                                enter = expandVertically(animationSpec = tween(180)),
+                                                exit = shrinkVertically(animationSpec = tween(180))
+                                            ) {
+                                                SmartKeyboardPanel(
+                                                    onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
+                                                    onRun = {
+                                                        viewModel.runCode()
+                                                        selectedSubmitSubScreen = SubmitSubScreen.RESULT
+                                                        selectedTab = SolveTab.SUBMIT
+                                                    },
+                                                    onSubmit = {
+                                                        viewModel.submitCode()
+                                                        selectedSubmitSubScreen = SubmitSubScreen.MAIN
+                                                        selectedTab = SolveTab.SUBMIT
+                                                    },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                                                )
+                                            }
                                         }
-                                    }
-                                    Button(
-                                        onClick = {
-                                            viewModel.submitCode()
-                                            selectedTab = SolveTab.SUBMIT
-                                        },
-                                        enabled = !uiState.isSubmitting,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(44.dp),
-                                        shape = RoundedCornerShape(8.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-                                    ) {
-                                        Text("▶  제출하기", color = BgPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -337,48 +323,17 @@ fun SolveScreen(
 
                         SolveTab.SUBMIT -> {
                             SubmitTabContent(
-                                viewModel = viewModel,
-                                onNextProblem = { onNextProblem(problemId + 1) }
-                            )
+                                        viewModel = viewModel,
+                                        currentSubScreen = selectedSubmitSubScreen,
+                                        onSubScreenChange = { selectedSubmitSubScreen = it },
+                                        onNextProblem = { onNextProblem(problemId + 1) }
+                                    )
                         }
                     }
                 }
             }
         }
 
-        // 스마트 키보드 (에디터 포커스 시)
-        AnimatedVisibility(
-            visible = (selectedTab == SolveTab.EDITOR) && editorFocused,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .imePadding()
-        ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = BgSurface,
-                shadowElevation = 8.dp
-            ) {
-                SmartKeyboardPanel(
-                    onInsert = { insert ->
-                        val updated = insertIntoTextFieldValue(tfv, insert)
-                        tfv = updated
-                        viewModel.updateCode(updated.text)
-                    },
-                    onRun = {
-                        viewModel.runCode()
-                        selectedTab = SolveTab.SUBMIT
-                    },
-                    onSubmit = {
-                        viewModel.submitCode()
-                        selectedTab = SolveTab.SUBMIT
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                )
-            }
-        }
     }
 }
 
@@ -589,18 +544,6 @@ private fun TestCaseSelectorBar(
     }
 }
 
-private fun insertIntoTextFieldValue(value: TextFieldValue, insert: String): TextFieldValue {
-    val text = value.text
-    val start = value.selection.start.coerceIn(0, text.length)
-    val end = value.selection.end.coerceIn(0, text.length)
-    val newText = buildString(text.length + insert.length) {
-        append(text.substring(0, start))
-        append(insert)
-        append(text.substring(end))
-    }
-    val newCursor = start + insert.length
-    return value.copy(text = newText, selection = TextRange(newCursor))
-}
 
 private fun buildLinesForUi(tc: TestCase, rawLines: List<String>): List<String> {
     return buildList {

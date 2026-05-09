@@ -29,11 +29,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -77,4 +77,8 @@ dependencies {
 
     //추가 (임시 저장)
     implementation("androidx.datastore:datastore-preferences:1.2.1")
+
+    // sora-editor (에디터 코어 및 자바 전용 언어팩)
+    implementation("io.github.Rosemoe.sora-editor:editor:0.23.4")
+    implementation("io.github.Rosemoe.sora-editor:language-java:0.23.4")
 }

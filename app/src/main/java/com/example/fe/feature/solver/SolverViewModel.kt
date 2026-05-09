@@ -23,6 +23,8 @@ class SolverViewModel(
     private val repository: SolverRepository
 ) : ViewModel() {
 
+    var pendingNavigationTarget: String? = null
+
     private val _uiState = MutableStateFlow(
         SolverUiState(
             code = "",
@@ -98,7 +100,12 @@ class SolverViewModel(
                         isLoadingProblem = false,
                         problemDetail = detail,
                         testCases = detail.testCases,
-                        code = serverDraft ?: if (isLanguageChanged || state.code.isBlank() || state.code == detail.initialCode) {
+                        code = serverDraft ?: if (
+                            oldState.problemId != problemId ||
+                            isLanguageChanged ||
+                            state.code.isBlank() ||
+                            state.code == detail.initialCode
+                        ) {
                             detail.initialCode
                         } else {
                             state.code

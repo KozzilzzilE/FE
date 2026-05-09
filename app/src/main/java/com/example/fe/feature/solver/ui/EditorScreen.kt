@@ -6,49 +6,29 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.fe.common.TopBar
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
-import com.example.fe.ui.theme.BgDivider
-import com.example.fe.ui.theme.BgElevated
-import com.example.fe.ui.theme.BgPrimary
-import com.example.fe.ui.theme.BgSurface
-import com.example.fe.ui.theme.CodeBgDark
-import com.example.fe.ui.theme.Primary
-import com.example.fe.ui.theme.TextMuted
-import com.example.fe.ui.theme.TextPrimary
-import com.example.fe.ui.theme.TextSecondary
+import com.example.fe.feature.solver.component.SoraCodeEditor
+import com.example.fe.ui.theme.*
 
 @Composable
 fun EditorScreen(
@@ -60,24 +40,10 @@ fun EditorScreen(
     onGoSubmit: () -> Unit = {},
     onFullscreenClick: () -> Unit = {}
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
     val titleToShow = uiState.problemDetail?.title.orEmpty()
-    val codeFromVm = uiState.code
 
-    var tfv by remember {
-        mutableStateOf(TextFieldValue(codeFromVm, selection = TextRange(codeFromVm.length)))
-    }
-
-    LaunchedEffect(codeFromVm) {
-        if (codeFromVm != tfv.text) {
-            tfv = tfv.copy(text = codeFromVm, selection = TextRange(codeFromVm.length))
-        }
-    }
-
-    var editorFocused by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-
+    var codeEditor by remember { mutableStateOf<io.github.rosemoe.sora.widget.CodeEditor?>(null) }
     val isKeyboardVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
 
     Box(modifier = Modifier.fillMaxSize().background(BgPrimary)) {
@@ -93,7 +59,7 @@ fun EditorScreen(
                 )
             },
             bottomBar = {
-                if (!isKeyboardVisible && !editorFocused) {
+                if (!isKeyboardVisible) {
                     StepIndicatorEditor(total = 3, current = 2)
                 }
             }
@@ -122,66 +88,44 @@ fun EditorScreen(
                         .weight(1f)
                         .padding(16.dp)
                 ) {
-                    Surface(
+                    // 에디터 영역 — Surface 대신 Box+background 사용 (AndroidView 클리핑 문제 방지)
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f),
-                        shape = RoundedCornerShape(18.dp),
-                        color = CodeBgDark,
-                        border = BorderStroke(1.dp, BgDivider)
+                            .weight(1f)
+                            .background(CodeBgDark, RoundedCornerShape(18.dp))
+                            .border(1.dp, BgDivider, RoundedCornerShape(18.dp))
                     ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            IconButton(
-                                onClick = onFullscreenClick,
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(8.dp)
-                                    .zIndex(1f)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.OpenInFull,
-                                    contentDescription = "전체화면",
-                                    tint = TextPrimary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-
-                            BasicTextField(
-                                value = tfv,
-                                onValueChange = { newValue ->
-                                    tfv = newValue
-                                    viewModel.updateCode(newValue.text)
-                                },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp)
-                                    .focusRequester(focusRequester)
-                                    .onFocusChanged { editorFocused = it.isFocused },
-                                textStyle = TextStyle(
-                                    fontFamily = FontFamily.Monospace,
-                                    fontSize = 14.sp,
-                                    color = TextPrimary,
-                                    lineHeight = 20.sp
-                                ),
-                                cursorBrush = SolidColor(Primary),
-                                keyboardOptions = KeyboardOptions(
-                                    capitalization = KeyboardCapitalization.None,
-                                    autoCorrect = false,
-                                    keyboardType = KeyboardType.Text,
-                                    imeAction = ImeAction.None
-                                )
+                        // 전체화면 버튼
+                        IconButton(
+                            onClick = onFullscreenClick,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(8.dp)
+                                .zIndex(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.OpenInFull,
+                                contentDescription = "전체화면",
+                                tint = TextPrimary,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
+
+                        SoraCodeEditor(
+                            code = uiState.code,
+                            onCodeChange = { viewModel.updateCode(it) },
+                            language = uiState.language.ifBlank { "JAVA" },
+                            onEditorReady = { editor -> codeEditor = editor }
+                        )
                     }
 
-                    if (!isKeyboardVisible && !editorFocused) {
+                    if (!isKeyboardVisible) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = { viewModel.runCode(); onGoSubmit() },
                             enabled = !uiState.isRunning,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Primary)
                         ) {
@@ -190,9 +134,7 @@ fun EditorScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         OutlinedButton(
                             onClick = { viewModel.updateCode(uiState.problemDetail?.initialCode ?: "") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp),
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
                             shape = RoundedCornerShape(14.dp),
                             border = BorderStroke(1.dp, BgDivider)
                         ) {
@@ -203,8 +145,9 @@ fun EditorScreen(
             }
         }
 
+        // 키보드가 올라왔을 때 스마트 키보드 패널 표시
         AnimatedVisibility(
-            visible = editorFocused || isKeyboardVisible,
+            visible = isKeyboardVisible,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .imePadding(),
@@ -219,12 +162,9 @@ fun EditorScreen(
                 Column {
                     HorizontalDivider(color = BgDivider)
                     SmartKeyboardPanel(
-                        onInsert = { insert ->
-                            val updated = insertIntoTextFieldValue(tfv, insert)
-                            tfv = updated
-                            viewModel.updateCode(updated.text)
-                            focusRequester.requestFocus()
-                        },
+                        onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
+                        onRun = { viewModel.runCode(); onGoSubmit() },
+                        onSubmit = { onGoSubmit() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp, vertical = 4.dp)
@@ -233,15 +173,6 @@ fun EditorScreen(
             }
         }
     }
-}
-
-private fun insertIntoTextFieldValue(value: TextFieldValue, insert: String): TextFieldValue {
-    val text = value.text
-    val start = value.selection.start.coerceIn(0, text.length)
-    val end = value.selection.end.coerceIn(0, text.length)
-    val newText = text.substring(0, start) + insert + text.substring(end)
-    val newCursor = start + insert.length
-    return value.copy(text = newText, selection = TextRange(newCursor))
 }
 
 @Composable
@@ -272,9 +203,7 @@ private fun RowScope.SolveTabChipStatic(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
         color = if (selected) BgSurface else Color.Transparent,
-        modifier = Modifier
-            .weight(1f)
-            .height(44.dp)
+        modifier = Modifier.weight(1f).height(44.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -287,11 +216,7 @@ private fun RowScope.SolveTabChipStatic(
                 modifier = Modifier.size(18.dp)
             )
             Spacer(Modifier.width(6.dp))
-            Text(
-                label,
-                color = if (selected) TextPrimary else TextMuted,
-                fontSize = 14.sp
-            )
+            Text(label, color = if (selected) TextPrimary else TextMuted, fontSize = 14.sp)
         }
     }
 }
@@ -299,10 +224,7 @@ private fun RowScope.SolveTabChipStatic(
 @Composable
 private fun StepIndicatorEditor(total: Int, current: Int) {
     Row(
-        Modifier
-            .fillMaxWidth()
-            .background(BgPrimary)
-            .padding(vertical = 10.dp),
+        Modifier.fillMaxWidth().background(BgPrimary).padding(vertical = 10.dp),
         Arrangement.Center,
         Alignment.CenterVertically
     ) {

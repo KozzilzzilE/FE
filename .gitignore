@@ -1,27 +1,47 @@
+# IDE & OS Files
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xmls
+/.idea/
 .DS_Store
-/build
+.cxx
 /captures
 .externalNativeBuild
-.cxx
+
+# Build & Gradle
+.gradle/
+.kotlin/
+/build/
+app/build/
+build/
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+
+# Properties & Secrets
 local.properties
+/local.properties
+secrets.properties
+*.jks
+*.keystore
+google-services.json
+
+# Markdown Docs (as requested previously)
+DESIGN_PROGRESS.md
 /DESIGN_PROGRESS.md
+API_GUIDE.md
+
+# Agent & AI Tools
+.claude/
+/.claude/
 /feat/home/.claude
 /test/.claude
 /test-mock/.claude
-/.claude/worktrees
 .claudedocs
 .agent
-/.claude/claude.toml
-/.claude/agents
-.claude/playwright-browsers
-DESIGN_PROGRESS.md
-API_GUIDE.md
+.gemini/
+
+# Temporary / Scratch files
+solver_feat_submit.kt
+solver_test_mock.kt
+base_commit

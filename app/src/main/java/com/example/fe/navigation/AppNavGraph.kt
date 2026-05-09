@@ -815,7 +815,12 @@ fun AppNavGraph() {
             EditorFullScreen(
                 problemId = problemId,
                 viewModel = solverViewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onGoSubmit = {
+                    navController.navigate(Routes.solve(problemId)) {
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 

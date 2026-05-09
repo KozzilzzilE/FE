@@ -35,16 +35,17 @@ import com.example.fe.ui.theme.TextMuted
 import com.example.fe.ui.theme.TextPrimary
 import com.example.fe.ui.theme.TextSecondary
 
-private enum class SubmitSubScreen {
+enum class SubmitSubScreen {
     MAIN, TESTCASE, RESULT, SOLUTION
 }
 
 @Composable
 fun SubmitTabContent(
     viewModel: SolverViewModel,
+    currentSubScreen: SubmitSubScreen,
+    onSubScreenChange: (SubmitSubScreen) -> Unit,
     onNextProblem: () -> Unit
 ) {
-    var currentSubScreen by remember { mutableStateOf(SubmitSubScreen.MAIN) }
     val uiState by viewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -52,7 +53,7 @@ fun SubmitTabContent(
         ErsPills(
             selected = currentSubScreen,
             onSelect = { next ->
-                currentSubScreen = next
+                onSubScreenChange(next)
                 if (next == SubmitSubScreen.SOLUTION) {
                     viewModel.loadSolution()
                 }
@@ -64,7 +65,7 @@ fun SubmitTabContent(
                 SubmitSubScreen.MAIN -> SubmitResultView(
                     viewModel = viewModel,
                     isSubmitting = uiState.isSubmitting,
-                    onViewSolution = { currentSubScreen = SubmitSubScreen.SOLUTION },
+                    onViewSolution = { onSubScreenChange(SubmitSubScreen.SOLUTION) },
                     onNextProblem = onNextProblem
                 )
                 SubmitSubScreen.TESTCASE -> TestCaseTabContent(viewModel)

@@ -47,15 +47,20 @@ fun SubmitTabContent(
     onNextProblem: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showSolutionLockDialog by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // ersPills - 4개 탭 가로 선택
         ErsPills(
             selected = currentSubScreen,
             onSelect = { next ->
-                onSubScreenChange(next)
-                if (next == SubmitSubScreen.SOLUTION) {
-                    viewModel.loadSolution()
+                if (next == SubmitSubScreen.SOLUTION && uiState.submissions.isEmpty()) {
+                    showSolutionLockDialog = true
+                } else {
+                    onSubScreenChange(next)
+                    if (next == SubmitSubScreen.SOLUTION) {
+                        viewModel.loadSolution()
+                    }
                 }
             }
         )
@@ -71,6 +76,52 @@ fun SubmitTabContent(
                 SubmitSubScreen.TESTCASE -> TestCaseTabContent(viewModel)
                 SubmitSubScreen.RESULT -> ExecutionResultView(viewModel)
                 SubmitSubScreen.SOLUTION -> ProblemSolutionTabContent(viewModel)
+            }
+        }
+    }
+
+    if (showSolutionLockDialog) {
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showSolutionLockDialog = false }
+        ) {
+            androidx.compose.material3.Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(24.dp),
+                color = BgSurface
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "알림",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    
+                    Text(
+                        text = "코드를 제출해야 문제 해설을 볼 수 있습니다.",
+                        fontSize = 14.sp,
+                        color = TextSecondary,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+                    
+                    Button(
+                        onClick = { showSolutionLockDialog = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("확인", color = BgPrimary, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
     }

@@ -219,6 +219,7 @@ fun AppNavGraph() {
 
             val problems = if (uiState is ProblemUiState.Success) {
                 (uiState as ProblemUiState.Success).problems.map { res ->
+                    android.util.Log.d("DifficultyCheck", "AllProblem - 문제제목: ${res.title}, difficulty: ${res.difficulty}, displayName: ${res.difficultyDisplayName}")
                     AllProblemItem(
                         problemId = res.problemId,
                         title = res.title,
@@ -226,10 +227,10 @@ fun AppNavGraph() {
                             "쉬움" -> Difficulty.EASY
                             "보통", "중간" -> Difficulty.MEDIUM
                             "어려움" -> Difficulty.HARD
-                            else -> when (res.difficulty) {
-                                "EASY" -> Difficulty.EASY
-                                "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
-                                "HARD" -> Difficulty.HARD
+                            else -> when (res.difficulty?.uppercase()) {
+                                "EASY", "LV1", "1" -> Difficulty.EASY
+                                "NORMAL", "MEDIUM", "LV2", "2" -> Difficulty.MEDIUM
+                                "HARD", "LV3", "3" -> Difficulty.HARD
                                 else -> Difficulty.EASY
                             }
                         },
@@ -578,6 +579,7 @@ fun AppNavGraph() {
                     } else {
                         val problems = if (uiState is ProblemUiState.Success) {
                             (uiState as ProblemUiState.Success).problems.map { res ->
+                                android.util.Log.d("DifficultyCheck", "ProblemLearning - 문제제목: ${res.title}, difficulty: ${res.difficulty}, displayName: ${res.difficultyDisplayName}")
                                 Problem(
                                     id = res.problemId,
                                     title = res.title,
@@ -585,10 +587,10 @@ fun AppNavGraph() {
                                         "쉬움" -> Difficulty.EASY
                                         "보통", "중간" -> Difficulty.MEDIUM
                                         "어려움" -> Difficulty.HARD
-                                        else -> when (res.difficulty) {
-                                            "EASY" -> Difficulty.EASY
-                                            "NORMAL", "MEDIUM" -> Difficulty.MEDIUM
-                                            "HARD" -> Difficulty.HARD
+                                        else -> when (res.difficulty?.uppercase()) {
+                                            "EASY", "LV1", "1" -> Difficulty.EASY
+                                            "NORMAL", "MEDIUM", "LV2", "2" -> Difficulty.MEDIUM
+                                            "HARD", "LV3", "3" -> Difficulty.HARD
                                             else -> Difficulty.EASY
                                         }
                                     },

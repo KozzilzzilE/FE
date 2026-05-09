@@ -23,7 +23,8 @@ fun SoraCodeEditor(
     language: String,
     modifier: Modifier = Modifier.fillMaxSize(),
     onEditorReady: (CodeEditor) -> Unit = {},
-    onFocusChange: (Boolean) -> Unit = {}
+    onFocusChange: (Boolean) -> Unit = {},
+    insertTextEvent: kotlinx.coroutines.flow.SharedFlow<String>? = null
 ) {
     val bgColor = CodeBgDark.toArgb()
     val primaryColor = Primary.toArgb()
@@ -32,6 +33,8 @@ fun SoraCodeEditor(
     val currentOnCodeChange by rememberUpdatedState(onCodeChange)
     val currentCode by rememberUpdatedState(code)
     val currentOnFocusChange by rememberUpdatedState(onFocusChange)
+    
+    var editorInstance by remember { mutableStateOf<CodeEditor?>(null) }
 
     AndroidView(
         modifier = modifier,
@@ -121,6 +124,7 @@ fun SoraCodeEditor(
                     currentOnFocusChange(hasFocus)
                 }
 
+                editorInstance = this
                 onEditorReady(this)
             }
         },
@@ -133,4 +137,16 @@ fun SoraCodeEditor(
             }
         }
     )
+
+    LaunchedEffect(insertTextEvent) {
+        insertTextEvent?.collect { text ->
+            val editor = editorInstance
+            if (editor != null) {
+                val line = editor.cursor.leftLine
+                val col = editor.cursor.leftColumn
+                editor.text.insert(line, col, text)
+                try { editor.setSelection(line, col + text.length) } catch (_: Exception) {}
+            }
+        }
+    }
 }

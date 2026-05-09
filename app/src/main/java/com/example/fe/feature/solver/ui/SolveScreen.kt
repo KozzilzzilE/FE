@@ -85,7 +85,6 @@ fun SolveScreen(
     }
 
     val codeFromVm = uiState.code
-    var codeEditor by remember { mutableStateOf<io.github.rosemoe.sora.widget.CodeEditor?>(null) }
     var smartPanelExpanded by remember { mutableStateOf(true) }
 
     val executionLines = uiState.runResult?.terminalLines
@@ -260,7 +259,7 @@ fun SolveScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .weight(1f),
-                                        onEditorReady = { editor -> codeEditor = editor }
+                                        insertTextEvent = viewModel.insertTextEvent
                                     )
                                 }
 
@@ -299,7 +298,7 @@ fun SolveScreen(
                                                 exit = shrinkVertically(animationSpec = tween(180))
                                             ) {
                                                 SmartKeyboardPanel(
-                                                    onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
+                                                    onInsert = { insert -> viewModel.insertText(insert) },
                                                     onRun = {
                                                         viewModel.runCode()
                                                         selectedSubmitSubScreen = SubmitSubScreen.RESULT

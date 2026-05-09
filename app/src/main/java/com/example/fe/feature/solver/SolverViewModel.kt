@@ -18,12 +18,24 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 class SolverViewModel(
     private val repository: SolverRepository
 ) : ViewModel() {
 
     var pendingNavigationTarget: String? = null
+
+    private val _insertTextEvent = MutableSharedFlow<String>()
+    val insertTextEvent = _insertTextEvent.asSharedFlow()
+
+    fun insertText(text: String) {
+        viewModelScope.launch {
+            _insertTextEvent.emit(text)
+        }
+    }
 
     private val _uiState = MutableStateFlow(
         SolverUiState(

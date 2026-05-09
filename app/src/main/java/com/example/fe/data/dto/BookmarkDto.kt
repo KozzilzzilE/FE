@@ -15,7 +15,6 @@ data class BookmarkResponse(
 )
 
 data class BookmarkResult(
-    @SerializedName("problemId") val problemId: Long,
     @SerializedName("bookmarked") val bookmarked: Boolean
 )
 

@@ -592,7 +592,7 @@ fun AppNavGraph() {
                                             else -> Difficulty.EASY
                                         }
                                     },
-                                    isCompleted = false,
+                                    isCompleted = res.isCompleted ?: false,
                                     bookmarkCount = res.bookmarkCount ?: 0,
                                     isBookmarked = res.isBookmark ?: false
                                 )

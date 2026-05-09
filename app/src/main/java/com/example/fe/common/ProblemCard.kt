@@ -78,12 +78,7 @@ fun DetailCard(
                     color = TextPrimary
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = item.difficulty.label,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = difficultyColor
-                )
+                DifficultyBadge(difficulty = item.difficulty)
             }
 
             // 북마크 (Problem 타입에만 표시)

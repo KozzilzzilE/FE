@@ -61,35 +61,56 @@ class ProblemListViewModel(private val repository: ProblemRepository) : ViewMode
         if (currentState !is ProblemUiState.Success) return
 
         viewModelScope.launch {
-            try {
-                val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
-                
-                // 낙관적 업데이트
-                val optimisticProblems = currentState.problems.map {
-                    if (it.problemId == problemId) {
-                        it.copy(
-                            isBookmark = !isCurrentlyBookmarked,
-                            bookmarkCount = (it.bookmarkCount ?: 0) + (if (isCurrentlyBookmarked) -1 else 1)
-                        )
-                    } else it
-                }
-                _uiState.value = ProblemUiState.Success(optimisticProblems)
+            // 낙관적 업데이트
+            val optimisticProblems = currentState.problems.map {
+                if (it.problemId == problemId) {
+                    it.copy(
+                        isBookmark = !isCurrentlyBookmarked,
+                        bookmarkCount = (it.bookmarkCount ?: 0) + (if (isCurrentlyBookmarked) -1 else 1)
+                    )
+                } else it
+            }
+            _uiState.value = ProblemUiState.Success(optimisticProblems)
 
-                val resultBookmarked = repository.toggleBookmark(token, problemId, isCurrentlyBookmarked)
-                
-                // 결과 보정
-                val verifiedProblems = optimisticProblems.map {
+            val resultBookmarked = try {
+                val token = TokenManager.getAccessToken() ?: "mock_token_for_dev"
+                repository.toggleBookmark(token, problemId, isCurrentlyBookmarked)
+            } catch (e: Exception) {
+                Log.e("ProblemListViewModel", "찜하기 실패", e)
+                null
+            }
+
+            if (resultBookmarked != null) {
+                // 성공 시 결과 보정 (현재 상태에서 업데이트)
+                val currentProblems = (_uiState.value as? ProblemUiState.Success)?.problems ?: optimisticProblems
+                val verifiedProblems = currentProblems.map {
                     if (it.problemId == problemId) {
+                        val originalItem = currentState.problems.find { p -> p.problemId == problemId }
+                        val originalCount = originalItem?.bookmarkCount ?: 0
                         it.copy(
                             isBookmark = resultBookmarked,
-                            bookmarkCount = currentState.problems.find { p -> p.problemId == problemId }?.bookmarkCount?.plus(if (resultBookmarked) 1 else if (isCurrentlyBookmarked) -1 else 0) ?: 0
+                            bookmarkCount = originalCount + when {
+                                resultBookmarked && !isCurrentlyBookmarked -> 1
+                                !resultBookmarked && isCurrentlyBookmarked -> -1
+                                else -> 0
+                            }
                         )
                     } else it
                 }
                 _uiState.value = ProblemUiState.Success(verifiedProblems)
-            } catch (e: Exception) {
-                // 실패 시 원래 상태로 복구
-                _uiState.value = currentState
+            } else {
+                // 실패 시 롤백 (현재 상태에서 해당 아이템만 원래 상태로 복구)
+                val currentProblems = (_uiState.value as? ProblemUiState.Success)?.problems ?: optimisticProblems
+                val rolledBackProblems = currentProblems.map {
+                    if (it.problemId == problemId) {
+                        val originalItem = currentState.problems.find { p -> p.problemId == problemId }
+                        it.copy(
+                            isBookmark = isCurrentlyBookmarked,
+                            bookmarkCount = originalItem?.bookmarkCount ?: 0
+                        )
+                    } else it
+                }
+                _uiState.value = ProblemUiState.Success(rolledBackProblems)
             }
         }
     }

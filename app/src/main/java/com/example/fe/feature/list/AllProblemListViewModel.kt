@@ -76,41 +76,57 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
         if (currentState !is ProblemUiState.Success) return
 
         viewModelScope.launch {
-            try {
+            // 낙관적 업데이트
+            val optimisticProblems = currentState.problems.map {
+                if (it.problemId == problemId) {
+                    it.copy(
+                        isBookmark = !isCurrentlyBookmarked,
+                        bookmarkCount = (it.bookmarkCount ?: 0) + (if (isCurrentlyBookmarked) -1 else 1)
+                    )
+                } else it
+            }
+            _uiState.value = ProblemUiState.Success(optimisticProblems)
+
+            val resultBookmarked = try {
                 val token = TokenManager.getAccessToken() 
                     ?: throw Exception("로그인 토큰이 없습니다.")
-                
-                val optimisticProblems = currentState.problems.map {
-                    if (it.problemId == problemId) {
-                        it.copy(
-                            isBookmark = !isCurrentlyBookmarked,
-                            bookmarkCount = (it.bookmarkCount ?: 0) + (if (isCurrentlyBookmarked) -1 else 1)
-                        )
-                    } else it
-                }
-                _uiState.value = ProblemUiState.Success(optimisticProblems)
+                repository.toggleBookmark(token, problemId, isCurrentlyBookmarked)
+            } catch (e: Exception) {
+                Log.e("AllProblemListVM", "찜하기 실패: ${e.message}", e)
+                null
+            }
 
-                val resultBookmarked = repository.toggleBookmark(token, problemId, isCurrentlyBookmarked)
-                
-                // 실제 서버 결과로 최종 보정
-                val verifiedProblems = currentState.problems.map {
+            if (resultBookmarked != null) {
+                // 성공 시 결과 보정 (현재 상태에서 업데이트)
+                val currentProblems = (_uiState.value as? ProblemUiState.Success)?.problems ?: optimisticProblems
+                val verifiedProblems = currentProblems.map {
                     if (it.problemId == problemId) {
-                        val newCount = (it.bookmarkCount ?: 0) + when {
-                            resultBookmarked && !isCurrentlyBookmarked -> 1
-                            !resultBookmarked && isCurrentlyBookmarked -> -1
-                            else -> 0
-                        }
+                        val originalItem = currentState.problems.find { p -> p.problemId == problemId }
+                        val originalCount = originalItem?.bookmarkCount ?: 0
                         it.copy(
                             isBookmark = resultBookmarked,
-                            bookmarkCount = newCount
+                            bookmarkCount = originalCount + when {
+                                resultBookmarked && !isCurrentlyBookmarked -> 1
+                                !resultBookmarked && isCurrentlyBookmarked -> -1
+                                else -> 0
+                            }
                         )
                     } else it
                 }
                 _uiState.value = ProblemUiState.Success(verifiedProblems)
-                
-            } catch (e: Exception) {
-                Log.e("AllProblemListVM", "찜하기 실패: ${e.message}", e)
-                _uiState.value = currentState // 실패 시 원래 상태로 복구
+            } else {
+                // 실패 시 롤백 (현재 상태에서 해당 아이템만 원래 상태로 복구)
+                val currentProblems = (_uiState.value as? ProblemUiState.Success)?.problems ?: optimisticProblems
+                val rolledBackProblems = currentProblems.map {
+                    if (it.problemId == problemId) {
+                        val originalItem = currentState.problems.find { p -> p.problemId == problemId }
+                        it.copy(
+                            isBookmark = isCurrentlyBookmarked,
+                            bookmarkCount = originalItem?.bookmarkCount ?: 0
+                        )
+                    } else it
+                }
+                _uiState.value = ProblemUiState.Success(rolledBackProblems)
             }
         }
     }

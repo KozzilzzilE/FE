@@ -97,7 +97,7 @@ fun HomeScreen(
                     // 3. 빠른 메뉴 카드 3장
                     MainActionsRow(
                         onStudyClick = { onNavigate(Routes.TOPIC) },
-                        onFavoriteClick = { onNavigate(Routes.MY) },
+                        onFavoriteClick = { onNavigate(Routes.FAVORITE_PROBLEMS) },
                         onQuizClick = { onNavigate(Routes.CS_QUIZ) }
                     )
 

@@ -11,8 +11,9 @@ data class MyPageUiState(
     val languageOptions: List<LanguageResult> = emptyList(),
     val level: Int = 1,
     val stat: ProfileStat = ProfileStat(
-        streak = "14D",
-        solved = "85"
+        streak = "0",
+        solved = "0",
+        studyDays = "0"
     ),
     val error: String? = null
 )

@@ -29,6 +29,7 @@ import com.example.fe.ui.theme.TextPrimary
 fun StatSection(
     streak: String,
     solved: String,
+    studyDays: String,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -36,11 +37,11 @@ fun StatSection(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         StatItem(
-            icon = "⚡",
-            iconBg = Color(0x20F59E0B), // Primary 15%
-            label = "STREAK",
-            value = streak,
-            valueColor = Primary
+            icon = "📅",
+            iconBg = Color(0x203B82F6), // Blue 15%
+            label = "STUDY DAYS",
+            value = studyDays,
+            valueColor = Color(0xFF3B82F6)
         )
         StatItem(
             icon = "<>",
@@ -48,6 +49,13 @@ fun StatSection(
             label = "SOLVED",
             value = solved,
             valueColor = Success
+        )
+        StatItem(
+            icon = "⚡",
+            iconBg = Color(0x20F59E0B), // Primary 15%
+            label = "STREAK",
+            value = streak,
+            valueColor = Primary
         )
     }
 }

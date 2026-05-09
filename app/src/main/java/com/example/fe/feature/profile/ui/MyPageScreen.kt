@@ -248,19 +248,19 @@ fun MyPageScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 StatCard(
-                    value = "23",
+                    value = uiState.stat.studyDays,
                     label = "학습 일수",
                     valueColor = Color(0xFF3B82F6),
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
-                    value = "47",
+                    value = uiState.stat.solved,
                     label = "풀이 문제",
                     valueColor = Color(0xFFF59E0B),
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
-                    value = "5",
+                    value = uiState.stat.streak,
                     label = "연속 학습",
                     valueColor = Color(0xFF22C55E),
                     modifier = Modifier.weight(1f)

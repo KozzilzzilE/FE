@@ -51,22 +51,25 @@ class BookmarkViewModel(private val repository: BookmarkRepository) : ViewModel(
         if (currentState !is BookmarkUiState.Success) return
 
         viewModelScope.launch {
-            try {
-                val token = TokenManager.getAccessToken() ?: ""
-                
-                // 낙관적 업데이트
-                val optimisticList = currentState.bookmarks.filter { it.problemId != problemId }
-                _uiState.value = BookmarkUiState.Success(optimisticList)
+            // 낙관적 업데이트
+            val optimisticList = currentState.bookmarks.filter { it.problemId != problemId }
+            _uiState.value = BookmarkUiState.Success(optimisticList)
 
-                val success = repository.deleteBookmark(token, problemId)
-                if (!success) {
-                    // 실패 시 롤백
-                    _uiState.value = currentState
-                }
+            val success = try {
+                val token = TokenManager.getAccessToken() ?: ""
+                repository.deleteBookmark(token, problemId)
             } catch (e: Exception) {
                 Log.e("BookmarkViewModel", "북마크 삭제 예외 발생", e)
-                // 실패 시 롤백
-                _uiState.value = currentState
+                false
+            }
+
+            if (!success) {
+                // 실패 시 롤백 (현재 상태에 실패한 아이템만 다시 추가)
+                val currentBookmarks = (_uiState.value as? BookmarkUiState.Success)?.bookmarks ?: emptyList()
+                val failedItem = currentState.bookmarks.find { it.problemId == problemId }
+                if (failedItem != null && failedItem !in currentBookmarks) {
+                    _uiState.value = BookmarkUiState.Success(currentBookmarks + failedItem)
+                }
             }
         }
     }

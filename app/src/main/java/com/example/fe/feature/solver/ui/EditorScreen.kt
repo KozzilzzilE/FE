@@ -43,6 +43,16 @@ fun EditorScreen(
     val uiState by viewModel.uiState.collectAsState()
     val titleToShow = uiState.problemDetail?.title.orEmpty()
 
+    var wasSubmitting by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.isSubmitting) {
+        if (wasSubmitting && !uiState.isSubmitting) {
+            if (uiState.submitResult != null) {
+                onGoSubmit()
+            }
+        }
+        wasSubmitting = uiState.isSubmitting
+    }
+
     var codeEditor by remember { mutableStateOf<io.github.rosemoe.sora.widget.CodeEditor?>(null) }
     val isKeyboardVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
 
@@ -164,7 +174,8 @@ fun EditorScreen(
                     SmartKeyboardPanel(
                         onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
                         onRun = { viewModel.runCode(); onGoSubmit() },
-                        onSubmit = { onGoSubmit() },
+                        onSubmit = { viewModel.submitCode() },
+                        isSubmitting = uiState.isSubmitting,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp, vertical = 4.dp)

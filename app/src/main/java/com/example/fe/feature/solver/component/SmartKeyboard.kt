@@ -25,6 +25,7 @@ fun SmartKeyboardPanel(
     onInsert: (String) -> Unit,
     onRun: () -> Unit = {},
     onSubmit: () -> Unit = {},
+    isSubmitting: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val pageCount = 3
@@ -109,20 +110,28 @@ fun SmartKeyboardPanel(
                 }
             }
             Surface(
-                onClick = onSubmit,
+                onClick = { if (!isSubmitting) onSubmit() },
                 modifier = Modifier
                     .weight(1f)
                     .height(44.dp),
                 shape = RoundedCornerShape(8.dp),
-                color = Primary
+                color = if (isSubmitting) BgElevated else Primary
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "▶  제출하기",
-                        color = BgPrimary,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (isSubmitting) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            color = Primary,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "▶  제출하기",
+                            color = BgPrimary,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

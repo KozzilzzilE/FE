@@ -76,6 +76,17 @@ fun SolveScreen(
         viewModel.pendingNavigationTarget = null
     }
 
+    var wasSubmitting by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.isSubmitting) {
+        if (wasSubmitting && !uiState.isSubmitting) {
+            if (uiState.submitResult != null) {
+                selectedTab = SolveTab.SUBMIT
+                selectedSubmitSubScreen = SubmitSubScreen.MAIN
+            }
+        }
+        wasSubmitting = uiState.isSubmitting
+    }
+
     val context = LocalContext.current
     LaunchedEffect(uiState.errorToast) {
         uiState.errorToast?.let {
@@ -291,9 +302,8 @@ fun SolveScreen(
                                                     },
                                                     onSubmit = {
                                                         viewModel.submitCode()
-                                                        selectedSubmitSubScreen = SubmitSubScreen.MAIN
-                                                        selectedTab = SolveTab.SUBMIT
                                                     },
+                                                    isSubmitting = uiState.isSubmitting,
                                                     modifier = Modifier
                                                         .fillMaxWidth()
                                                         .padding(horizontal = 12.dp, vertical = 8.dp)

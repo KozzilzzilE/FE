@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -377,82 +378,73 @@ private fun ConceptImageSection(images: List<String>) {
     val pagerState = rememberPagerState(pageCount = { images.size })
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // 이미지 dot 인디케이터
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            images.forEachIndexed { i, _ ->
-                val isActive = i == pagerState.currentPage
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 3.dp)
-                        .then(
-                            if (isActive) Modifier.width(18.dp).height(5.dp)
-                            else Modifier.size(5.dp)
-                        )
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(if (isActive) Primary else BgElevated)
-                )
-            }
-        }
-
-        // 이미지 페이저
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxWidth()
         ) { page ->
-            Box(
+            SubcomposeAsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(images[page])
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "이미지 ${page + 1}",
+                contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp)
+                    .wrapContentHeight()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(BgSurface)
-                    .border(1.dp, BgElevated, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
             ) {
-                SubcomposeAsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(images[page])
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "이미지 ${page + 1}",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    when (val state = painter.state) {
-                        is AsyncImagePainter.State.Loading -> {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Image,
-                                    contentDescription = null,
-                                    tint = TextMuted,
-                                    modifier = Modifier.size(36.dp)
-                                )
-                                Text("이미지 ${page + 1}", fontSize = 12.sp, color = TextMuted)
-                                Text("${page + 1} / ${images.size}", fontSize = 10.sp, color = BgElevated)
-                            }
+                when (painter.state) {
+                    is AsyncImagePainter.State.Loading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .background(BgSurface),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Primary, modifier = Modifier.size(32.dp))
                         }
-                        is AsyncImagePainter.State.Error -> {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Image,
-                                    contentDescription = null,
-                                    tint = BgElevated,
-                                    modifier = Modifier.size(36.dp)
-                                )
-                                Text("이미지 로드 실패", fontSize = 12.sp, color = BgElevated)
-                            }
-                        }
-                        else -> SubcomposeAsyncImageContent()
                     }
+                    is AsyncImagePainter.State.Error -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .background(BgSurface),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Image,
+                                contentDescription = null,
+                                tint = BgElevated,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+                    }
+                    else -> SubcomposeAsyncImageContent()
+                }
+            }
+        }
+
+        if (images.size > 1) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                images.forEachIndexed { i, _ ->
+                    val isActive = i == pagerState.currentPage
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 3.dp)
+                            .then(
+                                if (isActive) Modifier.width(18.dp).height(5.dp)
+                                else Modifier.size(5.dp)
+                            )
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(if (isActive) Primary else BgElevated)
+                    )
                 }
             }
         }

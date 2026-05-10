@@ -22,10 +22,6 @@ class AuthRepository(
             return AuthState.Error("이메일과 비밀번호를 입력해주세요.")
         }
 
-        if (com.example.fe.common.MockConfig.USE_MOCK) {
-            return loginToServer("mock_firebase_token")
-        }
-
         return try {
             val taskResult = auth.signInWithEmailAndPassword(email, pass).await()
             val user = taskResult.user ?: return AuthState.Error("유저 정보를 찾을 수 없습니다.")
@@ -39,16 +35,6 @@ class AuthRepository(
     }
 
     suspend fun signUp(name: String, email: String, pass: String, language: String): AuthState {
-        if (com.example.fe.common.MockConfig.USE_MOCK) {
-            val (isSuccess, message) = registerUserToServer(
-                firebaseToken = "mock_firebase_token",
-                name = name,
-                email = email,
-                language = language
-            )
-            return if (isSuccess) AuthState.SignedUp(message) else AuthState.Error(message)
-        }
-
         return try {
             val taskResult = auth.createUserWithEmailAndPassword(email, pass).await()
             val user = taskResult.user ?: return AuthState.Error("유저 정보를 찾을 수 없습니다.")

@@ -72,9 +72,11 @@ fun ContributionGraph(
                     fontWeight = FontWeight.Medium,
                     color = TextPrimary
                 )
-                Text(
-                    text = "🔥",
-                    fontSize = 18.sp
+                androidx.compose.material3.Icon(
+                    painter = androidx.compose.ui.res.painterResource(id = com.example.fe.R.drawable.ic_flame),
+                    contentDescription = "Streak Fire",
+                    tint = androidx.compose.ui.graphics.Color.Unspecified,
+                    modifier = Modifier.size(20.dp)
                 )
             }
             Text(
@@ -198,7 +200,7 @@ private fun GrassCell(count: Int, isToday: Boolean = false) {
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .background(Color.White, shape = androidx.compose.foundation.shape.CircleShape)
+                    .background(Color(0xFFF59E0B), shape = androidx.compose.foundation.shape.CircleShape)
             )
         }
     }

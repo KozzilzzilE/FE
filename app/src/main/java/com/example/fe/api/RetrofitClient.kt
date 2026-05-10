@@ -4,7 +4,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.example.fe.common.MockConfig
 import com.example.fe.common.TokenManager
 
 object RetrofitClient { // 싱글톤 객체로 생성
@@ -56,14 +55,9 @@ object RetrofitClient { // 싱글톤 객체로 생성
     }
 
     private val okHttpClient = OkHttpClient.Builder().apply {
-        // ★ [MOCK] Mock 모드일 때 가짜 서버 인터셉터를 가장 먼저 등록합니다.
-        // ★ 실제 서버 연동 시: MockConfig.USE_MOCK = false 로 바꾸면 이 블록이 실행되지 않습니다.
-        if (MockConfig.USE_MOCK) {
-            addInterceptor(MockInterceptor())
-        }
-        addInterceptor(loggingInterceptor)          // 기존 상세 로그 기록기
-        addInterceptor(customLoggingInterceptor)     // 성공/실패 한눈에 요약하는 커스텀 로깅
-        addInterceptor(authInterceptor)              // 인증 인터셉터
+        addInterceptor(loggingInterceptor)
+        addInterceptor(customLoggingInterceptor)
+        addInterceptor(authInterceptor)
     }.build()
 
     val instance: ApiService by lazy { // Retrofit 인스턴스 생성, 사용할때 만들어짐

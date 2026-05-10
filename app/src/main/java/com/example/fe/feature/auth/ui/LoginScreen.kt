@@ -48,8 +48,7 @@ fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit,
     onGoogleLoginClick: (String) -> Unit = {},
-    onGithubLoginClick: (Activity) -> Unit = {},
-    onSkipLoginClick: () -> Unit = {}
+    onGithubLoginClick: (Activity) -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -184,10 +183,6 @@ fun LoginScreen(
             Text("회원가입", color = Primary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
         }
 
-        // 개발용
-        TextButton(onClick = onSkipLoginClick) {
-            Text("🛠 테스트: 로그인 건너뛰기", color = TextMuted, fontSize = 11.sp)
-        }
 
         Spacer(modifier = Modifier.height(24.dp))
     }
@@ -261,7 +256,6 @@ fun LoginScreenPreview() {
         onLoginClick = { _, _ -> },
         onSignUpClick = {},
         onGoogleLoginClick = {},
-        onGithubLoginClick = {},
-        onSkipLoginClick = {}
+        onGithubLoginClick = {}
     )
 }

@@ -143,12 +143,6 @@ fun AppNavGraph() {
                 },
                 onGithubLoginClick = { activity ->
                     authViewModel.signInWithGithubLogin(activity)
-                },
-                onSkipLoginClick = {
-                    com.example.fe.common.TokenManager.saveAccessToken("mock_access_token_PocketCo_2026")
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
-                    }
                 }
             )
         }

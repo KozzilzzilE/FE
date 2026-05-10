@@ -26,10 +26,7 @@ class ConceptViewModel(private val repository: ConceptRepository) : ViewModel() 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            val token = com.example.fe.common.TokenManager.getAccessToken() ?: "mock_token"
-            
-            // 실제 서버 연동 모드이고 토큰이 없는 경우에만 에러 처리
-            if (!com.example.fe.common.MockConfig.USE_MOCK && token == "mock_token") {
+            val token = com.example.fe.common.TokenManager.getAccessToken() ?: run {
                 _uiState.update { it.copy(isLoading = false, error = "로그인 토큰이 없습니다.") }
                 return@launch
             }

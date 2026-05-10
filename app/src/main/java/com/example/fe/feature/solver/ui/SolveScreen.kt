@@ -8,8 +8,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -100,23 +100,22 @@ fun SolveScreen(
     val isBookmarked = detail?.isBookmarked == true
     val bookmarkCount = detail?.bookmarkCount ?: 0
 
-    var dragSum by remember { mutableStateOf(0f) }
-    val swipeThreshold = 80f
+    val tabs = SolveTab.values()
+    val pagerState = rememberPagerState(
+        initialPage = selectedTab.ordinal,
+        pageCount = { tabs.size }
+    )
 
-    fun goPrev() {
-        selectedTab = when (selectedTab) {
-            SolveTab.PROBLEM -> SolveTab.PROBLEM
-            SolveTab.EDITOR -> SolveTab.PROBLEM
-            SolveTab.SUBMIT -> SolveTab.EDITOR
+    // 탭바 클릭 or 프로그래밍 탭 전환 → pager 스크롤
+    LaunchedEffect(selectedTab) {
+        if (pagerState.currentPage != selectedTab.ordinal) {
+            pagerState.animateScrollToPage(selectedTab.ordinal)
         }
     }
 
-    fun goNext() {
-        selectedTab = when (selectedTab) {
-            SolveTab.PROBLEM -> SolveTab.EDITOR
-            SolveTab.EDITOR -> SolveTab.SUBMIT
-            SolveTab.SUBMIT -> SolveTab.SUBMIT
-        }
+    // pager 스와이프 → selectedTab 동기화
+    LaunchedEffect(pagerState.currentPage) {
+        selectedTab = tabs[pagerState.currentPage]
     }
 
 
@@ -187,29 +186,15 @@ fun SolveScreen(
                     isSubmitEnabled = uiState.submissions.isNotEmpty()
                 )
 
-                // 컨텐츠
-                Box(
+                // 컨텐츠 — HorizontalPager로 탭 전환 (손가락 따라 실시간)
+                HorizontalPager(
+                    state = pagerState,
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth()
-                        .pointerInput(selectedTab) {
-                            detectHorizontalDragGestures(
-                                onDragStart = { dragSum = 0f },
-                                onHorizontalDrag = { change, dragAmount ->
-                                    dragSum += dragAmount
-                                    change.consume()
-                                },
-                                onDragEnd = {
-                                    when {
-                                        dragSum > swipeThreshold -> goPrev()
-                                        dragSum < -swipeThreshold -> goNext()
-                                    }
-                                    dragSum = 0f
-                                }
-                            )
-                        }
-                ) {
-                    when (selectedTab) {
+                        .fillMaxWidth(),
+                    userScrollEnabled = true
+                ) { page ->
+                    when (tabs[page]) {
                         SolveTab.PROBLEM -> {
                             ProblemTab(
                                 detail = detail,
@@ -322,11 +307,11 @@ fun SolveScreen(
 
                         SolveTab.SUBMIT -> {
                             SubmitTabContent(
-                                        viewModel = viewModel,
-                                        currentSubScreen = selectedSubmitSubScreen,
-                                        onSubScreenChange = { selectedSubmitSubScreen = it },
-                                        onNextProblem = { onNextProblem(problemId + 1) }
-                                    )
+                                viewModel = viewModel,
+                                currentSubScreen = selectedSubmitSubScreen,
+                                onSubScreenChange = { selectedSubmitSubScreen = it },
+                                onNextProblem = { onNextProblem(problemId + 1) }
+                            )
                         }
                     }
                 }

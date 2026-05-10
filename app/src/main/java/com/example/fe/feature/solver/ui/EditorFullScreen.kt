@@ -91,6 +91,7 @@ fun EditorFullScreen(
                             viewModel.submitCode()
                             onGoSubmit()
                         },
+                        isSubmitting = uiState.isSubmitting,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp, vertical = 8.dp)

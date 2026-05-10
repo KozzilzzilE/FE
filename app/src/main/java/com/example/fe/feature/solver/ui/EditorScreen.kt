@@ -165,6 +165,7 @@ fun EditorScreen(
                         onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
                         onRun = { viewModel.runCode(); onGoSubmit() },
                         onSubmit = { onGoSubmit() },
+                        isSubmitting = uiState.isSubmitting,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp, vertical = 4.dp)

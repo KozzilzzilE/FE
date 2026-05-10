@@ -294,6 +294,7 @@ fun SolveScreen(
                                                         selectedSubmitSubScreen = SubmitSubScreen.MAIN
                                                         selectedTab = SolveTab.SUBMIT
                                                     },
+                                                    isSubmitting = uiState.isSubmitting,
                                                     modifier = Modifier
                                                         .fillMaxWidth()
                                                         .padding(horizontal = 12.dp, vertical = 8.dp)

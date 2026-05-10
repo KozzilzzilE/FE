@@ -317,7 +317,7 @@ class SolverRepository(
             }
 
             com.example.fe.feature.solver.model.SubmissionRecord(
-                date = it.createdAt,
+                date = formatSubmissionDate(it.createdAt),
                 language = it.language,
                 result = resultText,
                 isCorrect = isCorrect
@@ -371,5 +371,19 @@ class SolverRepository(
         if (!body.isSuccess) return null
 
         return body.result?.sourceCode
+    }
+}
+
+private fun formatSubmissionDate(raw: String?): String {
+    if (raw.isNullOrBlank()) return "-"
+    return try {
+        // "2026-05-09T20:23:48.524917" → "2026.05.09 20:23"
+        val datePart = raw.substringBefore("T")
+        val timePart = raw.substringAfter("T").substringBefore(".")
+        val (y, m, d) = datePart.split("-")
+        val (h, min) = timePart.split(":")
+        "${y.takeLast(2)}.$m.$d $h:$min"
+    } catch (e: Exception) {
+        raw
     }
 }

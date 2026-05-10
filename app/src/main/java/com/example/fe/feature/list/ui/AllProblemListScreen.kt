@@ -42,7 +42,7 @@ import com.example.fe.feature.list.model.AllProblemItem
 
 
 enum class AllProblemDifficultyFilter {
-    ALL, EASY, MEDIUM, HARD
+    ALL, EASY, NORMAL, HARD
 }
 
 
@@ -112,8 +112,8 @@ fun AllProblemListScreen(
                 )
                 DifficultyChip(
                     text = "보통",
-                    selected = selectedDifficulty == AllProblemDifficultyFilter.MEDIUM,
-                    onClick = { onDifficultySelected(AllProblemDifficultyFilter.MEDIUM) }
+                    selected = selectedDifficulty == AllProblemDifficultyFilter.NORMAL,
+                    onClick = { onDifficultySelected(AllProblemDifficultyFilter.NORMAL) }
                 )
                 DifficultyChip(
                     text = "어려움",
@@ -185,7 +185,7 @@ private fun AllProblemListScreenPreview() {
         when (selectedDifficulty) {
             AllProblemDifficultyFilter.ALL -> true
             AllProblemDifficultyFilter.EASY -> problem.difficulty == Difficulty.EASY
-            AllProblemDifficultyFilter.MEDIUM -> problem.difficulty == Difficulty.MEDIUM
+            AllProblemDifficultyFilter.NORMAL -> problem.difficulty == Difficulty.MEDIUM
             AllProblemDifficultyFilter.HARD -> problem.difficulty == Difficulty.HARD
         }
     }

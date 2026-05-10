@@ -202,7 +202,7 @@ fun AppNavGraph() {
             // ViewModel의 문자열 난이도 상태를 UI용 Enum으로 변환
             val selectedDifficulty = when (selectedDifficultyStr) {
                 "EASY" -> AllProblemDifficultyFilter.EASY
-                "NORMAL", "MEDIUM" -> AllProblemDifficultyFilter.MEDIUM
+                "NORMAL", "MEDIUM" -> AllProblemDifficultyFilter.NORMAL
                 "HARD" -> AllProblemDifficultyFilter.HARD
                 else -> AllProblemDifficultyFilter.ALL
             }
@@ -244,7 +244,7 @@ fun AppNavGraph() {
                 onDifficultySelected = { filter ->
                     val diffStr = when (filter) {
                         AllProblemDifficultyFilter.EASY -> "EASY"
-                        AllProblemDifficultyFilter.MEDIUM -> "NORMAL"
+                        AllProblemDifficultyFilter.NORMAL -> "NORMAL"
                         AllProblemDifficultyFilter.HARD -> "HARD"
                         else -> null
                     }

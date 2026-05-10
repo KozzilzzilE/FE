@@ -33,6 +33,16 @@ fun EditorFullScreen(
     var codeEditor by remember { mutableStateOf<io.github.rosemoe.sora.widget.CodeEditor?>(null) }
     var bottomBarExpanded by remember { mutableStateOf(true) }
 
+    var wasSubmitting by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.isSubmitting) {
+        if (wasSubmitting && !uiState.isSubmitting) {
+            if (uiState.submitResult != null) {
+                onGoSubmit()
+            }
+        }
+        wasSubmitting = uiState.isSubmitting
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -87,9 +97,7 @@ fun EditorFullScreen(
                             onGoSubmit()
                         },
                         onSubmit = {
-                            viewModel.pendingNavigationTarget = "MAIN"
                             viewModel.submitCode()
-                            onGoSubmit()
                         },
                         isSubmitting = uiState.isSubmitting,
                         modifier = Modifier

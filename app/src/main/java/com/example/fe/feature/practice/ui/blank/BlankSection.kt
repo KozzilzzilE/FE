@@ -3,6 +3,7 @@ package com.example.fe.feature.practice.ui.blank
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -46,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.fe.common.highlight
+import com.example.fe.common.parseCodeFence
 import com.example.fe.ui.theme.BlankBorder
 import com.example.fe.ui.theme.BlankBorderSelected
 import com.example.fe.ui.theme.BodyText
@@ -188,6 +192,27 @@ fun QuestionInfoCard(
     }
 }
 
+private data class LinePart(val text: String, val isBlank: Boolean, val originalLength: Int)
+
+private fun parseLine(line: String): List<LinePart> {
+    val result = mutableListOf<LinePart>()
+    val regex = Regex("_{2,}")
+    var lastEnd = 0
+    for (match in regex.findAll(line)) {
+        if (match.range.first > lastEnd) {
+            val t = line.substring(lastEnd, match.range.first)
+            result.add(LinePart(t, false, t.length))
+        }
+        result.add(LinePart("", true, match.value.length))
+        lastEnd = match.range.last + 1
+    }
+    if (lastEnd < line.length) {
+        val t = line.substring(lastEnd)
+        result.add(LinePart(t, false, t.length))
+    }
+    return result
+}
+
 @Composable
 fun CodeBlankCard(
     codeTemplate: String,
@@ -196,47 +221,61 @@ fun CodeBlankCard(
     filledAnswers: List<String?>,
     onBlankClick: (Int) -> Unit
 ) {
-    // 코드 템플릿을 줄 단위로 분리
-    val lines = remember(codeTemplate) {
-        codeTemplate.lines()
-    }
+    val (language, cleanTemplate) = remember(codeTemplate) { parseCodeFence(codeTemplate) }
+    val fullHighlighted = remember(cleanTemplate, language) { highlight(cleanTemplate, language) }
+    val lines = remember(cleanTemplate) { cleanTemplate.lines() }
 
+    var globalOffset = 0
     var blankIndex = 0
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(CodeBg, RoundedCornerShape(16.dp))
-            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .horizontalScroll(rememberScrollState())
     ) {
-        lines.forEach { line ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val parts = line.split("____")
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+        ) {
+            lines.forEach { line ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val parts = parseLine(line)
+                    var partOffset = globalOffset
 
-                parts.forEachIndexed { index, part ->
-                    Text(
-                        text = part,
-                        color = CodeText,
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 14.sp,
-                        lineHeight = 22.sp
-                    )
-
-                    // ____ 위치에 빈칸 슬롯 삽입
-                    if (index < parts.lastIndex && blankIndex < blankCount) {
-                        BlankSlot(
-                            text = filledAnswers.getOrNull(blankIndex) ?: "",
-                            isSelected = selectedBlankIndex == blankIndex,
-                            onClick = { onBlankClick(blankIndex) }
-                        )
-                        blankIndex++
+                    parts.forEach { part ->
+                        if (part.isBlank) {
+                            if (blankIndex < blankCount) {
+                                BlankSlot(
+                                    text = filledAnswers.getOrNull(blankIndex) ?: "",
+                                    isSelected = selectedBlankIndex == blankIndex,
+                                    onClick = { onBlankClick(blankIndex) }
+                                )
+                                blankIndex++
+                            }
+                        } else if (part.text.isNotEmpty()) {
+                            val segStart = partOffset.coerceIn(0, fullHighlighted.length)
+                            val segEnd = (partOffset + part.originalLength).coerceIn(0, fullHighlighted.length)
+                            val segment = if (segStart < segEnd) {
+                                fullHighlighted.subSequence(segStart, segEnd)
+                            } else {
+                                androidx.compose.ui.text.AnnotatedString(part.text)
+                            }
+                            Text(
+                                text = segment,
+                                color = Color.White,
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 13.sp,
+                                lineHeight = 20.sp,
+                                softWrap = false
+                            )
+                        }
+                        partOffset += part.originalLength
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(4.dp))
+                globalOffset += line.length + 1
+                Spacer(modifier = Modifier.height(2.dp))
+            }
         }
     }
 }

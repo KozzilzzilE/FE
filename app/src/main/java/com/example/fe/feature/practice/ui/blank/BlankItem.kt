@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,7 +55,6 @@ fun BlankSlot(
         modifier = Modifier
             .padding(horizontal = 2.dp, vertical = 2.dp)
             .height(24.dp)
-            .width(52.dp)
             .background(
                 color = if (isSelected) BlankBoxSelected else BlankBox,
                 shape = RoundedCornerShape(6.dp)
@@ -67,11 +68,12 @@ fun BlankSlot(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = if (text.isBlank()) "___" else text,
-            color = if (text.isBlank()) BlankTextFilled else BlankTextFilled,
+            text = if (text.isBlank()) "   " else text,
+            color = BlankTextFilled,
             fontSize = 11.sp,
             fontFamily = FontFamily.Monospace,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.common.highlight
 import com.example.fe.ui.theme.BgElevated
 import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.TextPrimary

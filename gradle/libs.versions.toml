@@ -13,6 +13,7 @@ okhttp = "4.12.0"
 playServicesAuth = "20.7.0"
 markdownRenderer = "0.30.0"
 coil = "2.6.0"
+highlights = "0.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +40,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+highlights = { group = "dev.snipme", name = "highlights", version.ref = "highlights" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -258,37 +259,54 @@ private fun ConceptContentCard(concept: NotionDto) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "💡  ${concept.title}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-            Text(
                 text = concept.point,
-                fontSize = 13.sp,
-                color = TextSecondary,
-                lineHeight = 20.sp
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary,
+                lineHeight = 22.sp
             )
 
             if (concept.exampleCode != null && concept.exampleCode.content.isNotBlank()) {
                 HorizontalDivider(color = BgElevated, thickness = 1.dp)
-                Text(
-                    text = "💻  예제 코드",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(Primary)
+                    )
+                    Text(
+                        text = "예제 코드",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                }
                 CodeExampleBox(code = concept.exampleCode.content)
             }
 
             if (concept.detail.isNotBlank()) {
                 HorizontalDivider(color = BgElevated, thickness = 1.dp)
-                Text(
-                    text = "📝  상세 설명",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(Primary)
+                    )
+                    Text(
+                        text = "상세 설명",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                }
                 ConceptDetailBox(text = concept.detail)
             }
         }

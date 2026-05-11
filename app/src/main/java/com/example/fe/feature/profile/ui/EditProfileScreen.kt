@@ -200,7 +200,8 @@ fun EditProfileScreen(
                                 } else {
                                     Text(
                                         text = option.emoji,
-                                        fontSize = 40.sp
+                                        fontSize = 65.sp
+                                        // 폰트 크기를 키워 원에 꽉 차는 느낌을 줍니다.
                                     )
                                 }
                                 
@@ -288,7 +289,8 @@ private fun ProfileImageSection(
                 } else {
                     Text(
                         text = emoji,
-                        fontSize = 60.sp
+                        fontSize = 90.sp
+                        // 폰트 크기를 키워 원에 꽉 차는 느낌을 줍니다.
                     )
                 }
             }

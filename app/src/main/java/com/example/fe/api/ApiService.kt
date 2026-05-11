@@ -19,6 +19,8 @@ import com.example.fe.data.dto.UpdateLanguageRequest
 import com.example.fe.data.dto.UpdateLanguageResponse
 import com.example.fe.data.dto.UpdateNicknameRequest
 import com.example.fe.data.dto.UpdateNicknameResponse
+import com.example.fe.data.dto.UpdateProfileRequest
+import com.example.fe.data.dto.UpdateProfileResponse
 
 import retrofit2.Response
 import retrofit2.http.Body
@@ -205,6 +207,13 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: UpdateNicknameRequest
     ): Response<UpdateNicknameResponse>
+
+    // 프로필 변경 (이름 + 프로필 사진)
+    @PATCH("api/v1/users/me/profiles")
+    suspend fun updateProfile(
+        @Header("Authorization") token: String,
+        @Body request: UpdateProfileRequest
+    ): Response<UpdateProfileResponse>
 
     // --- [찜(북마크)] ---
 

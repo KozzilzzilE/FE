@@ -64,3 +64,27 @@ data class UpdateNicknameResult(
     @SerializedName("nickname") val nickname: String,
     @SerializedName("language") val language: String
 )
+
+/**
+ * [사용자 프로필 변경 API]
+ * PATCH /api/v1/users/me/profiles
+ */
+data class UpdateProfileRequest(
+    @SerializedName("nickname") val nickname: String,
+    @SerializedName("profileId") val profileId: Int?
+)
+
+data class UpdateProfileResponse(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: UpdateProfileResult?
+)
+
+data class UpdateProfileResult(
+    @SerializedName("userId") val userId: Int,
+    @SerializedName("imgUrl") val imgUrl: String?,
+    @SerializedName("email") val email: String,
+    @SerializedName("nickname") val nickname: String,
+    @SerializedName("language") val language: String
+)

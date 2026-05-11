@@ -95,6 +95,22 @@ fun SolveScreen(
         }
     }
 
+    var editorHasCursor by remember { mutableStateOf(false) }
+    var codeEditor by remember { mutableStateOf<io.github.rosemoe.sora.widget.CodeEditor?>(null) }
+
+    val hideKeyboard: () -> Unit = {
+        val imm = context.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
+                as android.view.inputmethod.InputMethodManager
+        imm.hideSoftInputFromWindow(codeEditor?.windowToken, 0)
+        codeEditor?.clearFocus()
+    }
+
+    LaunchedEffect(selectedTab) {
+        if (selectedTab != SolveTab.EDITOR) {
+            hideKeyboard()
+        }
+    }
+
     val codeFromVm = uiState.code
     var smartPanelExpanded by remember { mutableStateOf(true) }
 
@@ -203,7 +219,7 @@ fun SolveScreen(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
-                    userScrollEnabled = true
+                    userScrollEnabled = !editorHasCursor
                 ) { page ->
                     when (tabs[page]) {
                         SolveTab.PROBLEM -> {
@@ -214,101 +230,103 @@ fun SolveScreen(
                         }
 
                         SolveTab.EDITOR -> {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                // 스트립 + 에디터
-                                Column(modifier = Modifier.fillMaxSize()) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(40.dp)
-                                            .background(BgSurface)
-                                            .padding(horizontal = 16.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            text = uiState.language,
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = TextSecondary
-                                        )
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            DraftSaveButton(onClick = { viewModel.saveDraft() })
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            IconButton(
-                                                onClick = { onOpenEditorFull(problemId) },
-                                                modifier = Modifier.size(28.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.OpenInFull,
-                                                    contentDescription = "전체화면",
-                                                    tint = TextSecondary,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                            }
+                            // imePadding()으로 키보드가 올라오면 레이아웃 전체가 줄어들어
+                            // Sora Editor가 실제 뷰포트 높이를 정확히 인식
+                            Column(
+                                modifier = Modifier.fillMaxSize().imePadding()
+                            ) {
+                                // 스트립
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .background(BgSurface)
+                                        .padding(horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = uiState.language,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = TextSecondary
+                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        DraftSaveButton(onClick = { viewModel.saveDraft() })
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        IconButton(
+                                            onClick = { onOpenEditorFull(problemId) },
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.OpenInFull,
+                                                contentDescription = "전체화면",
+                                                tint = TextSecondary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
                                         }
                                     }
-                                    SoraCodeEditor(
-                                        code = codeFromVm,
-                                        onCodeChange = { viewModel.updateCode(it) },
-                                        language = uiState.language.ifBlank { "JAVA" },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .weight(1f),
-                                        insertTextEvent = viewModel.insertTextEvent
-                                    )
                                 }
 
-                                // 하단 바 — 항상 표시, 드래그 핸들로 접기/펼치기
-                                Column(
+                                // 에디터 — 나머지 공간 전부
+                                SoraCodeEditor(
+                                    code = codeFromVm,
+                                    onCodeChange = { viewModel.updateCode(it) },
+                                    language = uiState.language.ifBlank { "JAVA" },
                                     modifier = Modifier
-                                        .align(Alignment.BottomCenter)
                                         .fillMaxWidth()
-                                        .imePadding()
+                                        .weight(1f),
+                                    insertTextEvent = viewModel.insertTextEvent,
+                                    onEditorReady = { editor -> codeEditor = editor },
+                                    onFocusChange = { hasFocus ->
+                                        editorHasCursor = hasFocus
+                                        if (!hasFocus) hideKeyboard()
+                                    }
+                                )
+
+                                // 하단 바 — Column 안에 배치해 에디터가 실제 크기를 정확히 인식
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = BgSurface,
+                                    shadowElevation = 8.dp
                                 ) {
-                                    Surface(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        color = BgSurface,
-                                        shadowElevation = 8.dp
-                                    ) {
-                                        Column {
-                                            HorizontalDivider(color = BgDivider)
+                                    Column {
+                                        HorizontalDivider(color = BgDivider)
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(24.dp)
+                                                .clickable { smartPanelExpanded = !smartPanelExpanded },
+                                            contentAlignment = Alignment.Center
+                                        ) {
                                             Box(
+                                                Modifier
+                                                    .width(36.dp)
+                                                    .height(4.dp)
+                                                    .clip(RoundedCornerShape(2.dp))
+                                                    .background(TextMuted.copy(alpha = 0.4f))
+                                            )
+                                        }
+                                        AnimatedVisibility(
+                                            visible = smartPanelExpanded,
+                                            enter = expandVertically(animationSpec = tween(180)),
+                                            exit = shrinkVertically(animationSpec = tween(180))
+                                        ) {
+                                            SmartKeyboardPanel(
+                                                onInsert = { insert -> viewModel.insertText(insert) },
+                                                onRun = {
+                                                    viewModel.runCode()
+                                                    selectedSubmitSubScreen = SubmitSubScreen.RESULT
+                                                    selectedTab = SolveTab.SUBMIT
+                                                },
+                                                onSubmit = {
+                                                    viewModel.submitCode()
+                                                },
+                                                isSubmitting = uiState.isSubmitting,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .height(24.dp)
-                                                    .clickable { smartPanelExpanded = !smartPanelExpanded },
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Box(
-                                                    Modifier
-                                                        .width(36.dp)
-                                                        .height(4.dp)
-                                                        .clip(RoundedCornerShape(2.dp))
-                                                        .background(TextMuted.copy(alpha = 0.4f))
-                                                )
-                                            }
-                                            AnimatedVisibility(
-                                                visible = smartPanelExpanded,
-                                                enter = expandVertically(animationSpec = tween(180)),
-                                                exit = shrinkVertically(animationSpec = tween(180))
-                                            ) {
-                                                SmartKeyboardPanel(
-                                                    onInsert = { insert -> viewModel.insertText(insert) },
-                                                    onRun = {
-                                                        viewModel.runCode()
-                                                        selectedSubmitSubScreen = SubmitSubScreen.RESULT
-                                                        selectedTab = SolveTab.SUBMIT
-                                                    },
-                                                    onSubmit = {
-                                                        viewModel.submitCode()
-                                                    },
-                                                    isSubmitting = uiState.isSubmitting,
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                                                )
-                                            }
+                                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                            )
                                         }
                                     }
                                 }

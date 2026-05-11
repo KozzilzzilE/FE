@@ -1,6 +1,8 @@
 package com.example.fe.feature.solver.component
 
+import android.content.Context
 import android.graphics.Typeface
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -122,6 +124,16 @@ fun SoraCodeEditor(
 
                 setOnFocusChangeListener { _, hasFocus ->
                     currentOnFocusChange(hasFocus)
+                    if (hasFocus) {
+                        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                    }
+                }
+
+                setOnClickListener {
+                    requestFocus()
+                    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
                 }
 
                 editorInstance = this
@@ -148,5 +160,48 @@ fun SoraCodeEditor(
                 try { editor.setSelection(line, col + text.length) } catch (_: Exception) {}
             }
         }
+    }
+}
+
+fun CodeEditor.moveCursor(left: Boolean) {
+    val line = cursor.leftLine
+    val col = cursor.leftColumn
+
+    val newLine: Int
+    val newCol: Int
+    try {
+        if (left) {
+            when {
+                col > 0 -> { newLine = line; newCol = col - 1 }
+                line > 0 -> { newLine = line - 1; newCol = text.getColumnCount(line - 1) }
+                else -> return
+            }
+        } else {
+            val lineLen = text.getColumnCount(line)
+            when {
+                col < lineLen -> { newLine = line; newCol = col + 1 }
+                line < text.lineCount - 1 -> { newLine = line + 1; newCol = 0 }
+                else -> return
+            }
+        }
+    } catch (_: Exception) { return }
+
+    try { setSelection(newLine, newCol) } catch (_: Exception) { return }
+
+    // Sora Editor가 커서를 화면에 보이게 스크롤한 뒤, 커서가 뷰포트 40% 지점에 오도록 재조정
+    post {
+        try {
+            val scaledDensity = resources.displayMetrics.scaledDensity
+            val charWidthPx  = 16f * scaledDensity * 0.6f
+            val lineHeightPx = 16f * scaledDensity * 1.8f  // 텍스트 크기 × 줄 간격
+
+            // 가로: 커서가 뷰포트 40% 지점
+            val targetX = (newCol * charWidthPx - width * 0.4f).coerceAtLeast(0f).toInt()
+
+            // 세로: 커서가 뷰포트 상단 20% 지점 (커서 위 여백 확보)
+            val targetY = (newLine * lineHeightPx - height * 0.2f).coerceAtLeast(0f).toInt()
+
+            scrollTo(targetX, targetY)
+        } catch (_: Exception) {}
     }
 }

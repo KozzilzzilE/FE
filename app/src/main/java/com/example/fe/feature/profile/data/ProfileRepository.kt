@@ -8,6 +8,8 @@ import com.example.fe.data.dto.UpdateLanguageRequest
 import com.example.fe.data.dto.UpdateLanguageResponse
 import com.example.fe.data.dto.UpdateNicknameRequest
 import com.example.fe.data.dto.UpdateNicknameResponse
+import com.example.fe.data.dto.UpdateProfileRequest
+import com.example.fe.data.dto.UpdateProfileResponse
 
 class ProfileRepository(
     private val apiService: ApiService
@@ -90,4 +92,27 @@ class ProfileRepository(
 
         return body
     }
+
+    suspend fun updateProfile(nickname: String, profileId: Int?): UpdateProfileResponse {
+        val token = TokenManager.getAccessToken()
+            ?: throw Exception("로그인이 필요합니다.")
+
+        val response = apiService.updateProfile(
+            "Bearer $token",
+            UpdateProfileRequest(nickname, profileId)
+        )
+
+        if (!response.isSuccessful) {
+            throw Exception("프로필 변경 실패: ${response.code()}")
+        }
+
+        val body = response.body() ?: throw Exception("응답 본문이 비어 있습니다.")
+
+        if (!body.isSuccess || body.result == null) {
+            throw Exception(body.message)
+        }
+
+        return body
+    }
+}
 }

@@ -183,11 +183,11 @@ private fun DayLabel(text: String) {
 @Composable
 private fun GrassCell(count: Int, isToday: Boolean = false) {
     val color = when {
-        count == 0    -> BgElevated
-        count in 1..3 -> Color(0x40F59E0B)
-        count in 4..8 -> Color(0x80F59E0B)
-        count in 9..15 -> Color(0xBFF59E0B)
-        else           -> Primary
+        count == 0   -> BgElevated
+        count in 1..2 -> Color(0x40F59E0B)
+        count in 3..5 -> Color(0x80F59E0B)
+        count in 6..8 -> Color(0xBFF59E0B)
+        else          -> Primary
     }
 
     Box(

@@ -13,10 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.feature.concept.component.CodeExampleBox
+import com.example.fe.feature.concept.component.ConceptDetailBox
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.ui.theme.*
 
@@ -109,30 +110,13 @@ fun ProblemSolutionTabContent(
                         color = TextPrimary
                     )
                     Spacer(Modifier.height(10.dp))
-                    
-                    // 간단 설명 (brief)
-                    Text(
-                        text = "해시맵을 사용하여 O(n) 시간 복잡도로 해결할 수 있습니다.",
-                        fontSize = 13.sp,
-                        color = Color(0xFFA8A29E),
-                        lineHeight = 18.sp
-                    )
-                    
-                    Spacer(Modifier.height(10.dp))
-
-                    // 코드 블록
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFF0D1117), RoundedCornerShape(10.dp))
-                            .padding(14.dp)
-                    ) {
+                    if (solution.code.isNotBlank()) {
+                        CodeExampleBox(code = solution.code)
+                    } else {
                         Text(
-                            text = solution.code.ifBlank { "// 정답 코드가 비어있습니다." },
-                            color = Color(0xFFA8A29E),
-                            fontFamily = FontFamily.Monospace,
+                            text = "// 정답 코드가 비어있습니다.",
                             fontSize = 12.sp,
-                            lineHeight = 18.sp
+                            color = TextMuted
                         )
                     }
                 }
@@ -153,13 +137,16 @@ fun ProblemSolutionTabContent(
                         color = TextPrimary
                     )
                     Spacer(Modifier.height(10.dp))
-
-                    Text(
-                        text = solution.explanation.ifBlank { "상세 해설이 제공되지 않았습니다." },
-                        fontSize = 13.sp,
-                        lineHeight = 20.sp,
-                        color = Color(0xFFA8A29E)
-                    )
+                    if (solution.explanation.isNotBlank()) {
+                        ConceptDetailBox(text = solution.explanation)
+                    } else {
+                        Text(
+                            text = "상세 해설이 제공되지 않았습니다.",
+                            fontSize = 13.sp,
+                            color = TextMuted,
+                            lineHeight = 20.sp
+                        )
+                    }
                 }
             }
             

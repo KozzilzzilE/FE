@@ -77,7 +77,7 @@ fun SmartKeyboardPanel(
             }
         }
 
-        // 액션 키 — 모든 페이지 공통 (Tab / 줄바꿈 / 주석)
+        // 액션 키 — Tab / 줄바꿈 / 주석
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp)

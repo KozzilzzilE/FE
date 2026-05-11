@@ -142,7 +142,7 @@ class MyPageViewModel(
         }
     }
 
-    fun updateProfile(name: String, onSuccess: () -> Unit) {
+    fun updateProfile(name: String, profileId: Int?, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isSaving = true,
@@ -150,11 +150,12 @@ class MyPageViewModel(
             )
 
             try {
-                val response = repository.updateNickname(name)
+                val response = repository.updateProfile(name, profileId)
 
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
                     userName = response.result?.nickname ?: name,
+                    profileImageUrl = response.result?.imgUrl,
                     error = null
                 )
                 onSuccess()

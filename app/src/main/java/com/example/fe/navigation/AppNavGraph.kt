@@ -308,8 +308,8 @@ fun AppNavGraph() {
                 initialName = profileUiState.userName,
                 isSaving = profileUiState.isSaving,
                 onBackClick = { navController.popBackStack() },
-                onSaveClick = { name ->
-                    profileViewModel.updateProfile(name) {
+                onSaveClick = { name, profileId ->
+                    profileViewModel.updateProfile(name, profileId) {
                         navController.popBackStack()
                     }
                 }

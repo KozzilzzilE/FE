@@ -9,6 +9,7 @@ data class MyPageUiState(
     val userName: String = "",
     val languageName: String = "",
     val languageOptions: List<LanguageResult> = emptyList(),
+    val profileImageUrl: String? = null,
     val level: Int = 1,
     val stat: ProfileStat = ProfileStat(
         streak = "0",

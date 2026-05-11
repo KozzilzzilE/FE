@@ -115,4 +115,3 @@ class ProfileRepository(
         return body
     }
 }
-}

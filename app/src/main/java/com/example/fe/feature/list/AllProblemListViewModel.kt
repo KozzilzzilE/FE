@@ -49,9 +49,12 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
                 val token = TokenManager.getAccessToken() 
                     ?: throw Exception("로그인 토큰이 없습니다.")
                 
+                Log.d("AllProblemListVM", "요청: page=${page - 1}, difficulty=$difficulty")
                 val response = repository.getAllProblems(token, page - 1, difficulty)
+                Log.d("AllProblemListVM", "응답 코드: ${response.code()}")
                 if (response.isSuccessful) {
                     val body = response.body()
+                    Log.d("AllProblemListVM", "응답 바디: isSuccess=${body?.isSuccess}, resultNull=${body?.result == null}, 문제수=${body?.result?.problemList?.size}, totalPage=${body?.result?.totalPage}")
                     if (body != null && body.isSuccess && body.result != null) {
                         _uiState.value = ProblemUiState.Success(body.result.problemList)
                         _totalPages.value = body.result.totalPage
@@ -59,6 +62,7 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
                         _uiState.value = ProblemUiState.Error(body?.message ?: "데이터를 불러올 수 없습니다.")
                     }
                 } else {
+                    Log.e("AllProblemListVM", "서버 오류: ${response.code()} ${response.errorBody()?.string()}")
                     _uiState.value = ProblemUiState.Error("서버 응답 오류 (${response.code()})")
                 }
             } catch (e: Exception) {

@@ -339,11 +339,22 @@ private fun SubmitResultView(
 @Composable
 private fun ExecutionResultView(viewModel: SolverViewModel) {
     val executionResult by viewModel.executionResult.collectAsState()
+    val isRunning by viewModel.isRunning.collectAsState()
     val testCases by viewModel.testCases.collectAsState()
 
     var selectedIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(testCases.size) {
         if (selectedIndex > testCases.lastIndex) selectedIndex = 0
+    }
+
+    if (isRunning) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                CircularProgressIndicator(color = Primary, modifier = Modifier.size(32.dp))
+                Text("실행 중...", color = TextMuted, fontSize = 14.sp)
+            }
+        }
+        return
     }
 
     if (testCases.isEmpty()) {
@@ -359,18 +370,16 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
 
     val hasResult = executionResult != null
     val tc = testCases[selectedIndex]
-    
+
     val caseCount = testCases.size
     val inputText = tc.input
     val expectedText = tc.expectedOutput
     val myOutputText = if (hasResult) {
-        executionResult!!.filter { !it.startsWith("$") }.joinToString("\n").ifEmpty { "(출력 없음)" }
+        executionResult!!.rawOutput?.ifBlank { "(출력 없음)" } ?: "(출력 없음)"
     } else {
         "출력 없음"
     }
-    val passed = if (hasResult) {
-        myOutputText.trim() == expectedText.trim()
-    } else null
+    val passed = if (hasResult) executionResult!!.passed else null
 
     Column(
         modifier = Modifier

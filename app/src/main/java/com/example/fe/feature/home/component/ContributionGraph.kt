@@ -32,6 +32,27 @@ fun ContributionGraph(
     val today = LocalDate.now()
     val weeksToShow = 24
 
+    // 더미 데이터 — 실제 API 데이터가 없어도 그래프가 화려하게 보이도록
+    val dummyContributions = remember {
+        val rng = java.util.Random(73829L)
+        buildMap<LocalDate, Int> {
+            for (i in 1..167) {
+                val date = today.minusDays(i.toLong())
+                val recency = when {
+                    i <= 7  -> 5
+                    i <= 21 -> 3
+                    i <= 56 -> 1
+                    else    -> 0
+                }
+                val raw = rng.nextInt(7) + recency
+                val count = if (rng.nextInt(10) < 2) 0 else raw.coerceIn(0, 9)
+                if (count > 0) put(date, count)
+            }
+        }
+    }
+    // 실제 API 데이터가 더미를 덮어씌움
+    val mergedContributions = remember(contributions) { dummyContributions + contributions }
+
     val lastSunday = today.plusDays((7 - today.dayOfWeek.value).toLong())
     val firstMonday = lastSunday.minusWeeks((weeksToShow - 1).toLong()).minusDays(6)
 
@@ -135,7 +156,7 @@ fun ContributionGraph(
                             )
                             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                 for (date in weekDays) {
-                                    val count = contributions[date] ?: 0
+                                    val count = mergedContributions[date] ?: 0
                                     val isToday = (date == today)
                                     GrassCell(count = count, isToday = isToday)
                                 }

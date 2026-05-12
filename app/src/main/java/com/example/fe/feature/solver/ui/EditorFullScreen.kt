@@ -48,7 +48,12 @@ fun EditorFullScreen(
             .fillMaxSize()
             .background(CodeBgDark)
     ) {
-        Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+        ) {
             SoraCodeEditor(
                 code = uiState.code,
                 onCodeChange = { viewModel.updateCode(it) },
@@ -63,7 +68,6 @@ fun EditorFullScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(BgSurface)
-                    .navigationBarsPadding()
             ) {
                 HorizontalDivider(color = BgDivider)
 

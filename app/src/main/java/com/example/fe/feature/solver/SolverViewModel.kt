@@ -60,9 +60,9 @@ class SolverViewModel(
         uiState.map { it.isRunning }
             .stateIn(viewModelScope, started, _uiState.value.isRunning)
 
-    val executionResult: StateFlow<List<String>?> =
-        uiState.map { it.runResult?.terminalLines }
-            .stateIn(viewModelScope, started, _uiState.value.runResult?.terminalLines)
+    val executionResult: StateFlow<com.example.fe.feature.solver.model.RunResult?> =
+        uiState.map { it.runResult }
+            .stateIn(viewModelScope, started, _uiState.value.runResult)
 
     val submissions: StateFlow<List<SubmissionRecord>> =
         uiState.map { it.submissions }
@@ -225,17 +225,15 @@ class SolverViewModel(
             return
         }
 
-        viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isRunning = true,
-                    runResult = null
-                )
-            }
+        // 탭 전환 전에 동기적으로 이전 결과를 지워 스타일 flash 방지
+        _uiState.update { it.copy(isRunning = true, runResult = null) }
 
+        viewModelScope.launch {
             try {
                 val token = TokenManager.getAccessToken()
                     ?: throw Exception("로그인 토큰이 없습니다.")
+
+                Log.d("RunCode", "실행 요청 시작 — problemId=${state.problemId}, language=${state.language}")
 
                 val runToken = repository.runCode(
                     token = token,
@@ -244,11 +242,14 @@ class SolverViewModel(
                     language = state.language
                 )
 
+                Log.d("RunCode", "runToken 수신: $runToken")
+
                 pollRunResult(
                     accessToken = token,
                     runToken = runToken
                 )
             } catch (e: Exception) {
+                Log.e("RunCode", "실행 실패", e)
                 _uiState.update {
                     it.copy(
                         isRunning = false,
@@ -266,24 +267,32 @@ class SolverViewModel(
         accessToken: String,
         runToken: String
     ) {
-        repeat(15) {
-            val result = repository.getRunResult(accessToken, runToken)
+        var attempt = 0
+        while (attempt < 20) {
+            attempt++
+            try {
+                val result = repository.getRunResult(accessToken, runToken)
 
-            _uiState.update {
-                it.copy(runResult = result)
-            }
+                Log.d("RunCode", "poll[$attempt] status=${result.errorMessage}, passed=${result.passed}")
 
-            val currentStatus = result.errorMessage
+                _uiState.update { it.copy(runResult = result) }
 
-            if (currentStatus == "In Queue" || currentStatus == "Processing") {
+                val status = result.errorMessage
+                if (status == "In Queue" || status == "Processing") {
+                    delay(1500)
+                    continue
+                }
+
+                Log.d("RunCode", "poll 완료 — passed=${result.passed}, output=${result.rawOutput}")
+                _uiState.update { it.copy(isRunning = false) }
+                return
+
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e  // 코루틴 취소는 반드시 재전파
+            } catch (e: Exception) {
+                Log.w("RunCode", "poll[$attempt] API 오류 (재시도): ${e.message}")
                 delay(1500)
-                return@repeat
             }
-
-            _uiState.update {
-                it.copy(isRunning = false)
-            }
-            return
         }
 
         _uiState.update {

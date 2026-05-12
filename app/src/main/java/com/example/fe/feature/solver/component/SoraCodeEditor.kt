@@ -157,7 +157,10 @@ fun SoraCodeEditor(
                 val line = editor.cursor.leftLine
                 val col = editor.cursor.leftColumn
                 editor.text.insert(line, col, text)
-                try { editor.setSelection(line, col + text.length) } catch (_: Exception) {}
+                val newlineCount = text.count { it == '\n' }
+                val newLine = line + newlineCount
+                val newCol = if (newlineCount > 0) text.substringAfterLast('\n').length else col + text.length
+                try { editor.setSelection(newLine, newCol) } catch (_: Exception) {}
             }
         }
     }

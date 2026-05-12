@@ -19,8 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import com.example.fe.feature.concept.component.CodeExampleBox
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.aireview.SubmissionViewModel
@@ -90,13 +90,13 @@ fun SubmissionDetailScreen(
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         ReviewTextCard(
                             dotColor = Primary,
-                            title = "AI 코드 리뷰",
-                            content = aiReviewState?.aiReview ?: ""
+                            title = "아쉬운 점",
+                            content = (aiReviewState?.aiReview ?: "").stripNumberedList()
                         )
                         ReviewTextCard(
                             dotColor = Cyan,
                             title = "개선할 점",
-                            content = aiReviewState?.aiImprovement ?: ""
+                            content = (aiReviewState?.aiImprovement ?: "").stripNumberedList()
                         )
                         aiReviewState?.aiCode?.let { code ->
                             if (code.isNotEmpty()) {
@@ -246,20 +246,7 @@ private fun CodeCard(
                 )
             }
             // 코드 블록
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(10.dp),
-                color = CodeBgDark
-            ) {
-                Text(
-                    text = code,
-                    modifier = Modifier.padding(14.dp),
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = TextSecondary,
-                    lineHeight = 20.sp
-                )
-            }
+            CodeExampleBox(code = code)
         }
     }
 }
@@ -362,3 +349,8 @@ private fun AiReviewButton(
         }
     }
 }
+
+private fun String.stripNumberedList(): String =
+    lines().joinToString("\n") { line ->
+        line.replace(Regex("^\\d+\\.\\s*"), "")
+    }.trim()

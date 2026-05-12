@@ -155,30 +155,30 @@ class SolverRepository(
 
         val result = body.result ?: throw Exception("실행 결과가 없습니다.")
 
+        // statusId: 1=In Queue, 2=Processing, 3=Accepted, <=0=Judge0 미처리(재시도 필요)
+        val stillProcessing = result.statusId <= 0 || result.statusId == 1 || result.statusId == 2
         val isPassed = result.statusId == 3
+
         val outputText = result.output?.takeIf { it.isNotBlank() } ?: "출력 없음"
 
         val terminalLines = buildList {
             add("\$ Running test cases...")
             add("상태: ${result.status} (${result.statusId})")
-
-            if (!result.input.isNullOrBlank()) {
-                add("입력: ${result.input}")
-            }
-
+            if (!result.input.isNullOrBlank()) add("입력: ${result.input}")
             add("출력: $outputText")
-
-            if (isPassed) {
-                add("실행 완료")
-            } else {
-                add("실행 실패 또는 미완료")
-            }
+            if (isPassed) add("실행 완료") else add("실행 실패 또는 미완료")
         }
 
         return RunResult(
-            passed = isPassed,
+            passed = if (stillProcessing) null else isPassed,
             runtimeMs = null,
-            errorMessage = if (isPassed) null else result.status,
+            // stillProcessing이면 폴링이 계속되도록 "Processing"으로 통일
+            errorMessage = when {
+                stillProcessing -> "Processing"
+                isPassed -> null
+                else -> result.status
+            },
+            rawOutput = result.output?.trim(),
             terminalLines = terminalLines
         )
     }

@@ -180,7 +180,8 @@ fun MyPageScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = 24.dp)
+                    .clickable { onEditProfileClick() },
                 shape = RoundedCornerShape(16.dp),
                 color = BgSurface,
                 border = BorderStroke(1.dp, Color(0xFF44403C))

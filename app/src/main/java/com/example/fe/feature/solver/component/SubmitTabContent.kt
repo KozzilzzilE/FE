@@ -444,6 +444,21 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val isCorrect = passed == true
+                val errorMsg = executionResult?.errorMessage
+                val statusText = if (isCorrect) {
+                    "맞았습니다"
+                } else {
+                    when {
+                        errorMsg.isNullOrBlank() -> "틀렸습니다"
+                        errorMsg.equals("Wrong Answer", ignoreCase = true) -> "틀렸습니다"
+                        errorMsg.equals("Compilation Error", ignoreCase = true) -> "컴파일 에러"
+                        errorMsg.equals("Time Limit Exceeded", ignoreCase = true) -> "시간 초과"
+                        errorMsg.contains("Runtime Error", ignoreCase = true) -> "런타임 에러"
+                        errorMsg.contains("judge0", ignoreCase = true) || errorMsg.contains("채점불가") -> "채점 불가"
+                        else -> errorMsg
+                    }
+                }
+
                 Icon(
                     imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
                     contentDescription = null,
@@ -451,7 +466,7 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = if (isCorrect) "맞았습니다" else "틀렸습니다",
+                    text = statusText,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (isCorrect) Color(0xFF22C55E) else Error

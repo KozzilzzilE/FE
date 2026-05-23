@@ -155,8 +155,9 @@ class SolverRepository(
 
         val result = body.result ?: throw Exception("실행 결과가 없습니다.")
 
-        // statusId: 1=In Queue, 2=Processing, 3=Accepted, <=0=Judge0 미처리(재시도 필요)
-        val stillProcessing = result.statusId <= 0 || result.statusId == 1 || result.statusId == 2
+        // statusId: 1=In Queue, 2=Processing, 3=Accepted, -1=접근불가(확정)
+        // 0은 혹시 모를 미처리 상태로 간주하여 0, 1, 2일 때만 폴링
+        val stillProcessing = result.statusId == 0 || result.statusId == 1 || result.statusId == 2
         val isPassed = result.statusId == 3
 
         val outputText = result.output?.takeIf { it.isNotBlank() } ?: "출력 없음"

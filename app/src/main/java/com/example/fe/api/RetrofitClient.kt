@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.example.fe.common.TokenManager
 
 object RetrofitClient { // 싱글톤 객체로 생성
-    private const val BASE_URL = "http://15.164.136.153:8080/"
+    private const val BASE_URL = com.example.fe.BuildConfig.BASE_URL
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply { // 로그 기록기 생성
         level = HttpLoggingInterceptor.Level.BODY // HTTP 요청/응답 로그 기록

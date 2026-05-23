@@ -225,7 +225,7 @@ fun MyPageScreen(
                         )
                         // myEmail
                         Text(
-                            text = "leech000107107@gmail.com",
+                            text = uiState.email.ifBlank { "" },
                             fontSize = 12.sp,
                             color = Color(0xFF78716C)
                         )

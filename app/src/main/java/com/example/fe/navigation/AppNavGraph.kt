@@ -306,8 +306,14 @@ fun AppNavGraph() {
 
             EditProfileScreen(
                 initialName = profileUiState.userName,
+                currentProfileImgUrl = profileUiState.currentProfileImgUrl,
+                profileImages = profileUiState.profileImages,
+                selectedProfileId = profileUiState.selectedProfileId,
                 isSaving = profileUiState.isSaving,
                 onBackClick = { navController.popBackStack() },
+                onProfileImageSelect = { profileId ->
+                    profileViewModel.selectProfileImage(profileId)
+                },
                 onSaveClick = { name ->
                     profileViewModel.updateProfile(name) {
                         navController.popBackStack()

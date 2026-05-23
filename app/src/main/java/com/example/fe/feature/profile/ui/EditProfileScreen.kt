@@ -22,37 +22,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.fe.common.TopBar
+import com.example.fe.data.dto.ProfileImageItem
 import com.example.fe.feature.profile.component.SaveButtonBar
 import com.example.fe.ui.theme.*
-
-// 아바타 옵션 (API 연동 전 placeholder — 동물 이모지 + 색상)
-private val avatarOptions = listOf(
-    "👤" to Color(0xFF292524),
-    "🐶" to Color(0xFF3B2F1E),
-    "🐱" to Color(0xFF2A1F2A),
-    "🐰" to Color(0xFF2A2032),
-    "🦝" to Color(0xFF1F2A1F),
-    "🐹" to Color(0xFF2A201A),
-    "🌟" to Color(0xFF1A1F2A)
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
     initialName: String = "",
+    currentProfileImgUrl: String? = null,
+    profileImages: List<ProfileImageItem> = emptyList(),
+    selectedProfileId: Int? = null,
     isSaving: Boolean = false,
     onBackClick: () -> Unit = {},
+    onProfileImageSelect: (Int) -> Unit = {},
     onSaveClick: (String) -> Unit = {}
 ) {
     var name by remember(initialName) { mutableStateOf(initialName) }
-    var selectedAvatarIndex by remember { mutableIntStateOf(0) }
     var showImagePicker by remember { mutableStateOf(false) }
-    var pendingAvatarIndex by remember { mutableIntStateOf(0) }
+    var pendingProfileId by remember(selectedProfileId) { mutableStateOf(selectedProfileId) }
+
+    val displayImgUrl = profileImages.find { it.profileId == selectedProfileId }?.imgUrl
+        ?: currentProfileImgUrl
 
     if (showImagePicker) {
         ModalBottomSheet(
@@ -62,10 +60,11 @@ fun EditProfileScreen(
             dragHandle = null
         ) {
             ProfileImagePickerSheet(
-                selectedIndex = pendingAvatarIndex,
-                onSelectIndex = { pendingAvatarIndex = it },
+                profileImages = profileImages,
+                selectedProfileId = pendingProfileId,
+                onSelectProfileId = { pendingProfileId = it },
                 onApply = {
-                    selectedAvatarIndex = pendingAvatarIndex
+                    pendingProfileId?.let { onProfileImageSelect(it) }
                     showImagePicker = false
                 },
                 onDismiss = { showImagePicker = false }
@@ -99,9 +98,9 @@ fun EditProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ProfileImageSection(
-                avatarIndex = selectedAvatarIndex,
+                imgUrl = displayImgUrl,
                 onClick = {
-                    pendingAvatarIndex = selectedAvatarIndex
+                    pendingProfileId = selectedProfileId
                     showImagePicker = true
                 }
             )
@@ -129,16 +128,13 @@ fun EditProfileScreen(
 
 @Composable
 private fun ProfileImageSection(
-    avatarIndex: Int,
+    imgUrl: String?,
     onClick: () -> Unit
 ) {
-    val (emoji, bgColor) = avatarOptions[avatarIndex]
-
     Box(
         contentAlignment = Alignment.BottomEnd,
         modifier = Modifier.clickable(onClick = onClick)
     ) {
-        // 외곽 앰버 테두리 원
         Box(
             modifier = Modifier
                 .size(120.dp)
@@ -146,36 +142,39 @@ private fun ProfileImageSection(
                 .background(Color(0xFFF59E0B)),
             contentAlignment = Alignment.Center
         ) {
-            // 내부 아바타 원
             Box(
                 modifier = Modifier
                     .size(112.dp)
                     .clip(CircleShape)
-                    .background(bgColor),
+                    .background(BgSurface),
                 contentAlignment = Alignment.Center
             ) {
-                if (avatarIndex == 0) {
+                if (imgUrl != null) {
+                    AsyncImage(
+                        model = imgUrl,
+                        contentDescription = "프로필 이미지",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(112.dp)
+                            .clip(CircleShape)
+                    )
+                } else {
                     Icon(
                         imageVector = Icons.Outlined.Person,
                         contentDescription = "프로필",
                         tint = TextSecondary,
                         modifier = Modifier.size(50.dp)
                     )
-                } else {
-                    Text(text = emoji, fontSize = 48.sp)
                 }
             }
         }
 
-        // 카메라 편집 버튼
         Box(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
                 .background(
-                    Brush.linearGradient(
-                        listOf(Color(0xFFF59E0B), Color(0xFFE8A825))
-                    )
+                    Brush.linearGradient(listOf(Color(0xFFF59E0B), Color(0xFFE8A825)))
                 )
                 .border(3.dp, BgPrimary, CircleShape),
             contentAlignment = Alignment.Center
@@ -192,13 +191,13 @@ private fun ProfileImageSection(
 
 @Composable
 private fun ProfileImagePickerSheet(
-    selectedIndex: Int,
-    onSelectIndex: (Int) -> Unit,
+    profileImages: List<ProfileImageItem>,
+    selectedProfileId: Int?,
+    onSelectProfileId: (Int) -> Unit,
     onApply: () -> Unit,
     onDismiss: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        // 헤더
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -213,7 +212,9 @@ private fun ProfileImagePickerSheet(
             )
             IconButton(
                 onClick = onDismiss,
-                modifier = Modifier.align(Alignment.CenterEnd).size(24.dp)
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(24.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Close,
@@ -226,29 +227,36 @@ private fun ProfileImagePickerSheet(
 
         HorizontalDivider(color = BgSurface)
 
-        // 아바타 그리드
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            itemsIndexed(avatarOptions) { index, (emoji, bgColor) ->
-                AvatarOptionItem(
-                    emoji = emoji,
-                    bgColor = bgColor,
-                    isSelected = index == selectedIndex,
-                    isFirst = index == 0,
-                    onClick = { onSelectIndex(index) }
-                )
+        if (profileImages.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color(0xFFF59E0B), strokeWidth = 2.dp)
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                itemsIndexed(profileImages) { _, item ->
+                    AvatarOptionItem(
+                        imgUrl = item.imgUrl,
+                        isSelected = item.profileId == selectedProfileId,
+                        onClick = { onSelectProfileId(item.profileId) }
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 적용 버튼
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -257,9 +265,7 @@ private fun ProfileImagePickerSheet(
                 .height(52.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(
-                    Brush.linearGradient(
-                        listOf(Color(0xFFF59E0B), Color(0xFFE8A825))
-                    )
+                    Brush.linearGradient(listOf(Color(0xFFF59E0B), Color(0xFFE8A825)))
                 )
                 .clickable { onApply() },
             contentAlignment = Alignment.Center
@@ -278,10 +284,8 @@ private fun ProfileImagePickerSheet(
 
 @Composable
 private fun AvatarOptionItem(
-    emoji: String,
-    bgColor: Color,
+    imgUrl: String,
     isSelected: Boolean,
-    isFirst: Boolean,
     onClick: () -> Unit
 ) {
     Box(
@@ -292,26 +296,23 @@ private fun AvatarOptionItem(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .background(bgColor)
+                .background(BgSurface)
                 .then(
                     if (isSelected) Modifier.border(2.5.dp, Color(0xFFF59E0B), CircleShape)
                     else Modifier
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (isFirst) {
-                Icon(
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = null,
-                    tint = TextSecondary,
-                    modifier = Modifier.size(44.dp)
-                )
-            } else {
-                Text(text = emoji, fontSize = 40.sp)
-            }
+            AsyncImage(
+                model = imgUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+            )
         }
 
-        // 선택 체크 배지
         if (isSelected) {
             Box(
                 modifier = Modifier

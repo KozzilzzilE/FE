@@ -17,6 +17,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val secrets = java.util.Properties()
+        val secretsFile = rootProject.file("secrets.properties")
+        if (secretsFile.exists()) secrets.load(secretsFile.inputStream())
+
+        buildConfigField("String", "BASE_URL", "\"${secrets["BASE_URL"] ?: "http://localhost:8080/"}\"")
     }
 
     buildTypes {
@@ -37,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

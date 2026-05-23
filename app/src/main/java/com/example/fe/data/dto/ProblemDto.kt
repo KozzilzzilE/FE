@@ -190,6 +190,7 @@ data class SubmissionHistoryResponseDto(
 )
 
 data class SubmissionHistoryItem(
+    @SerializedName("historyId") val historyId: Long,
     @SerializedName("sourceCode") val sourceCode: String,
     @SerializedName("status") val status: String,
     @SerializedName("language") val language: String,

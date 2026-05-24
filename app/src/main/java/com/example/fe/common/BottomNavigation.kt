@@ -38,6 +38,7 @@ fun BottomNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .background(BgPrimary)
+            .navigationBarsPadding()
             .padding(horizontal = 21.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {

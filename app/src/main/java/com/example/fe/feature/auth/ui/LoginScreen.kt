@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,16 +69,19 @@ fun LoginScreen(
         }
     }
 
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .heightIn(min = screenHeight)
             .background(BgPrimary)
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Spacer(modifier = Modifier.height(80.dp))
-
         // 로고
         Image(
             painter = painterResource(id = R.drawable.logo_main),
@@ -182,9 +186,6 @@ fun LoginScreen(
         TextButton(onClick = onSignUpClick) {
             Text("회원가입", color = Primary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
         }
-
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

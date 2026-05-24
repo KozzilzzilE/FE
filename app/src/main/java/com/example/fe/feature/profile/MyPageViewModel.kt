@@ -21,22 +21,21 @@ class MyPageViewModel(
 
     init {
         loadMyPageAndLanguages()
+        loadProfileImages()
     }
 
     fun loadMyPageAndLanguages() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                error = null
-            )
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
             try {
                 val myPageResponse = repository.getMyPageInfo()
+                val userMe = repository.getUserMe()
                 val languageList = repository.getLanguageList()
 
                 val result = myPageResponse.result
                 val savedLanguage = LanguagePreferenceManager.getLanguage(getApplication())
-                val serverLanguage = result?.languageName.orEmpty()
+                val serverLanguage = userMe.language
 
                 val finalLanguage = when {
                     savedLanguage.isNotBlank() -> savedLanguage
@@ -65,12 +64,14 @@ class MyPageViewModel(
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    userName = result?.nickname ?: "사용자",
+                    userName = userMe.nickname,
+                    email = userMe.email,
+                    currentProfileImgUrl = userMe.imgUrl,
                     languageName = finalLanguage,
                     languageOptions = languageList,
                     stat = com.example.fe.feature.profile.model.ProfileStat(
                         streak = streakCount.toString(),
-                        solved = (result?.thisMonthSolvedCount ?: 0).toString(),
+                        solved = userMe.solvedProblemCount.toString(),
                         studyDays = totalStudyDays.toString()
                     ),
                     error = null
@@ -86,6 +87,21 @@ class MyPageViewModel(
                 )
             }
         }
+    }
+
+    fun loadProfileImages() {
+        viewModelScope.launch {
+            try {
+                val images = repository.getProfileImages()
+                _uiState.value = _uiState.value.copy(profileImages = images)
+            } catch (e: Exception) {
+                android.util.Log.e("MyPageViewModel", "프로필 이미지 목록 조회 실패: ${e.message}")
+            }
+        }
+    }
+
+    fun selectProfileImage(profileId: Int) {
+        _uiState.value = _uiState.value.copy(selectedProfileId = profileId)
     }
 
     fun loadMyPageInfo() {
@@ -144,17 +160,19 @@ class MyPageViewModel(
 
     fun updateProfile(name: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isSaving = true,
-                error = null
-            )
+            _uiState.value = _uiState.value.copy(isSaving = true, error = null)
 
             try {
-                val response = repository.updateNickname(name)
+                val result = repository.updateProfile(
+                    nickname = name,
+                    profileId = _uiState.value.selectedProfileId
+                )
 
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
-                    userName = response.result?.nickname ?: name,
+                    userName = result.nickname,
+                    currentProfileImgUrl = result.imgUrl,
+                    selectedProfileId = null,
                     error = null
                 )
                 onSuccess()

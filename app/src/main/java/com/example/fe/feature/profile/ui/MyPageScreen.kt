@@ -105,38 +105,11 @@ fun MyPageScreen(
     Scaffold(
         containerColor = BgPrimary,
         bottomBar = {
-            Column {
-                // ─── 로그아웃 ───
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .height(130.dp)
-                        .clickable { showLogoutDialog = true },
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
-                        contentDescription = null,
-                        tint = Color(0xFFFB2C36),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "로그아웃",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFFFB2C36),
-                        textAlign = TextAlign.Center
-                    )
-                }
-                BottomNavigationBar(
-                    items = bottomNavItems,
-                    currentRoute = Routes.MY,
-                    onNavigate = onNavigate
-                )
-            }
+            BottomNavigationBar(
+                items = bottomNavItems,
+                currentRoute = Routes.MY,
+                onNavigate = onNavigate
+            )
         }
     ) { innerPadding ->
         Column(
@@ -180,7 +153,8 @@ fun MyPageScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = 24.dp)
+                    .clickable { onEditProfileClick() },
                 shape = RoundedCornerShape(16.dp),
                 color = BgSurface,
                 border = BorderStroke(1.dp, Color(0xFF44403C))
@@ -224,7 +198,7 @@ fun MyPageScreen(
                         )
                         // myEmail
                         Text(
-                            text = "leech000107107@gmail.com",
+                            text = uiState.email.ifBlank { "" },
                             fontSize = 12.sp,
                             color = Color(0xFF78716C)
                         )
@@ -361,6 +335,33 @@ fun MyPageScreen(
             }
 
             Spacer(Modifier.height(28.dp))
+
+            // ─── 로그아웃 ───
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(vertical = 12.dp)
+                    .clickable { showLogoutDialog = true },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
+                    contentDescription = null,
+                    tint = Color(0xFFFB2C36),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "로그아웃",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFFFB2C36)
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
         }
     }
 }

@@ -2,49 +2,59 @@ package com.example.fe.feature.solver.data
 
 object CodeTemplates {
     val JAVA = """
-        import java.util.*;
-        
-        public class Solution {
-            public int[] solution(int[] nums) {
-                // 여기에 코드를 작성하세요...
-                return new int[] {};
-            }
-        }
-    """.trimIndent()
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+    }
+}
+""".trimIndent()
 
     val CPP = """
-        #include <iostream>
-        #include <vector>
-        #include <string>
-        
-        using namespace std;
-        
-        vector<int> solution(vector<int> nums) {
-            // 여기에 코드를 작성하세요...
-            return {};
-        }
-    """.trimIndent()
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    return 0;
+}
+""".trimIndent()
 
     val PYTHON = """
-        def solution(nums):
-            # 여기에 코드를 작성하세요...
-            return []
-    """.trimIndent()
+import sys
+input = sys.stdin.readline
+
+def main():
+    pass
+
+main()
+""".trimIndent()
 
     val JAVASCRIPT = """
-        function solution(nums) {
-            // 여기에 코드를 작성하세요...
-            return [];
-        }
-    """.trimIndent()
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin });
+const lines = [];
+rl.on('line', line => lines.push(line.trim()));
+rl.on('close', () => {
 
-    fun getInitialCode(language: String): String {
-        return when (language.uppercase()) {
-            "JAVA" -> JAVA
-            "C++", "CPP" -> CPP
-            "PYTHON" -> PYTHON
-            "JAVASCRIPT", "JS" -> JAVASCRIPT
-            else -> JAVA
-        }
+});
+""".trimIndent()
+
+    fun getInitialCode(language: String): String = when (language.uppercase()) {
+        "JAVA"                  -> JAVA
+        "C++", "CPP"            -> CPP
+        "PYTHON"                -> PYTHON
+        "JAVASCRIPT", "JS"      -> JAVASCRIPT
+        else                    -> JAVA
+    }
+
+    fun commentPrefix(language: String): String = when (language.uppercase()) {
+        "PYTHON" -> "# "
+        else     -> "// "
     }
 }

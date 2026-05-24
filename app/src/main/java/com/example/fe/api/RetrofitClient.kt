@@ -7,10 +7,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.example.fe.common.TokenManager
 
 object RetrofitClient { // 싱글톤 객체로 생성
-    private const val BASE_URL = "http://15.164.136.153:8080/"
+    private const val BASE_URL = com.example.fe.BuildConfig.BASE_URL
 
-    private val loggingInterceptor = HttpLoggingInterceptor().apply { // 로그 기록기 생성
-        level = HttpLoggingInterceptor.Level.BODY // HTTP 요청/응답 로그 기록
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = if (com.example.fe.BuildConfig.DEBUG)
+            HttpLoggingInterceptor.Level.BODY
+        else
+            HttpLoggingInterceptor.Level.NONE
     }
 
     // 서버에서 발급한 전용 토큰(AccessToken)을 헤더에 추가하는 인터셉터
@@ -28,28 +31,26 @@ object RetrofitClient { // 싱글톤 객체로 생성
         chain.proceed(requestBuilder.build())
     }
 
-    // API 요청 성공/실패 시 일관된 포맷으로 안드로이드 로그(Logcat)를 띄워주는 커스텀 인터셉터
     private val customLoggingInterceptor = okhttp3.Interceptor { chain ->
         val request = chain.request()
         val t1 = System.nanoTime()
-        
         val response = chain.proceed(request)
-        
         val t2 = System.nanoTime()
-        val timeStr = String.format("%.1f", (t2 - t1) / 1e6)
 
-        if (response.isSuccessful) {
-            // body 스트림을 소모하지 않고 안전하게 확인 (최대 2KB)
-            val bodyString = response.peekBody(2048).string()
-            android.util.Log.d(
-                "API_SUCCESS",
-                "✅ [${request.method}] ${request.url} (${timeStr}ms)\n응답 코드: ${response.code}\n결과: $bodyString"
-            )
-        } else {
-            android.util.Log.e(
-                "API_ERROR",
-                "❌ [${request.method}] ${request.url} (${timeStr}ms)\n응답 코드: ${response.code}\n에러 메시지: ${response.message}"
-            )
+        if (com.example.fe.BuildConfig.DEBUG) {
+            val timeStr = String.format("%.1f", (t2 - t1) / 1e6)
+            if (response.isSuccessful) {
+                val bodyString = response.peekBody(2048).string()
+                android.util.Log.d(
+                    "API_SUCCESS",
+                    "✅ [${request.method}] ${request.url} (${timeStr}ms)\n${response.code}\n$bodyString"
+                )
+            } else {
+                android.util.Log.e(
+                    "API_ERROR",
+                    "❌ [${request.method}] ${request.url} (${timeStr}ms)\n${response.code} ${response.message}"
+                )
+            }
         }
         response
     }

@@ -64,3 +64,66 @@ data class UpdateNicknameResult(
     @SerializedName("nickname") val nickname: String,
     @SerializedName("language") val language: String
 )
+
+/**
+ * [사용자 이름 및 프로필 사진 변경 API]
+ * PATCH /api/v1/users/me/profiles
+ */
+data class UpdateProfileRequest(
+    @SerializedName("nickname") val nickname: String,
+    @SerializedName("profileId") val profileId: Int?
+)
+
+data class UpdateProfileResponse(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: UpdateProfileResult?
+)
+
+data class UpdateProfileResult(
+    @SerializedName("userId") val userId: Int,
+    @SerializedName("imgUrl") val imgUrl: String?,
+    @SerializedName("email") val email: String,
+    @SerializedName("nickname") val nickname: String,
+    @SerializedName("language") val language: String
+)
+
+/**
+ * [사용자 정보 조회 API]
+ * GET /api/v1/users/me
+ */
+data class UserMeResponse(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: UserMeResult?
+)
+
+data class UserMeResult(
+    @SerializedName("imgUrl") val imgUrl: String?,
+    @SerializedName("email") val email: String,
+    @SerializedName("nickname") val nickname: String,
+    @SerializedName("language") val language: String,
+    @SerializedName("solvedProblemCount") val solvedProblemCount: Int
+)
+
+/**
+ * [공개 프로필 이미지 목록 조회 API]
+ * GET /api/v1/users/profile-images
+ */
+data class ProfileImageResponse(
+    @SerializedName("isSuccess") val isSuccess: Boolean,
+    @SerializedName("code") val code: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("result") val result: ProfileImageResult?
+)
+
+data class ProfileImageResult(
+    @SerializedName("images") val images: List<ProfileImageItem>
+)
+
+data class ProfileImageItem(
+    @SerializedName("profileId") val profileId: Int,
+    @SerializedName("imgUrl") val imgUrl: String
+)

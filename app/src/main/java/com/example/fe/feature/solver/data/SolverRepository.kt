@@ -3,6 +3,7 @@ package com.example.fe.feature.solver.data
 import com.example.fe.api.ApiService
 import com.example.fe.data.dto.RunRequestDto
 import com.example.fe.data.dto.SubmitRequestDto
+import com.example.fe.feature.solver.model.Judge0Status
 import com.example.fe.feature.solver.model.ProblemDetail
 import com.example.fe.feature.solver.model.RunResult
 import com.example.fe.feature.solver.model.SolutionDetail
@@ -155,31 +156,28 @@ class SolverRepository(
 
         val result = body.result ?: throw Exception("실행 결과가 없습니다.")
 
-        // statusId: 1=In Queue, 2=Processing, 3=Accepted, <=0=Judge0 미처리(재시도 필요)
-        val stillProcessing = result.statusId <= 0 || result.statusId == 1 || result.statusId == 2
-        val isPassed = result.statusId == 3
-
-        val outputText = result.output?.takeIf { it.isNotBlank() } ?: "출력 없음"
-
-        val terminalLines = buildList {
-            add("\$ Running test cases...")
-            add("상태: ${result.status} (${result.statusId})")
-            if (!result.input.isNullOrBlank()) add("입력: ${result.input}")
-            add("출력: $outputText")
-            if (isPassed) add("실행 완료") else add("실행 실패 또는 미완료")
-        }
+        val statusId = result.statusId
+        val isStillProcessing = Judge0Status.isStillProcessing(statusId)
+        val isPassed = Judge0Status.isAccepted(statusId)
+        val statusLabel = Judge0Status.toKoreanLabel(statusId)
 
         return RunResult(
-            passed = if (stillProcessing) null else isPassed,
-            runtimeMs = null,
-            // stillProcessing이면 폴링이 계속되도록 "Processing"으로 통일
+            statusId = statusId,
+            statusLabel = statusLabel,
+            passed = if (isStillProcessing) null else isPassed,
+            runtimeMs = result.time?.let { (it * 1000).toLong() },
             errorMessage = when {
-                stillProcessing -> "Processing"
+                isStillProcessing -> "Processing"
                 isPassed -> null
-                else -> result.status
+                else -> statusLabel
             },
             rawOutput = result.output?.trim(),
-            terminalLines = terminalLines
+            terminalLines = buildList {
+                add("\$ Running...")
+                add("상태: $statusLabel")
+                if (!result.input.isNullOrBlank()) add("입력: ${result.input}")
+                if (!result.output.isNullOrBlank()) add("출력: ${result.output.trim()}")
+            }
         )
     }
 
@@ -305,16 +303,8 @@ class SolverRepository(
         val result = body.result ?: emptyList()
 
         return result.map {
-            val statusUpper = it.status.uppercase().replace(" ", "_")
-            val isCorrect = statusUpper == "ACCEPTED" || statusUpper == "SUCCESS"
-
-            val resultText = when (statusUpper) {
-                "ACCEPTED", "SUCCESS" -> "정답"
-                "WRONG_ANSWER" -> "오답"
-                "COMPILATION_ERROR" -> "컴파일 에러"
-                "RUNTIME_ERROR" -> "런타임 에러"
-                else -> it.status
-            }
+            val isCorrect = Judge0Status.isServerStatusCorrect(it.status)
+            val resultText = Judge0Status.serverStatusToKorean(it.status)
 
             com.example.fe.feature.solver.model.SubmissionRecord(
                 date = formatSubmissionDate(it.createdAt),

@@ -306,8 +306,14 @@ fun AppNavGraph() {
 
             EditProfileScreen(
                 initialName = profileUiState.userName,
+                currentProfileImgUrl = profileUiState.currentProfileImgUrl,
+                profileImages = profileUiState.profileImages,
+                selectedProfileId = profileUiState.selectedProfileId,
                 isSaving = profileUiState.isSaving,
                 onBackClick = { navController.popBackStack() },
+                onProfileImageSelect = { profileId ->
+                    profileViewModel.selectProfileImage(profileId)
+                },
                 onSaveClick = { name ->
                     profileViewModel.updateProfile(name) {
                         navController.popBackStack()
@@ -794,6 +800,7 @@ fun AppNavGraph() {
                 },
                 onGoSubmit = {
                     navController.navigate(Routes.solve(problemId)) {
+                        popUpTo(Routes.SOLVE_ROUTE) { inclusive = false }
                         launchSingleTop = true
                     }
                 },
@@ -824,6 +831,7 @@ fun AppNavGraph() {
                 onBack = { navController.popBackStack() },
                 onGoSubmit = {
                     navController.navigate(Routes.solve(problemId)) {
+                        popUpTo(Routes.SOLVE_ROUTE) { inclusive = false }
                         launchSingleTop = true
                     }
                 }

@@ -1,14 +1,19 @@
 package com.example.fe.feature.profile.ui
 
 import com.example.fe.data.dto.LanguageResult
+import com.example.fe.data.dto.ProfileImageItem
 import com.example.fe.feature.profile.model.ProfileStat
 
 data class MyPageUiState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val userName: String = "",
+    val email: String = "",
+    val currentProfileImgUrl: String? = null,
     val languageName: String = "",
     val languageOptions: List<LanguageResult> = emptyList(),
+    val profileImages: List<ProfileImageItem> = emptyList(),
+    val selectedProfileId: Int? = null,
     val level: Int = 1,
     val stat: ProfileStat = ProfileStat(
         streak = "0",

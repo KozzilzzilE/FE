@@ -35,7 +35,13 @@ fun SoraCodeEditor(
     val currentOnCodeChange by rememberUpdatedState(onCodeChange)
     val currentCode by rememberUpdatedState(code)
     val currentOnFocusChange by rememberUpdatedState(onFocusChange)
-    
+
+    // Tracks the last code value sent TO the ViewModel from this editor.
+    // AtomicReference (not MutableState) so that setting it in subscribeEvent does NOT
+    // trigger recomposition — which would cause update{} to run while the ViewModel still
+    // holds the old code, making currentCode != lastCodeRef true and calling setText().
+    val lastCodeRef = remember { java.util.concurrent.atomic.AtomicReference(code) }
+
     var editorInstance by remember { mutableStateOf<CodeEditor?>(null) }
 
     AndroidView(
@@ -63,6 +69,7 @@ fun SoraCodeEditor(
                 subscribeEvent<ContentChangeEvent> { _, _ ->
                     val newCode = text.toString()
                     if (newCode != currentCode) {
+                        lastCodeRef.set(newCode)
                         currentOnCodeChange(newCode)
                     }
                 }
@@ -141,10 +148,14 @@ fun SoraCodeEditor(
             }
         },
         update = { editor ->
-            if (editor.text.toString() != currentCode) {
+            // Only call setText when the change originated from outside the editor
+            // (e.g., "reset code" button). If currentCode == lastCodeRef, the ViewModel
+            // is just echoing back what the editor already typed → skip to avoid cursor jump.
+            if (currentCode != lastCodeRef.get() && editor.text.toString() != currentCode) {
                 val line = editor.cursor.leftLine
                 val col  = editor.cursor.leftColumn
                 editor.setText(currentCode)
+                lastCodeRef.set(currentCode)
                 try { editor.setSelection(line, col) } catch (_: Exception) {}
             }
         }

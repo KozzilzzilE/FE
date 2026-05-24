@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,14 +40,10 @@ fun TestCaseTabContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)
-            .padding(top = 16.dp, bottom = 32.dp)
+            .padding(top = 16.dp, bottom = 16.dp)
+            .verticalScroll(scrollState),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
             // tcCard
             Surface(
                 modifier = Modifier.fillMaxWidth(),
@@ -143,35 +137,4 @@ fun TestCaseTabContent(
                 }
             }
         }
-
-        // tcsBot - 실행하기 버튼
-        Spacer(Modifier.height(16.dp))
-        Button(
-            onClick = { viewModel.runCode() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Primary),
-            contentPadding = PaddingValues(horizontal = 24.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = BgPrimary
-                )
-                Text(
-                    text = "실행하기",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = BgPrimary
-                )
-            }
-        }
-    }
 }

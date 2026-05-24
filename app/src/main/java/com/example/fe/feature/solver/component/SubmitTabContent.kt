@@ -204,6 +204,8 @@ private fun SubmitResultView(
                 ) {
                     if (latestResult != null || submissions.isNotEmpty()) {
                         val isCorrect = latestResult?.isCorrect ?: submissions.firstOrNull()?.isCorrect ?: false
+                        val resultLabel = latestResult?.statusLabel
+                            ?: if (isCorrect) "정답" else submissions.firstOrNull()?.result ?: "오답"
                         Icon(
                             imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
                             contentDescription = null,
@@ -211,7 +213,7 @@ private fun SubmitResultView(
                             modifier = Modifier.size(52.dp)
                         )
                         Text(
-                            text = if (isCorrect) "정답입니다!" else "오답입니다.",
+                            text = if (isCorrect) "정답입니다!" else "${resultLabel}입니다.",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (isCorrect) Success else Error
@@ -444,6 +446,8 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val isCorrect = passed == true
+                val statusLabel = executionResult?.statusLabel?.takeIf { it.isNotBlank() }
+                    ?: if (isCorrect) "맞았습니다" else "틀렸습니다"
                 Icon(
                     imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
                     contentDescription = null,
@@ -451,7 +455,7 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = if (isCorrect) "맞았습니다" else "틀렸습니다",
+                    text = if (isCorrect) "맞았습니다" else statusLabel,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (isCorrect) Color(0xFF22C55E) else Error
@@ -459,23 +463,23 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
             }
         }
 
-        // inCard — 입력 카드
-        ExecInfoCard(
-            label = "입력",
-            content = inputText
-        )
+        val isCompileOrRuntime = hasResult && executionResult!!.statusId.let { id ->
+            id == com.example.fe.feature.solver.model.Judge0Status.COMPILATION_ERROR ||
+            com.example.fe.feature.solver.model.Judge0Status.isRuntimeError(id)
+        }
 
-        // myCard — 나의 출력 카드
-        ExecInfoCard(
-            label = "나의 출력",
-            content = myOutputText
-        )
-
-        // ansCard — 정답 카드
-        ExecInfoCard(
-            label = "정답",
-            content = expectedText
-        )
+        if (isCompileOrRuntime) {
+            // 컴파일/런타임 오류: 오류 메시지만 표시
+            ExecInfoCard(
+                label = "오류 메시지",
+                content = executionResult!!.rawOutput?.ifBlank { "오류 세부 정보 없음" } ?: "오류 세부 정보 없음"
+            )
+        } else {
+            // 일반 실행: 입력 / 나의 출력 / 정답
+            ExecInfoCard(label = "입력", content = inputText)
+            ExecInfoCard(label = "나의 출력", content = myOutputText)
+            ExecInfoCard(label = "정답", content = expectedText)
+        }
     }
 }
 

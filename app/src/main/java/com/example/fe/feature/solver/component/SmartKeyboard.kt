@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.feature.solver.data.CodeTemplates
 import com.example.fe.ui.theme.BgElevated
 import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.Primary
@@ -23,10 +24,8 @@ import com.example.fe.ui.theme.TextPrimary
 @Composable
 fun SmartKeyboardPanel(
     onInsert: (String) -> Unit,
-    onRun: () -> Unit = {},
-    onSubmit: () -> Unit = {},
-    isSubmitting: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    language: String = "JAVA"
 ) {
     val pageCount = 3
     val pagerState = rememberPagerState(pageCount = { pageCount })
@@ -84,57 +83,9 @@ fun SmartKeyboardPanel(
         ) {
             ActionKey(text = "Tab", modifier = Modifier.weight(1f)) { onInsert("\t") }
             ActionKey(text = "줄바꿈", modifier = Modifier.weight(1f)) { onInsert("\n") }
-            ActionKey(text = "주석", modifier = Modifier.weight(1f)) { onInsert("// ") }
+            ActionKey(text = "주석", modifier = Modifier.weight(1f)) { onInsert(CodeTemplates.commentPrefix(language)) }
         }
 
-        // 실행하기 + 제출하기
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Surface(
-                onClick = onRun,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp),
-                shape = RoundedCornerShape(8.dp),
-                color = Primary
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "▶  실행하기",
-                        color = BgPrimary,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-            Surface(
-                onClick = { if (!isSubmitting) onSubmit() },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp),
-                shape = RoundedCornerShape(8.dp),
-                color = if (isSubmitting) BgElevated else Primary
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    if (isSubmitting) {
-                        androidx.compose.material3.CircularProgressIndicator(
-                            color = Primary,
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            text = "▶  제출하기",
-                            color = BgPrimary,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 

@@ -192,6 +192,18 @@ interface ApiService {
         @Header("Authorization") token: String
     ): Response<MyPageResponse>
 
+    // 사용자 정보 조회 (이메일, 프로필 이미지, 언어, 총 풀이 수)
+    @GET("api/v1/users/me")
+    suspend fun getUserMe(
+        @Header("Authorization") token: String
+    ): Response<com.example.fe.data.dto.UserMeResponse>
+
+    // 공개 프로필 이미지 목록 조회
+    @GET("api/v1/users/profile-images")
+    suspend fun getProfileImages(
+        @Header("Authorization") token: String
+    ): Response<com.example.fe.data.dto.ProfileImageResponse>
+
     // 언어 변경
     @PATCH("api/v1/users/me/languages")
     suspend fun updateLanguage(
@@ -205,6 +217,13 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: UpdateNicknameRequest
     ): Response<UpdateNicknameResponse>
+
+    // 이름 및 프로필 사진 변경
+    @PATCH("api/v1/users/me/profiles")
+    suspend fun updateProfile(
+        @Header("Authorization") token: String,
+        @Body request: com.example.fe.data.dto.UpdateProfileRequest
+    ): Response<com.example.fe.data.dto.UpdateProfileResponse>
 
     // --- [찜(북마크)] ---
 

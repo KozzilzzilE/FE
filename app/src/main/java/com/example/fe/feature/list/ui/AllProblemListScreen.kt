@@ -149,14 +149,15 @@ fun AllProblemListScreen(
                             onBookmarkClick = { onBookmarkClick(problem.problemId) }
                         )
                     }
+                    item {
+                        PaginationBar(
+                            currentPage = currentPage,
+                            totalPages = totalPages,
+                            onPageChange = onPageChange
+                        )
+                    }
                 }
             }
-
-            PaginationBar(
-                currentPage = currentPage,
-                totalPages = totalPages,
-                onPageChange = onPageChange
-            )
         }
     }
 }

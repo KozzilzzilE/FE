@@ -14,6 +14,9 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,10 +46,22 @@ fun EditorScreen(
     val uiState by viewModel.uiState.collectAsState()
     val titleToShow = uiState.problemDetail?.title.orEmpty()
 
+    var wasRunning by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.isRunning) {
+        if (wasRunning && !uiState.isRunning) {
+            if (uiState.runResult != null) {
+                viewModel.pendingNavigationTarget = "RESULT"
+                onGoSubmit()
+            }
+        }
+        wasRunning = uiState.isRunning
+    }
+
     var wasSubmitting by remember { mutableStateOf(false) }
     LaunchedEffect(uiState.isSubmitting) {
         if (wasSubmitting && !uiState.isSubmitting) {
             if (uiState.submitResult != null) {
+                viewModel.pendingNavigationTarget = "MAIN"
                 onGoSubmit()
             }
         }
@@ -55,6 +70,10 @@ fun EditorScreen(
 
     var codeEditor by remember { mutableStateOf<io.github.rosemoe.sora.widget.CodeEditor?>(null) }
     val isKeyboardVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
+
+    LaunchedEffect(isKeyboardVisible) {
+        if (isKeyboardVisible) onFullscreenClick()
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(BgPrimary)) {
         Scaffold(
@@ -89,7 +108,14 @@ fun EditorScreen(
                     )
                 }
 
-                SolveTabBarForEditor(onGoProblem = onGoProblem, onGoSubmit = onGoSubmit)
+                SolveTabBarForEditor(
+                    onGoProblem = onGoProblem,
+                    onGoSubmit = onGoSubmit,
+                    onRun = { viewModel.runCode() },
+                    onSubmit = { viewModel.submitCode() },
+                    isSubmitting = uiState.isSubmitting,
+                    isRunning = uiState.isRunning
+                )
                 HorizontalDivider(thickness = 1.dp, color = BgDivider)
 
                 Column(
@@ -133,7 +159,7 @@ fun EditorScreen(
                     if (!isKeyboardVisible) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { viewModel.runCode(); onGoSubmit() },
+                            onClick = { viewModel.runCode() },
                             enabled = !uiState.isRunning,
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(14.dp),
@@ -173,9 +199,7 @@ fun EditorScreen(
                     HorizontalDivider(color = BgDivider)
                     SmartKeyboardPanel(
                         onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
-                        onRun = { viewModel.runCode(); onGoSubmit() },
-                        onSubmit = { viewModel.submitCode() },
-                        isSubmitting = uiState.isSubmitting,
+                        language = uiState.language,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp, vertical = 4.dp)
@@ -187,19 +211,82 @@ fun EditorScreen(
 }
 
 @Composable
-private fun SolveTabBarForEditor(onGoProblem: () -> Unit, onGoSubmit: () -> Unit) {
+private fun SolveTabBarForEditor(
+    onGoProblem: () -> Unit,
+    onGoSubmit: () -> Unit,
+    onRun: () -> Unit,
+    onSubmit: () -> Unit,
+    isRunning: Boolean,
+    isSubmitting: Boolean
+) {
     Row(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 10.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(BgElevated)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        SolveTabChipStatic("문제", Icons.Filled.Description, selected = false, onClick = onGoProblem)
-        SolveTabChipStatic("에디터", Icons.Filled.Edit, selected = true, onClick = {})
-        SolveTabChipStatic("제출", Icons.Filled.CheckCircle, selected = false, onClick = onGoSubmit)
+        // 탭 칩 영역
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(16.dp))
+                .background(BgElevated)
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SolveTabChipStatic("문제", Icons.Filled.Description, selected = false, onClick = onGoProblem)
+            SolveTabChipStatic("에디터", Icons.Filled.Edit, selected = true, onClick = {})
+            SolveTabChipStatic("제출", Icons.Filled.CheckCircle, selected = false, onClick = onGoSubmit)
+        }
+
+        // 실행 버튼
+        IconButton(
+            onClick = { if (!isRunning) onRun() },
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isRunning) BgElevated else Primary)
+        ) {
+            if (isRunning) {
+                CircularProgressIndicator(
+                    color = Primary,
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = "실행",
+                    tint = BgPrimary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+
+        // 제출 버튼
+        IconButton(
+            onClick = { if (!isSubmitting) onSubmit() },
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isSubmitting) BgElevated else Primary)
+        ) {
+            if (isSubmitting) {
+                CircularProgressIndicator(
+                    color = Primary,
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "제출",
+                    tint = BgPrimary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
     }
 }
 

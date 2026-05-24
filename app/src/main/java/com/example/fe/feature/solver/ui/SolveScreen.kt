@@ -17,7 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -74,6 +76,17 @@ fun SolveScreen(
             }
         }
         viewModel.pendingNavigationTarget = null
+    }
+
+    var wasRunning by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.isRunning) {
+        if (wasRunning && !uiState.isRunning) {
+            if (uiState.runResult != null) {
+                selectedTab = SolveTab.SUBMIT
+                selectedSubmitSubScreen = SubmitSubScreen.RESULT
+            }
+        }
+        wasRunning = uiState.isRunning
     }
 
     var wasSubmitting by remember { mutableStateOf(false) }
@@ -251,9 +264,77 @@ fun SolveScreen(
                                         fontWeight = FontWeight.Medium,
                                         color = TextSecondary
                                     )
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        // 실행 버튼
+                                        Box(
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(
+                                                    if (uiState.isRunning || uiState.isSubmitting)
+                                                        BgElevated else Primary
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (uiState.isRunning) {
+                                                CircularProgressIndicator(
+                                                    color = Primary,
+                                                    modifier = Modifier.size(14.dp),
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                IconButton(
+                                                    onClick = { if (!uiState.isSubmitting) viewModel.runCode() },
+                                                    modifier = Modifier.size(30.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.PlayArrow,
+                                                        contentDescription = "실행",
+                                                        tint = if (uiState.isSubmitting) TextMuted else BgPrimary,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        // 제출 버튼
+                                        Box(
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(
+                                                    if (uiState.isRunning || uiState.isSubmitting)
+                                                        BgElevated else Primary
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (uiState.isSubmitting) {
+                                                CircularProgressIndicator(
+                                                    color = Primary,
+                                                    modifier = Modifier.size(14.dp),
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                IconButton(
+                                                    onClick = { if (!uiState.isRunning) viewModel.submitCode() },
+                                                    modifier = Modifier.size(30.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.AutoMirrored.Filled.Send,
+                                                        contentDescription = "제출",
+                                                        tint = if (uiState.isRunning) TextMuted else BgPrimary,
+                                                        modifier = Modifier.size(14.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.width(4.dp))
                                         DraftSaveButton(onClick = { viewModel.saveDraft() })
-                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
                                         IconButton(
                                             onClick = { onOpenEditorFull(problemId) },
                                             modifier = Modifier.size(28.dp)
@@ -314,15 +395,7 @@ fun SolveScreen(
                                         ) {
                                             SmartKeyboardPanel(
                                                 onInsert = { insert -> viewModel.insertText(insert) },
-                                                onRun = {
-                                                    viewModel.runCode()
-                                                    selectedSubmitSubScreen = SubmitSubScreen.RESULT
-                                                    selectedTab = SolveTab.SUBMIT
-                                                },
-                                                onSubmit = {
-                                                    viewModel.submitCode()
-                                                },
-                                                isSubmitting = uiState.isSubmitting,
+                                                language = uiState.language,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .padding(horizontal = 12.dp, vertical = 8.dp)

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import android.util.Log
 import com.example.fe.common.TokenManager
 import com.example.fe.feature.solver.data.SolverRepository
+import com.example.fe.feature.solver.model.Judge0Status
 import com.example.fe.feature.solver.model.SolverUiState
 import com.example.fe.feature.solver.model.SubmissionRecord
 import com.example.fe.feature.solver.model.SubmitResult
@@ -268,27 +269,49 @@ class SolverViewModel(
         runToken: String
     ) {
         var attempt = 0
+        var noResponseCount = 0
         while (attempt < 20) {
             attempt++
             try {
                 val result = repository.getRunResult(accessToken, runToken)
 
-                Log.d("RunCode", "poll[$attempt] status=${result.errorMessage}, passed=${result.passed}")
+                Log.d("RunCode", "poll[$attempt] statusId=${result.statusId} label=${result.statusLabel}")
 
                 _uiState.update { it.copy(runResult = result) }
 
-                val status = result.errorMessage
-                if (status == "In Queue" || status == "Processing") {
-                    delay(1500)
-                    continue
+                when {
+                    // 정상 대기/처리 중 → 계속 폴링
+                    Judge0Status.isStillProcessing(result.statusId) -> {
+                        delay(1500)
+                    }
+                    // -1: 백엔드가 Judge0 응답을 아직 못 받은 일시적 상태일 수 있음
+                    // 최대 5회까지 재시도, 그 이후엔 에러 처리
+                    result.statusId == Judge0Status.NO_RESPONSE -> {
+                        noResponseCount++
+                        Log.w("RunCode", "poll[$attempt] Judge0 연결 실패 ($noResponseCount/5)")
+                        if (noResponseCount >= 5) {
+                            _uiState.update {
+                                it.copy(
+                                    isRunning = false,
+                                    errorToast = "코드 실행 서버(Judge0)에 연결할 수 없습니다."
+                                )
+                            }
+                            return
+                        }
+                        delay(2000)
+                    }
+                    // 최종 결과 (정답, 오답, 컴파일오류, 시간초과 등)
+                    else -> {
+                        Log.d("RunCode", "poll 완료 — statusId=${result.statusId}, output=${result.rawOutput}")
+                        val toast = if (result.statusId == Judge0Status.INTERNAL_ERROR)
+                            "채점 시스템 내부 오류가 발생했습니다." else null
+                        _uiState.update { it.copy(isRunning = false, errorToast = toast) }
+                        return
+                    }
                 }
 
-                Log.d("RunCode", "poll 완료 — passed=${result.passed}, output=${result.rawOutput}")
-                _uiState.update { it.copy(isRunning = false) }
-                return
-
             } catch (e: kotlinx.coroutines.CancellationException) {
-                throw e  // 코루틴 취소는 반드시 재전파
+                throw e
             } catch (e: Exception) {
                 Log.w("RunCode", "poll[$attempt] API 오류 (재시도): ${e.message}")
                 delay(1500)
@@ -374,13 +397,14 @@ class SolverViewModel(
                 historyId = historyId
             )
 
-            if (status == "PROCESSING") {
+            if (Judge0Status.isServerStatusProcessing(status)) {
                 delay(1500)
                 return@repeat
             }
 
             val submitResult = SubmitResult(
                 isCorrect = isCorrect,
+                statusLabel = Judge0Status.serverStatusToKorean(status),
                 runtimeMs = null,
                 errorMessage = if (isCorrect) null else status
             )

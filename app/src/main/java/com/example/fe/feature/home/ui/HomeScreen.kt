@@ -76,7 +76,7 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
+                        .padding(top = innerPadding.calculateTopPadding())
                         .verticalScroll(scrollState)
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -118,7 +118,7 @@ fun HomeScreen(
                     // 6. 명언 카드 (Amber 테두리)
                     QuoteCard()
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 8.dp))
                 }
             }
         }

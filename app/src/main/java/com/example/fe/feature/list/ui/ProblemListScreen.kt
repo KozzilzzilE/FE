@@ -48,12 +48,15 @@ fun ProblemListScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
                 .background(com.example.fe.ui.theme.BgPrimary)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
-                    contentPadding = PaddingValues(vertical = 8.dp)
+                    contentPadding = PaddingValues(
+                        top = 8.dp,
+                        bottom = innerPadding.calculateBottomPadding() + 8.dp
+                    )
                 ) {
                 items(problems) { problem ->
                     DetailCard(

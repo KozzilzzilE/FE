@@ -85,7 +85,7 @@ fun BlankScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(PageBg)
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
         ) {
             Column(
                 modifier = Modifier
@@ -151,7 +151,7 @@ fun BlankScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(100.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = BgPrimary,
                         contentColor = TextPrimary,
@@ -178,6 +178,8 @@ fun BlankScreen(
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
+                
+                Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 16.dp))
             }
         }
 

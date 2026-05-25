@@ -74,7 +74,7 @@ fun AllProblemListScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
                 .background(BgPrimary)
         ) {
             // plHdr
@@ -139,7 +139,12 @@ fun AllProblemListScreen(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp, 
+                        end = 16.dp, 
+                        top = 8.dp, 
+                        bottom = innerPadding.calculateBottomPadding() + 8.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(problems) { problem ->

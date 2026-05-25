@@ -49,7 +49,7 @@ fun StepSelectionScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
         ) {
             // 헤더: ← + 토픽 배지
             Row(
@@ -142,6 +142,8 @@ fun StepSelectionScreen(
                     accentBg = bgYellow,
                     onClick = { onNavigate(Routes.detailList(topicId, topicName, "problem")) }
                 )
+                
+                Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 16.dp))
             }
         }
     }

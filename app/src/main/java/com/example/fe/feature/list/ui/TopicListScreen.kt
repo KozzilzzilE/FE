@@ -54,7 +54,7 @@ fun TopicListScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
+                        .padding(top = innerPadding.calculateTopPadding())
                         .verticalScroll(rememberScrollState())
                 ) {
                     // 헤더
@@ -98,7 +98,7 @@ fun TopicListScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 16.dp))
                 }
             }
         }

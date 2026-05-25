@@ -14,7 +14,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,7 +30,9 @@ import com.example.fe.ui.theme.BgPrimary
 import com.example.fe.ui.theme.CardBg
 import com.example.fe.ui.theme.PageBg
 import com.example.fe.ui.theme.TextPrimary
+import com.example.fe.ui.theme.TextSecondary
 import com.example.fe.ui.theme.TitleText
+import com.example.fe.ui.theme.Error
 
 @Composable
 fun BlankScreen(
@@ -40,6 +44,7 @@ fun BlankScreen(
     selectedBlankIndex: Int,
     isAnswerComplete: Boolean,
     checkResult: Boolean?,
+    hasPeeked: Boolean,
     onBack: () -> Unit,
     onHome: () -> Unit,
     onPrevClick: () -> Unit,
@@ -49,7 +54,8 @@ fun BlankScreen(
     onResetAnswers: () -> Unit,
     onAnswerSlotClick: (Int) -> Unit,
     onOptionClick: (String) -> Unit,
-    onCheckAnswerClick: () -> Unit
+    onCheckAnswerClick: () -> Unit,
+    onShowAnswerClick: () -> Unit
 ) {
     // blanks는 선택지, 빈칸 개수는 totalBlanks 사용
     val blankCount = quiz.totalBlanks
@@ -163,6 +169,15 @@ fun BlankScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+                if (hasPeeked) {
+                    Text(
+                        text = "정답을 확인하셨습니다. 초기화 후 다시 천천히 풀어보세요!",
+                        color = Error,
+                        fontSize = 13.sp,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
             }
         }
 
@@ -172,7 +187,8 @@ fun BlankScreen(
                 isCorrect = checkResult,
                 isLastProblem = currentIndex == totalCount - 1,
                 onClose = onResetAnswers,
-                onAction = if (checkResult) onNextClick else onResetAnswers
+                onAction = if (checkResult) onNextClick else onResetAnswers,
+                onPeekAnswer = if (!checkResult) onShowAnswerClick else null
             )
         }
     }
@@ -220,6 +236,7 @@ function countChars(str) {
         selectedBlankIndex = 0,
         isAnswerComplete = false,
         checkResult = null,
+        hasPeeked = false,
         onBack = {},
         onHome = {},
         onPrevClick = {},
@@ -229,6 +246,7 @@ function countChars(str) {
         onResetAnswers = {},
         onAnswerSlotClick = {},
         onOptionClick = {},
-        onCheckAnswerClick = {}
+        onCheckAnswerClick = {},
+        onShowAnswerClick = {}
     )
 }

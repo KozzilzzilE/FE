@@ -48,6 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.example.fe.common.highlight
 import com.example.fe.common.parseCodeFence
 import com.example.fe.ui.theme.BlankBorder
@@ -352,8 +355,57 @@ fun ResultModal(
     isCorrect: Boolean,
     isLastProblem: Boolean,
     onClose: () -> Unit,
-    onAction: () -> Unit
+    onAction: () -> Unit,
+    onPeekAnswer: (() -> Unit)? = null
 ) {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showConfirmDialog) {
+        Dialog(onDismissRequest = { showConfirmDialog = false }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = BgSurface,
+                border = BorderStroke(1.dp, BgElevated)
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(
+                        text = "정답을 확인하시겠습니까?",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = TextPrimary
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = "정답을 확인하시면 완료 체크가 안됩니다.",
+                        fontSize = 14.sp,
+                        color = TextSecondary,
+                        lineHeight = 20.sp
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.material3.TextButton(onClick = { showConfirmDialog = false }) {
+                            Text("취소", color = GrayText)
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                showConfirmDialog = false
+                                onPeekAnswer?.invoke()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("확인", color = BgPrimary, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Dialog(
         onDismissRequest = {},
         properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false)
@@ -422,25 +474,67 @@ fun ResultModal(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Button(
-                        onClick = onAction,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = BgElevated,
-                            contentColor = TextPrimary
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-                    ) {
-                        Text(
-                            text = if (isCorrect) {
-                                if (isLastProblem) "완료하기" else "다음으로 >"
-                            } else "다시 풀기",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    if (isCorrect) {
+                        Button(
+                            onClick = onAction,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = BgElevated,
+                                contentColor = TextPrimary
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                        ) {
+                            Text(
+                                text = if (isLastProblem) "완료하기" else "다음으로 >",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Button(
+                                onClick = onAction,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = BgElevated,
+                                    contentColor = TextPrimary
+                                ),
+                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                            ) {
+                                Text(
+                                    text = "다시 풀기",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            
+                            if (onPeekAnswer != null) {
+                                Button(
+                                    onClick = { showConfirmDialog = true },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(50.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = BgElevated,
+                                        contentColor = TextPrimary
+                                    ),
+                                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                                ) {
+                                    Text(
+                                        text = "정답 확인",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

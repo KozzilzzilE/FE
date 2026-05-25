@@ -91,7 +91,8 @@ fun MoveButtonBar(
     onPrevClick: () -> Unit,
     onNavigate: (String) -> Unit,
     isFirstPage: Boolean,
-    isLastPage: Boolean
+    isLastPage: Boolean,
+    isNextEnabled: Boolean = true
 ) {
     Row(
         modifier = Modifier
@@ -109,9 +110,9 @@ fun MoveButtonBar(
         }
         Box(modifier = Modifier.weight(1f)) {
             if (isLastPage) {
-                MoveButton(text = "다음 단계", onClick = onNextStepClick, isPrimary = true)
+                MoveButton(text = "다음 단계", onClick = onNextStepClick, isPrimary = true, enabled = isNextEnabled)
             } else {
-                MoveButton(text = "다음", onClick = onNextClick, isPrimary = true)
+                MoveButton(text = "다음", onClick = onNextClick, isPrimary = true, enabled = isNextEnabled)
             }
         }
     }

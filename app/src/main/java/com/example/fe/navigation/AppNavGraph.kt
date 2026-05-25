@@ -97,6 +97,16 @@ fun AppNavGraph() {
     val profileViewModel: MyPageViewModel = viewModel(factory = profileViewModelFactory)
     val profileUiState by profileViewModel.uiState.collectAsState()
 
+    LaunchedEffect(Unit) {
+        com.example.fe.common.TokenManager.tokenExpiredEvent.collect {
+            Toast.makeText(context, "로그인이 만료되었습니다. 다시 로그인해주세요.", Toast.LENGTH_SHORT).show()
+            navController.navigate(Routes.LOGIN) {
+                popUpTo(navController.graph.id) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
+
     LaunchedEffect(authState) {
         when (val state = authState) {
             is AuthState.Success -> {
@@ -115,7 +125,7 @@ fun AppNavGraph() {
             }
             is AuthState.LoggedOut -> {
                 navController.navigate(Routes.LOGIN) {
-                    popUpTo(0) { inclusive = true }
+                    popUpTo(navController.graph.id) { inclusive = true }
                     launchSingleTop = true
                 }
             }
@@ -126,9 +136,11 @@ fun AppNavGraph() {
         }
     }
 
+    val initialRoute = if (!com.example.fe.common.TokenManager.getAccessToken().isNullOrEmpty()) Routes.HOME else Routes.LOGIN
+
     NavHost(
         navController = navController,
-        startDestination = Routes.LOGIN
+        startDestination = initialRoute
     ) {
         composable(Routes.LOGIN) {
             LoginScreen(

@@ -3,6 +3,9 @@ package com.example.fe.common
 import android.content.Context
 import android.content.SharedPreferences
 
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+
 /**
  * 앱 전역에서 서버 인증 토큰(AccessToken)을 읽고 쓰기 위한 로컬 저장소 관리자
  * 앱의 진입점(MainActivity 또는 Application)에서 init()으로 가장 먼저 초기화해야 함
@@ -11,6 +14,9 @@ object TokenManager {
     private const val PREF_NAME = "FeAppPrefs"
     private const val KEY_ACCESS_TOKEN = "server_access_token"
     private const val KEY_PREFERRED_LANGUAGE = "preferred_language"
+
+    private val _tokenExpiredEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val tokenExpiredEvent = _tokenExpiredEvent.asSharedFlow()
 
     private var prefs: SharedPreferences? = null
 
@@ -24,17 +30,25 @@ object TokenManager {
 
     // 서버 토큰 저장
     fun saveAccessToken(token: String) {
+        android.util.Log.d("TokenManager", "Saving token: $token")
         prefs?.edit()?.putString(KEY_ACCESS_TOKEN, token)?.apply()
     }
 
     // 서버 토큰 조회
     fun getAccessToken(): String? {
-        return prefs?.getString(KEY_ACCESS_TOKEN, null)
+        val token = prefs?.getString(KEY_ACCESS_TOKEN, null)
+        android.util.Log.d("TokenManager", "Getting token: $token")
+        return token
     }
 
     // 서버 토큰 삭제 (로그아웃용)
     fun clearAccessToken() {
         prefs?.edit()?.remove(KEY_ACCESS_TOKEN)?.apply()
+    }
+
+    // 토큰 만료 이벤트 발생
+    fun emitTokenExpired() {
+        _tokenExpiredEvent.tryEmit(Unit)
     }
 
     // 선호 언어 저장

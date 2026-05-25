@@ -69,16 +69,20 @@ fun PracticeScreen(
         onHome = onHome,
         onNextStepClick = onNextStepClick,
         onCheckAnswer = { quizIndex, answers ->
-            vm.checkAnswers(
+            val isCorrect = vm.checkAnswers(
                 quizIndex = quizIndex,
                 userAnswers = answers
             )
+            if (isCorrect) {
+                vm.completeQuiz(quizIndex)
+            }
+            isCorrect
         },
-        onNextWithComplete = { currentIndex, moveNext ->
-            vm.nextQuizAndComplete(currentIndex, moveNext)
+        onNextWithComplete = { _, moveNext ->
+            moveNext()
         },
-        onNextStepWithComplete = { currentIndex, goNextStep ->
-            vm.completeCurrentQuizAndGoNext(currentIndex, goNextStep)
+        onNextStepWithComplete = { _, goNextStep ->
+            goNextStep()
         }
     )
 }
@@ -193,6 +197,11 @@ private fun PracticeBlankContent(
         mutableStateOf<Boolean?>(null)
     }
 
+    // 엿보기 여부
+    var hasPeeked by remember(quiz.exerciseId) {
+        mutableStateOf(false)
+    }
+
     // 모든 빈칸이 채워졌는지 여부
     val isAnswerComplete =
         quiz.totalBlanks > 0 && filledAnswers.none { it.isNullOrBlank() }
@@ -206,6 +215,7 @@ private fun PracticeBlankContent(
         selectedBlankIndex = selectedBlankIndex,
         isAnswerComplete = isAnswerComplete,
         checkResult = checkResult,
+        hasPeeked = hasPeeked,
 
         onBack = onBack,
         onHome = onHome,
@@ -225,6 +235,7 @@ private fun PracticeBlankContent(
             }
             selectedBlankIndex = 0
             checkResult = null
+            hasPeeked = false
         },
 
         // 답칸 클릭
@@ -256,6 +267,17 @@ private fun PracticeBlankContent(
         onCheckAnswerClick = {
             val answers = filledAnswers.map { it ?: "" }
             checkResult = onCheckAnswer(answers)
+        },
+        
+        // 모달창에서 정답 확인 시 동작 (정답 채워주기)
+        onShowAnswerClick = {
+            quiz.blanks?.forEachIndexed { index, blank ->
+                if (index < filledAnswers.size) {
+                    filledAnswers[index] = blank.content
+                }
+            }
+            hasPeeked = true
+            checkResult = null
         }
     )
 }

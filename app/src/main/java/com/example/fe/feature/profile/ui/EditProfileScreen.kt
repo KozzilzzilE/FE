@@ -43,7 +43,9 @@ fun EditProfileScreen(
     initialName: String = "",
     currentProfileImgUrl: String? = null,
     profileImages: List<ProfileImageItem> = emptyList(),
+    isLoadingImages: Boolean = false,
     selectedProfileId: Int? = null,
+    selectedProfileImgUrl: String? = null,
     isSaving: Boolean = false,
     onBackClick: () -> Unit = {},
     onProfileImageSelect: (Int) -> Unit = {},
@@ -53,8 +55,8 @@ fun EditProfileScreen(
     var showImagePicker by remember { mutableStateOf(false) }
     var pendingProfileId by remember(selectedProfileId) { mutableStateOf(selectedProfileId) }
 
-    val displayImgUrl = profileImages.find { it.profileId == selectedProfileId }?.imgUrl
-        ?: currentProfileImgUrl
+    // 선택한 이미지 URL이 있으면 우선 표시, 없으면 현재 프로필 이미지 표시
+    val displayImgUrl = selectedProfileImgUrl ?: currentProfileImgUrl
 
     if (showImagePicker) {
         ModalBottomSheet(
@@ -65,6 +67,7 @@ fun EditProfileScreen(
         ) {
             ProfileImagePickerSheet(
                 profileImages = profileImages,
+                isLoading = isLoadingImages,
                 selectedProfileId = pendingProfileId,
                 onSelectProfileId = { pendingProfileId = it },
                 onApply = {
@@ -201,6 +204,7 @@ private fun ProfileImageSection(
 @Composable
 private fun ProfileImagePickerSheet(
     profileImages: List<ProfileImageItem>,
+    isLoading: Boolean,
     selectedProfileId: Int?,
     onSelectProfileId: (Int) -> Unit,
     onApply: () -> Unit,
@@ -236,7 +240,7 @@ private fun ProfileImagePickerSheet(
 
         HorizontalDivider(color = BgSurface)
 
-        if (profileImages.isEmpty()) {
+        if (isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

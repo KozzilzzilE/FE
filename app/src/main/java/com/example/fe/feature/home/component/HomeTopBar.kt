@@ -17,11 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.fe.R
 import com.example.fe.ui.theme.BgElevated
 import com.example.fe.ui.theme.BgPrimary
@@ -38,6 +41,7 @@ import com.example.fe.ui.theme.TextPrimary
 @Composable
 fun HomeTopBar(
     userName: String = "사용자",
+    profileImgUrl: String? = null,
     onProfileClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -58,28 +62,46 @@ fun HomeTopBar(
                 contentScale = ContentScale.Fit
             )
 
-            // 우측: Amber 그라디언트 프로필 버튼 (Container 32x32)
+            // 우측: 프로필 버튼
             Box(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                Primary,
-                                Primary.copy(alpha = 0.85f)
-                            )
-                        )
-                    )
                     .clickable(onClick = onProfileClick),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = "프로필",
-                    tint = BgPrimary,
-                    modifier = Modifier.size(20.dp)
-                )
+                if (profileImgUrl != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(profileImgUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "프로필",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(Primary, Primary.copy(alpha = 0.85f))
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Person,
+                            contentDescription = "프로필",
+                            tint = BgPrimary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
         }
 

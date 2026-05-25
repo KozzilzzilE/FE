@@ -25,7 +25,7 @@ object RetrofitClient { // 싱글톤 객체로 생성
         
         // 토큰이 존재할 경우에만(로그인 된 상태) 요청 헤더에 삽입
         if (!serverToken.isNullOrEmpty()) {
-            requestBuilder.addHeader("Authorization", "Bearer $serverToken")
+            requestBuilder.header("Authorization", "Bearer $serverToken")
         }
         
         chain.proceed(requestBuilder.build())
@@ -52,6 +52,13 @@ object RetrofitClient { // 싱글톤 객체로 생성
                 )
             }
         }
+
+        // 토큰 만료(401) 감지 시 로컬 토큰 지우고 알림 발생
+        if (response.code == 401) {
+            TokenManager.clearAccessToken()
+            TokenManager.emitTokenExpired()
+        }
+
         response
     }
 

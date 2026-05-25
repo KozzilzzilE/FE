@@ -116,7 +116,7 @@ fun MyPageScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(BgPrimary)
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
         ) {
             // ─── Top Bar ───
@@ -361,7 +361,7 @@ fun MyPageScreen(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(innerPadding.calculateBottomPadding() + 16.dp))
         }
     }
 }

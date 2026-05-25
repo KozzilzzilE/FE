@@ -480,7 +480,7 @@ fun ResultModal(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(100.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = BgElevated,
                                 contentColor = TextPrimary
@@ -500,7 +500,7 @@ fun ResultModal(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(50.dp),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = RoundedCornerShape(100.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = BgElevated,
                                     contentColor = TextPrimary
@@ -520,7 +520,7 @@ fun ResultModal(
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(50.dp),
-                                    shape = RoundedCornerShape(12.dp),
+                                    shape = RoundedCornerShape(100.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = BgElevated,
                                         contentColor = TextPrimary

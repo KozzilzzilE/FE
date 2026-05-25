@@ -37,9 +37,17 @@ fun BottomNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(BgPrimary)
+            .background(
+                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        BgPrimary.copy(alpha = 0.8f),
+                        BgPrimary
+                    )
+                )
+            )
             .navigationBarsPadding()
-            .padding(horizontal = 21.dp, vertical = 12.dp),
+            .padding(start = 21.dp, end = 21.dp, top = 24.dp, bottom = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -48,8 +56,7 @@ fun BottomNavigationBar(
                 .height(62.dp)
                 .clip(RoundedCornerShape(36.dp))
                 .background(BgSurface)
-                .border(1.dp, BgElevated, RoundedCornerShape(36.dp))
-                .padding(4.dp),
+                .border(1.dp, BgElevated, RoundedCornerShape(36.dp)),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -59,24 +66,24 @@ fun BottomNavigationBar(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .clip(RoundedCornerShape(26.dp))
+                        .clip(RoundedCornerShape(100.dp))
                         .background(if (selected) Primary else Color.Transparent)
                         .clickable { onNavigate(item.route) },
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically)
+                        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)
                     ) {
                         Icon(
                             painter = painterResource(id = item.icon),
                             contentDescription = item.title,
                             tint = if (selected) BgPrimary else TextMuted,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                         Text(
                             text = item.title,
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                             color = if (selected) BgPrimary else TextMuted
                         )

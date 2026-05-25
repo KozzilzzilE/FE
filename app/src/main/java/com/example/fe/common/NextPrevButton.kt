@@ -1,6 +1,7 @@
 package com.example.fe.common
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -49,7 +50,7 @@ fun MoveButton(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(100.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
@@ -94,12 +95,24 @@ fun MoveButtonBar(
     isLastPage: Boolean,
     isNextEnabled: Boolean = true
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .background(
+                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                    colors = listOf(
+                        androidx.compose.ui.graphics.Color.Transparent,
+                        com.example.fe.ui.theme.BgPrimary.copy(alpha = 0.8f),
+                        com.example.fe.ui.theme.BgPrimary
+                    )
+                )
+            )
+            .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp)
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
         Box(modifier = Modifier.weight(1f)) {
             MoveButton(
                 text = "이전",
@@ -116,6 +129,7 @@ fun MoveButtonBar(
             }
         }
     }
+}
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF1C1917)

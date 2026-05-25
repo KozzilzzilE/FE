@@ -15,6 +15,7 @@ data class MyPageResponse(
 
 data class MyPageResult(
     @SerializedName("nickname") val nickname: String,
+    @SerializedName("imgUrl") val imgUrl: String?,
     @SerializedName("languageId") val languageId: Int,
     @SerializedName("languageName") val languageName: String,
     @SerializedName("totalSolvedDetails") val totalSolvedDetails: List<SolvedDetail> = emptyList(),
@@ -83,7 +84,7 @@ data class UpdateProfileResponse(
 
 data class UpdateProfileResult(
     @SerializedName("userId") val userId: Int,
-    @SerializedName("imgUrl") val imgUrl: String?,
+    @SerializedName("profileImgUrl") val profileImgUrl: String?,
     @SerializedName("email") val email: String,
     @SerializedName("nickname") val nickname: String,
     @SerializedName("language") val language: String
@@ -101,7 +102,7 @@ data class UserMeResponse(
 )
 
 data class UserMeResult(
-    @SerializedName("imgUrl") val imgUrl: String?,
+    @SerializedName("profileImgUrl") val profileImgUrl: String?,
     @SerializedName("email") val email: String,
     @SerializedName("nickname") val nickname: String,
     @SerializedName("language") val language: String,

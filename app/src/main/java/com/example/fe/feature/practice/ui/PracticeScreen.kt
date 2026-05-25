@@ -83,6 +83,9 @@ fun PracticeScreen(
         },
         onNextStepWithComplete = { _, goNextStep ->
             goNextStep()
+        },
+        onCompleteQuiz = { index ->
+            vm.completeQuiz(index)
         }
     )
 }
@@ -96,7 +99,8 @@ fun PracticeContent(
     onNextStepClick: () -> Unit = {},
     onCheckAnswer: (Int, List<String>) -> Boolean = { _, _ -> false },
     onNextWithComplete: (Int, () -> Unit) -> Unit = { _, cb -> cb() },
-    onNextStepWithComplete: (Int, () -> Unit) -> Unit = { _, cb -> cb() }
+    onNextStepWithComplete: (Int, () -> Unit) -> Unit = { _, cb -> cb() },
+    onCompleteQuiz: (Int) -> Unit = {}
 ) {
 
     // 현재 보고 있는 문제 index (전역 초기값 index 적용, 범위 제한 추가)
@@ -160,6 +164,10 @@ fun PracticeContent(
                     // 정답 체크
                     onCheckAnswer = { answers ->
                         onCheckAnswer(currentIndex, answers)
+                    },
+                    
+                    onCompleteQuiz = {
+                        onCompleteQuiz(currentIndex)
                     }
                 )
             }
@@ -177,7 +185,8 @@ private fun PracticeBlankContent(
     onPrevClick: () -> Unit,
     onNextClick: () -> Unit,
     onNextStepClick: () -> Unit,
-    onCheckAnswer: (List<String>) -> Boolean
+    onCheckAnswer: (List<String>) -> Boolean,
+    onCompleteQuiz: () -> Unit
 ) {
 
     // 각 빈칸에 입력된 사용자 답 — totalBlanks가 실제 빈칸 수
@@ -197,10 +206,11 @@ private fun PracticeBlankContent(
         mutableStateOf<Boolean?>(null)
     }
 
-    // 엿보기 여부
     var hasPeeked by remember(quiz.exerciseId) {
         mutableStateOf(false)
     }
+
+
 
     // 모든 빈칸이 채워졌는지 여부
     val isAnswerComplete =
@@ -269,14 +279,23 @@ private fun PracticeBlankContent(
             checkResult = onCheckAnswer(answers)
         },
         
-        // 모달창에서 정답 확인 시 동작 (정답 채워주기)
+        // 모달창에서 정답 확인 시 동작 (정답 채워주기 + 완료 처리)
         onShowAnswerClick = {
-            quiz.blanks?.forEachIndexed { index, blank ->
+            val correctAnswers = quiz.blanks
+                ?.filter { it.answer != null }
+                ?.sortedBy { it.answer }
+                ?.map { it.content }
+                ?: emptyList()
+
+            correctAnswers.forEachIndexed { index, content ->
                 if (index < filledAnswers.size) {
-                    filledAnswers[index] = blank.content
+                    filledAnswers[index] = content
                 }
             }
             hasPeeked = true
+            
+            // 모달창 닫기 및 백그라운드 완료 처리
+            onCompleteQuiz()
             checkResult = null
         }
     )

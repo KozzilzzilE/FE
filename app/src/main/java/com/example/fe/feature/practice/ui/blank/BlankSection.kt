@@ -376,7 +376,7 @@ fun ResultModal(
                     )
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        text = "정답을 확인하시면 완료 체크가 안됩니다.",
+                        text = "빈칸에 정답이 자동으로 채워집니다.",
                         fontSize = 14.sp,
                         color = TextSecondary,
                         lineHeight = 20.sp
@@ -488,7 +488,7 @@ fun ResultModal(
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                         ) {
                             Text(
-                                text = if (isLastProblem) "완료하기" else "다음으로 >",
+                                text = if (isLastProblem) "완료하기" else "다음 단계 >",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )

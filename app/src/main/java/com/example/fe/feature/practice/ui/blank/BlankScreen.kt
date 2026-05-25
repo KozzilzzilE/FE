@@ -147,7 +147,7 @@ fun BlankScreen(
                 // 정답 확인 버튼
                 Button(
                     onClick = onCheckAnswerClick,
-                    enabled = isAnswerComplete && !hasPeeked,
+                    enabled = isAnswerComplete,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),

@@ -44,7 +44,8 @@ fun SubmitTabContent(
     viewModel: SolverViewModel,
     currentSubScreen: SubmitSubScreen,
     onSubScreenChange: (SubmitSubScreen) -> Unit,
-    onNextProblem: () -> Unit
+    onNextProblem: () -> Unit,
+    onHistoryClick: (Long) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showSolutionLockDialog by remember { mutableStateOf(false) }
@@ -71,7 +72,8 @@ fun SubmitTabContent(
                     viewModel = viewModel,
                     isSubmitting = uiState.isSubmitting,
                     onViewSolution = { onSubScreenChange(SubmitSubScreen.SOLUTION) },
-                    onNextProblem = onNextProblem
+                    onNextProblem = onNextProblem,
+                    onHistoryClick = onHistoryClick
                 )
                 SubmitSubScreen.TESTCASE -> TestCaseTabContent(viewModel)
                 SubmitSubScreen.RESULT -> ExecutionResultView(viewModel)
@@ -175,7 +177,8 @@ private fun SubmitResultView(
     viewModel: SolverViewModel,
     isSubmitting: Boolean,
     onViewSolution: () -> Unit,
-    onNextProblem: () -> Unit
+    onNextProblem: () -> Unit,
+    onHistoryClick: (Long) -> Unit = {}
 ) {
     val submissions by viewModel.submissions.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -274,7 +277,7 @@ private fun SubmitResultView(
             if (submissions.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     submissions.forEach { record ->
-                        SubmissionRecordItem(record)
+                        SubmissionRecordItem(record, onClick = { onHistoryClick(record.historyId) })
                     }
                 }
             } else {
@@ -531,11 +534,12 @@ private fun ExecInfoCard(
 }
 
 @Composable
-private fun SubmissionRecordItem(record: SubmissionRecord) {
+private fun SubmissionRecordItem(record: SubmissionRecord, onClick: () -> Unit = {}) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        color = BgSurface
+        color = BgSurface,
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier

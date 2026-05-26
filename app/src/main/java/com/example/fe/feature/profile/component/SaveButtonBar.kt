@@ -24,13 +24,14 @@ import com.example.fe.ui.theme.TextMuted
 
 @Composable
 fun SaveButtonBar(
+    modifier: Modifier = Modifier,
     text: String = "저장하기",
     enabled: Boolean = true,
     isLoading: Boolean = false,
     onClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(BgPrimary)
             .navigationBarsPadding()

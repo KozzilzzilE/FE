@@ -10,26 +10,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.fe.api.RetrofitClient
 import com.example.fe.common.BottomNavigationBar
 import com.example.fe.common.bottomNavItems
 import com.example.fe.feature.home.HomeUiState
 import com.example.fe.feature.home.HomeViewModel
-import com.example.fe.feature.home.HomeViewModelFactory
 import com.example.fe.feature.home.component.*
-import com.example.fe.feature.home.data.HomeRepository
 import com.example.fe.navigation.Routes
 import com.example.fe.ui.theme.*
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(HomeRepository(RetrofitClient.instance))
-    ),
+    viewModel: HomeViewModel,
     profileImgUrl: String? = null,
     onNavigate: (String) -> Unit
 ) {
@@ -117,7 +110,15 @@ fun HomeScreen(
                         streakDays = successState.streakDays
                     )
 
-                    // 6. 명언 카드 (Amber 테두리)
+                    // 6. 명언 섹션 타이틀
+                    Text(
+                        text = "오늘의 명언",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+
+                    // 7. 명언 카드 (Amber 테두리)
                     QuoteCard()
 
                     Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 8.dp))
@@ -127,8 +128,4 @@ fun HomeScreen(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF1C1917)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen(onNavigate = {})
-}
+// Preview는 실제 ViewModel 주입이 필요해 IDE 툴바에서만 확인

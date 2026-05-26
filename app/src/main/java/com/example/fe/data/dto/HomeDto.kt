@@ -16,6 +16,7 @@ data class HomeResponse(
 
 data class HomeResult(
     @SerializedName("nickname") val name: String,
+    @SerializedName("profileImgUrl") val profileImgUrl: String?,
     @SerializedName("languageId") val languageId: Int,
     @SerializedName("languageName") val languageName: String,
     @SerializedName("totalSolvedDetails") val totalSolvedDetails: List<SolvedDetail> = emptyList(),

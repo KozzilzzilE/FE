@@ -58,9 +58,15 @@ fun EditProfileScreen(
     // 선택한 이미지 URL이 있으면 우선 표시, 없으면 현재 프로필 이미지 표시
     val displayImgUrl = selectedProfileImgUrl ?: currentProfileImgUrl
 
+    val imagePickerSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden }
+    )
+
     if (showImagePicker) {
         ModalBottomSheet(
-            onDismissRequest = { showImagePicker = false },
+            onDismissRequest = {},
+            sheetState = imagePickerSheetState,
             containerColor = BgPrimary,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
             dragHandle = null
@@ -88,12 +94,6 @@ fun EditProfileScreen(
                 showHomeIcon = false,
                 onBackClick = onBackClick
             )
-        },
-        bottomBar = {
-            SaveButtonBar(
-                isLoading = isSaving,
-                onClick = { onSaveClick(name) }
-            )
         }
     ) { innerPadding ->
         Column(
@@ -102,35 +102,45 @@ fun EditProfileScreen(
                 .background(BgPrimary)
                 .padding(innerPadding)
                 .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ProfileImageSection(
-                imgUrl = displayImgUrl,
-                onClick = {
-                    pendingProfileId = selectedProfileId
-                    showImagePicker = true
-                }
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(BgSurface)
-                    .padding(horizontal = 20.dp, vertical = 22.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp)
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp, vertical = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ProfileInputField(
-                    label = "이름",
-                    value = name,
-                    onValueChange = { name = it },
-                    placeholder = "이름을 입력하세요"
+                ProfileImageSection(
+                    imgUrl = displayImgUrl,
+                    onClick = {
+                        pendingProfileId = selectedProfileId
+                        showImagePicker = true
+                    }
                 )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(BgSurface)
+                        .padding(horizontal = 20.dp, vertical = 22.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
+                    ProfileInputField(
+                        label = "이름",
+                        value = name,
+                        onValueChange = { name = it },
+                        placeholder = "이름을 입력하세요"
+                    )
+                }
             }
+
+            SaveButtonBar(
+                isLoading = isSaving,
+                onClick = { onSaveClick(name) }
+            )
         }
     }
 }
@@ -254,7 +264,8 @@ private fun ProfileImagePickerSheet(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 20.dp),
+                    .height(280.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {

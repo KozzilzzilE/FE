@@ -27,9 +27,10 @@ class TopicViewModel : ViewModel() {
     }
 
     fun fetchTopics() {
-
         viewModelScope.launch {
-            _uiState.value = TopicUiState.Loading
+            if (_uiState.value !is TopicUiState.Success) {
+                _uiState.value = TopicUiState.Loading
+            }
             try {
                 val token = com.example.fe.common.TokenManager.getAccessToken()
                 if (token == null) {

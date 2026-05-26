@@ -307,10 +307,12 @@ class SolverRepository(
             val resultText = Judge0Status.serverStatusToKorean(it.status)
 
             com.example.fe.feature.solver.model.SubmissionRecord(
+                historyId = it.historyId,
                 date = formatSubmissionDate(it.createdAt),
                 language = it.language,
                 result = resultText,
-                isCorrect = isCorrect
+                isCorrect = isCorrect,
+                sourceCode = it.sourceCode
             )
         }
     }

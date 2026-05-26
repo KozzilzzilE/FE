@@ -53,7 +53,8 @@ fun SolveScreen(
     onBack: () -> Unit = {},
     onHome: () -> Unit = {},
     onOpenEditorFull: (Long) -> Unit = {},
-    onNextProblem: (Long) -> Unit = {}
+    onNextProblem: (Long) -> Unit = {},
+    onHistoryClick: (Long) -> Unit = {}
 ) {
     LaunchedEffect(problemId) {
         viewModel.loadProblemDetail(problemId)
@@ -411,7 +412,8 @@ fun SolveScreen(
                                 viewModel = viewModel,
                                 currentSubScreen = selectedSubmitSubScreen,
                                 onSubScreenChange = { selectedSubmitSubScreen = it },
-                                onNextProblem = { onNextProblem(problemId + 1) }
+                                onNextProblem = { onNextProblem(problemId + 1) },
+                                onHistoryClick = onHistoryClick
                             )
                         }
                     }

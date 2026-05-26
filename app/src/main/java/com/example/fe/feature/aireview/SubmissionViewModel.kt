@@ -58,8 +58,13 @@ class SubmissionViewModel(private val apiService: ApiService) : ViewModel() {
 
     fun selectEntry(historyId: Long) {
         _selectedEntry.value = _entries.value.find { it.historyId == historyId }
-        // 선택 시 해당 기록의 AI 리뷰도 함께 불러옵니다.
         loadAiReview(historyId)
+    }
+
+    fun setSelectedEntry(entry: SubmissionEntry) {
+        _selectedEntry.value = entry
+        _aiReview.value = null
+        loadAiReview(entry.historyId)
     }
 
     fun loadAiReview(historyId: Long) {

@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fe.common.BottomNavigationBar
 import com.example.fe.common.bottomNavItems
 import com.example.fe.navigation.Routes
@@ -24,7 +23,7 @@ import com.example.fe.ui.theme.*
 
 @Composable
 fun TopicListScreen(
-    viewModel: TopicViewModel = viewModel(),
+    viewModel: TopicViewModel,
     onNavigate: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()

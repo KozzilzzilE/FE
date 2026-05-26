@@ -7,22 +7,29 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fe.ui.theme.BgElevated
-import com.example.fe.ui.theme.BgSurface
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.fe.ui.theme.BgPrimary
+import com.example.fe.ui.theme.BgSurface
 import com.example.fe.ui.theme.Primary
 import com.example.fe.ui.theme.TextMuted
 import com.example.fe.ui.theme.TextPrimary
@@ -33,6 +40,7 @@ fun ProfileHeader(
     userName: String,
     bio: String,
     level: Int,
+    profileImgUrl: String? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -49,7 +57,26 @@ fun ProfileHeader(
                     .border(width = 3.dp, color = Primary, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "○", color = TextMuted, fontSize = 28.sp)
+                if (profileImgUrl != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(profileImgUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "프로필 이미지",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Outlined.Person,
+                        contentDescription = "프로필",
+                        tint = TextMuted,
+                        modifier = Modifier.size(38.dp)
+                    )
+                }
             }
 
             Box(

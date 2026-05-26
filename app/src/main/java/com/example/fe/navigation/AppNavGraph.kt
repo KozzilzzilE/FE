@@ -29,6 +29,8 @@ import com.example.fe.feature.list.ui.AllProblemListScreen
 import com.example.fe.feature.list.ui.AllProblemDifficultyFilter
 import com.example.fe.feature.list.model.AllProblemItem
 import com.example.fe.feature.step.ui.StepSelectionScreen
+import com.example.fe.feature.home.HomeViewModel
+import com.example.fe.feature.list.TopicViewModel
 import com.example.fe.feature.list.ui.TopicListScreen
 import com.example.fe.feature.home.ui.HomeScreen
 import com.example.fe.feature.solver.SolverViewModel
@@ -64,6 +66,7 @@ import com.example.fe.feature.list.AllProblemListViewModel
 import com.example.fe.feature.list.AllProblemListViewModelFactory
 import com.example.fe.api.RetrofitClient
 import com.example.fe.feature.aireview.SubmissionViewModel
+import com.example.fe.feature.aireview.model.SubmissionEntry
 import com.example.fe.feature.aireview.ui.SubmissionRecordScreen
 import com.example.fe.feature.aireview.ui.SubmissionDetailScreen
 
@@ -96,6 +99,15 @@ fun AppNavGraph() {
     }
     val profileViewModel: MyPageViewModel = viewModel(factory = profileViewModelFactory)
     val profileUiState by profileViewModel.uiState.collectAsState()
+
+    // 홈 / 주제목록 / 전체문제 ViewModel - Activity 스코프에서 한 번만 생성해 데이터 미리 로드
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = remember { com.example.fe.feature.home.HomeViewModelFactory(com.example.fe.feature.home.data.HomeRepository(RetrofitClient.instance)) }
+    )
+    val topicViewModel: TopicViewModel = viewModel()
+    val problemListViewModel: AllProblemListViewModel = viewModel(
+        factory = remember { AllProblemListViewModelFactory(ProblemRepository(RetrofitClient.instance)) }
+    )
 
     LaunchedEffect(Unit) {
         com.example.fe.common.TokenManager.tokenExpiredEvent.collect {
@@ -142,7 +154,11 @@ fun AppNavGraph() {
 
     NavHost(
         navController = navController,
-        startDestination = initialRoute
+        startDestination = initialRoute,
+        enterTransition = { androidx.compose.animation.EnterTransition.None },
+        exitTransition = { androidx.compose.animation.ExitTransition.None },
+        popEnterTransition = { androidx.compose.animation.EnterTransition.None },
+        popExitTransition = { androidx.compose.animation.ExitTransition.None }
     ) {
         composable(Routes.LOGIN) {
             LoginScreen(
@@ -193,7 +209,19 @@ fun AppNavGraph() {
         }
 
         composable(Routes.HOME) {
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        profileViewModel.loadMyPageInfo()
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+            }
+
             HomeScreen(
+                viewModel = homeViewModel,
                 profileImgUrl = profileUiState.currentProfileImgUrl,
                 onNavigate = { route ->
                     navController.navigate(route) {
@@ -206,25 +234,17 @@ fun AppNavGraph() {
         }
 
         composable("problem") {
-            val factory = remember {
-                AllProblemListViewModelFactory(ProblemRepository(RetrofitClient.instance))
-            }
-            val viewModel: AllProblemListViewModel = viewModel(factory = factory)
+            val viewModel = problemListViewModel
             val uiState by viewModel.uiState.collectAsState()
             val currentPage by viewModel.currentPage.collectAsState()
             val totalPages by viewModel.totalPages.collectAsState()
             val selectedDifficultyStr by viewModel.selectedDifficulty.collectAsState()
 
-            // ViewModel의 문자열 난이도 상태를 UI용 Enum으로 변환
             val selectedDifficulty = when (selectedDifficultyStr) {
                 "EASY" -> AllProblemDifficultyFilter.EASY
                 "NORMAL", "MEDIUM" -> AllProblemDifficultyFilter.NORMAL
                 "HARD" -> AllProblemDifficultyFilter.HARD
                 else -> AllProblemDifficultyFilter.ALL
-            }
-
-            LaunchedEffect(Unit) {
-                viewModel.loadAllProblems()
             }
 
             val problems = if (uiState is ProblemUiState.Success) {
@@ -276,6 +296,7 @@ fun AppNavGraph() {
                 onPageChange = { viewModel.loadAllProblems(page = it) },
                 onNavigate = { route ->
                     navController.navigate(route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -289,6 +310,7 @@ fun AppNavGraph() {
                 viewModel = profileViewModel,
                 onNavigate = { route ->
                     navController.navigate(route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -390,7 +412,11 @@ fun AppNavGraph() {
             arguments = listOf(navArgument(Routes.HISTORY_ID) { type = NavType.LongType })
         ) { backStackEntry ->
             val historyId = backStackEntry.arguments?.getLong(Routes.HISTORY_ID) ?: return@composable
-            LaunchedEffect(historyId) { submissionViewModel.selectEntry(historyId) }
+            LaunchedEffect(historyId) {
+                if (submissionViewModel.selectedEntry.value?.historyId != historyId) {
+                    submissionViewModel.selectEntry(historyId)
+                }
+            }
             SubmissionDetailScreen(
                 viewModel = submissionViewModel,
                 onBack = { navController.popBackStack() }
@@ -399,8 +425,10 @@ fun AppNavGraph() {
 
         composable(route = Routes.TOPIC) {
             TopicListScreen(
+                viewModel = topicViewModel,
                 onNavigate = { route ->
                     navController.navigate(route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -423,6 +451,7 @@ fun AppNavGraph() {
                 topicName = topicName,
                 onNavigate = { route ->
                     navController.navigate(route) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -783,6 +812,23 @@ fun AppNavGraph() {
                 },
                 onNextProblem = { nextId ->
                     navController.navigate(Routes.solve(nextId))
+                },
+                onHistoryClick = { historyId ->
+                    val record = solverViewModel.uiState.value.submissions.find { it.historyId == historyId }
+                    if (record != null) {
+                        val problemTitle = solverViewModel.uiState.value.problemDetail?.title.orEmpty()
+                        submissionViewModel.setSelectedEntry(
+                            SubmissionEntry(
+                                historyId = record.historyId,
+                                problemTitle = problemTitle,
+                                language = record.language,
+                                date = record.date,
+                                isCorrect = record.isCorrect,
+                                sourceCode = record.sourceCode
+                            )
+                        )
+                        navController.navigate(Routes.submissionDetail(historyId))
+                    }
                 }
             )
         }

@@ -37,9 +37,9 @@ class HomeViewModel(
 
     fun fetchHomeData() {
         viewModelScope.launch {
-            _uiState.value = HomeUiState.Loading
-            
-            // 깔끔하게 분리된 Repository 호출
+            if (_uiState.value !is HomeUiState.Success) {
+                _uiState.value = HomeUiState.Loading
+            }
             _uiState.value = repository.getHomeData()
         }
     }

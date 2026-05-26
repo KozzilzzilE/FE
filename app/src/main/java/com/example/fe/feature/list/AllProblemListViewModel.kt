@@ -31,16 +31,24 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
     private val _selectedDifficulty = MutableStateFlow<String?>(null)
     val selectedDifficulty: StateFlow<String?> = _selectedDifficulty.asStateFlow()
 
+    init {
+        loadAllProblems()
+    }
+
     /**
      * 전체 문제 목록 로드
      * @param page 불러올 페이지 번호
      * @param difficulty 필터링할 난이도 (null, "EASY", "MEDIUM", "HARD")
      */
     fun loadAllProblems(page: Int = _currentPage.value, difficulty: String? = _selectedDifficulty.value) {
+        if (_uiState.value is ProblemUiState.Success
+            && page == _currentPage.value
+            && difficulty == _selectedDifficulty.value) return
+
         viewModelScope.launch {
             _currentPage.value = page
             _selectedDifficulty.value = difficulty
-            
+
             if (_uiState.value !is ProblemUiState.Success) {
                 _uiState.value = ProblemUiState.Loading
             }

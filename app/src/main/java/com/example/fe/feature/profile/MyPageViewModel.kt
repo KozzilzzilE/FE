@@ -67,7 +67,7 @@ class MyPageViewModel(
                     isLoading = false,
                     userName = result?.nickname ?: userMe.nickname,
                     email = userMe.email,
-                    currentProfileImgUrl = result?.imgUrl ?: userMe.profileImgUrl,
+                    currentProfileImgUrl = result?.profileImgUrl ?: userMe.profileImgUrl,
                     languageName = finalLanguage,
                     languageOptions = languageList,
                     stat = com.example.fe.feature.profile.model.ProfileStat(
@@ -178,7 +178,7 @@ class MyPageViewModel(
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
                     userName = result.nickname,
-                    currentProfileImgUrl = result.profileImgUrl,
+                    currentProfileImgUrl = result.profileImgUrl ?: _uiState.value.currentProfileImgUrl,
                     selectedProfileId = null,
                     selectedProfileImgUrl = null,
                     error = null

@@ -15,7 +15,7 @@ data class MyPageResponse(
 
 data class MyPageResult(
     @SerializedName("nickname") val nickname: String,
-    @SerializedName("imgUrl") val imgUrl: String?,
+    @SerializedName("profileImgUrl") val profileImgUrl: String?,
     @SerializedName("languageId") val languageId: Int,
     @SerializedName("languageName") val languageName: String,
     @SerializedName("totalSolvedDetails") val totalSolvedDetails: List<SolvedDetail> = emptyList(),

@@ -46,6 +46,7 @@ private fun Context.findActivity(): Activity? = when (this) {
 
 @Composable
 fun LoginScreen(
+    isLoading: Boolean = false,
     onLoginClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit,
     onGoogleLoginClick: (String) -> Unit = {},
@@ -67,6 +68,30 @@ fun LoginScreen(
                 Log.e("GoogleLogin", "Google Sign In Failed", e)
             }
         }
+    }
+
+    if (isLoading) {
+        AlertDialog(
+            onDismissRequest = {},
+            containerColor = BgSurface,
+            tonalElevation = 0.dp,
+            title = null,
+            text = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CircularProgressIndicator(
+                        color = Primary,
+                        strokeWidth = 3.dp,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Text("로그인 중...", color = TextPrimary, fontSize = 15.sp)
+                }
+            },
+            confirmButton = {}
+        )
     }
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp

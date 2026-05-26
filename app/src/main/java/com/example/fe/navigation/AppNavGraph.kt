@@ -110,6 +110,8 @@ fun AppNavGraph() {
     LaunchedEffect(authState) {
         when (val state = authState) {
             is AuthState.Success -> {
+                profileViewModel.loadMyPageAndLanguages()
+                profileViewModel.loadProfileImages()
                 navController.navigate(Routes.HOME) {
                     popUpTo(Routes.LOGIN) { inclusive = true }
                 }
@@ -144,6 +146,7 @@ fun AppNavGraph() {
     ) {
         composable(Routes.LOGIN) {
             LoginScreen(
+                isLoading = authState is AuthState.Loading,
                 onLoginClick = { email, password ->
                     authViewModel.login(email, password)
                 },
@@ -191,6 +194,7 @@ fun AppNavGraph() {
 
         composable(Routes.HOME) {
             HomeScreen(
+                profileImgUrl = profileUiState.currentProfileImgUrl,
                 onNavigate = { route ->
                     navController.navigate(route) {
                         popUpTo(navController.graph.startDestinationId) { saveState = true }
@@ -320,7 +324,9 @@ fun AppNavGraph() {
                 initialName = profileUiState.userName,
                 currentProfileImgUrl = profileUiState.currentProfileImgUrl,
                 profileImages = profileUiState.profileImages,
+                isLoadingImages = profileUiState.isLoadingImages,
                 selectedProfileId = profileUiState.selectedProfileId,
+                selectedProfileImgUrl = profileUiState.selectedProfileImgUrl,
                 isSaving = profileUiState.isSaving,
                 onBackClick = { navController.popBackStack() },
                 onProfileImageSelect = { profileId ->
@@ -328,6 +334,7 @@ fun AppNavGraph() {
                 },
                 onSaveClick = { name ->
                     profileViewModel.updateProfile(name) {
+                        Toast.makeText(context, "저장되었습니다.", Toast.LENGTH_SHORT).show()
                         navController.popBackStack()
                     }
                 }

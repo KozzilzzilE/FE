@@ -30,6 +30,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(HomeRepository(RetrofitClient.instance))
     ),
+    profileImgUrl: String? = null,
     onNavigate: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -45,6 +46,7 @@ fun HomeScreen(
         topBar = {
             HomeTopBar(
                 userName = displayUserName,
+                profileImgUrl = profileImgUrl,
                 onProfileClick = { onNavigate(Routes.MY) }
             )
         },

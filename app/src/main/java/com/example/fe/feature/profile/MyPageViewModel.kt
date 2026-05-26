@@ -35,7 +35,8 @@ class MyPageViewModel(
 
                 val result = myPageResponse.result
                 val savedLanguage = LanguagePreferenceManager.getLanguage(getApplication())
-                val serverLanguage = userMe.language
+                val serverLanguage = result?.languageName?.takeIf { it.isNotBlank() }
+                    ?: userMe.language
 
                 val finalLanguage = when {
                     savedLanguage.isNotBlank() -> savedLanguage
@@ -64,9 +65,9 @@ class MyPageViewModel(
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    userName = userMe.nickname,
+                    userName = result?.nickname ?: userMe.nickname,
                     email = userMe.email,
-                    currentProfileImgUrl = userMe.imgUrl,
+                    currentProfileImgUrl = result?.imgUrl ?: userMe.profileImgUrl,
                     languageName = finalLanguage,
                     languageOptions = languageList,
                     stat = com.example.fe.feature.profile.model.ProfileStat(
@@ -91,17 +92,23 @@ class MyPageViewModel(
 
     fun loadProfileImages() {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingImages = true)
             try {
                 val images = repository.getProfileImages()
-                _uiState.value = _uiState.value.copy(profileImages = images)
+                _uiState.value = _uiState.value.copy(profileImages = images, isLoadingImages = false)
             } catch (e: Exception) {
                 android.util.Log.e("MyPageViewModel", "프로필 이미지 목록 조회 실패: ${e.message}")
+                _uiState.value = _uiState.value.copy(isLoadingImages = false)
             }
         }
     }
 
     fun selectProfileImage(profileId: Int) {
-        _uiState.value = _uiState.value.copy(selectedProfileId = profileId)
+        val imgUrl = _uiState.value.profileImages.find { it.profileId == profileId }?.imgUrl
+        _uiState.value = _uiState.value.copy(
+            selectedProfileId = profileId,
+            selectedProfileImgUrl = imgUrl
+        )
     }
 
     fun loadMyPageInfo() {
@@ -171,15 +178,17 @@ class MyPageViewModel(
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
                     userName = result.nickname,
-                    currentProfileImgUrl = result.imgUrl,
+                    currentProfileImgUrl = result.profileImgUrl,
                     selectedProfileId = null,
+                    selectedProfileImgUrl = null,
                     error = null
                 )
                 onSuccess()
             } catch (e: Exception) {
+                android.util.Log.e("MyPageViewModel", "프로필 저장 실패: ${e.message}")
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
-                    error = e.message
+                    error = e.message ?: "저장에 실패했습니다."
                 )
             }
         }

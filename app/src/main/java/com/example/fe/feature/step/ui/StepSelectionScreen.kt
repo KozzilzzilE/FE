@@ -41,7 +41,7 @@ fun StepSelectionScreen(
         bottomBar = {
             BottomNavigationBar(
                 items = bottomNavItems,
-                currentRoute = "study",
+                currentRoute = "topic",
                 onNavigate = onNavigate
             )
         }

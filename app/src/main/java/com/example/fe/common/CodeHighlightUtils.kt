@@ -96,8 +96,29 @@ fun parseCodeFence(raw: String): Pair<String, String> {
     val lines = raw.trim().lines()
     if (lines.isEmpty()) return Pair("", raw)
     val firstLine = lines.first().trim()
-    if (!firstLine.startsWith("```") && !firstLine.startsWith("~~~")) return Pair("", raw)
+    if (!firstLine.startsWith("```") && !firstLine.startsWith("~~~")) return Pair("", normalizeCodeSpacing(raw))
     val language = firstLine.trimStart('`', '~').trim()
     val endIdx = if (lines.last().trim() == "```" || lines.last().trim() == "~~~") lines.size - 1 else lines.size
-    return Pair(language, lines.subList(1, endIdx).joinToString("\n"))
+    val code = lines.subList(1, endIdx).joinToString("\n")
+    return Pair(language, normalizeCodeSpacing(code))
+}
+
+private fun normalizeCodeSpacing(code: String): String {
+    val lines = code.lines()
+    val result = StringBuilder()
+    for (i in lines.indices) {
+        val line = lines[i]
+        val prevTrimmed = if (i > 0) lines[i - 1].trim() else ""
+        // } 단독 줄 다음에 비어있지 않은 줄이 오면 빈 줄 삽입
+        if (i > 0 && prevTrimmed == "}" && line.isNotBlank()) {
+            result.append('\n')
+        }
+        // 연속 3개 이상 빈 줄은 2개로 축소
+        if (line.isBlank() && i > 1 && lines[i - 1].isBlank() && lines[i - 2].isBlank()) {
+            continue
+        }
+        result.append(line)
+        if (i < lines.size - 1) result.append('\n')
+    }
+    return result.toString()
 }

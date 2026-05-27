@@ -24,7 +24,8 @@ import com.example.fe.ui.theme.*
 @Composable
 fun TopicListScreen(
     viewModel: TopicViewModel,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    onTopicClick: (String) -> Unit = onNavigate
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -91,7 +92,7 @@ fun TopicListScreen(
                                 title = topic.displayName,
                                 index = index,
                                 onClick = {
-                                    onNavigate(Routes.step(topic.topicId, topic.displayName))
+                                    onTopicClick(Routes.step(topic.topicId, topic.displayName))
                                 }
                             )
                         }

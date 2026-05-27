@@ -93,7 +93,8 @@ fun HomeScreen(
                     MainActionsRow(
                         onStudyClick = { onNavigate(Routes.TOPIC) },
                         onFavoriteClick = { onNavigate(Routes.FAVORITE_PROBLEMS) },
-                        onQuizClick = { onNavigate(Routes.CS_QUIZ) }
+                        onQuizClick = { onNavigate(Routes.CS_QUIZ) },
+                        onAiReviewClick = { onNavigate(Routes.SUBMISSION_RECORD) }
                     )
 
                     // 4. "연속 학습" 섹션 타이틀

@@ -225,7 +225,7 @@ fun AppNavGraph() {
                 profileImgUrl = profileUiState.currentProfileImgUrl,
                 onNavigate = { route ->
                     navController.navigate(route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        popUpTo(Routes.HOME) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -296,7 +296,7 @@ fun AppNavGraph() {
                 onPageChange = { viewModel.loadAllProblems(page = it) },
                 onNavigate = { route ->
                     navController.navigate(route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        popUpTo(Routes.HOME) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -310,7 +310,7 @@ fun AppNavGraph() {
                 viewModel = profileViewModel,
                 onNavigate = { route ->
                     navController.navigate(route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        popUpTo(Routes.HOME) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -428,10 +428,13 @@ fun AppNavGraph() {
                 viewModel = topicViewModel,
                 onNavigate = { route ->
                     navController.navigate(route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        popUpTo(Routes.HOME) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
+                },
+                onTopicClick = { route ->
+                    navController.navigate(route)
                 }
             )
         }
@@ -451,7 +454,7 @@ fun AppNavGraph() {
                 topicName = topicName,
                 onNavigate = { route ->
                     navController.navigate(route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        popUpTo(Routes.HOME) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -526,6 +529,7 @@ fun AppNavGraph() {
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
+                                    popUpTo(Routes.HOME) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
@@ -590,6 +594,7 @@ fun AppNavGraph() {
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
+                                    popUpTo(Routes.HOME) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
@@ -662,6 +667,7 @@ fun AppNavGraph() {
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
+                                    popUpTo(Routes.HOME) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }

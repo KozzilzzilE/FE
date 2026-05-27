@@ -1,6 +1,7 @@
 package com.example.fe.feature.concept.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -135,111 +136,120 @@ fun ConceptDetailScreen(
         val concept = uiState.concepts[currentIndex]
         val images = listOfNotNull(concept.imgUrl)
 
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(top = 8.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Box(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 8.dp, bottom = 140.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(text = uiState.topicTitle, fontSize = 12.sp, color = TextMuted)
-                Text(text = "${currentIndex + 1} / $total", fontSize = 12.sp, color = TextSecondary)
-            }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = uiState.topicTitle, fontSize = 12.sp, color = TextMuted)
+                    Text(text = "${currentIndex + 1} / $total", fontSize = 12.sp, color = TextSecondary)
+                }
 
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
-                    text = concept.title,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
-                Box(
-                    modifier = Modifier
-                        .width(36.dp)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(Primary)
-                )
-            }
-
-            ConceptContentCard(concept = concept)
-
-            if (images.isNotEmpty()) {
-                ConceptImage(images = images)
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(BgPrimary)
-                .padding(horizontal = 20.dp)
-                .padding(top = 12.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                for (i in 0 until total) {
-                    val isActive = i == currentIndex
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = concept.title,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
                     Box(
                         modifier = Modifier
-                            .padding(horizontal = 3.dp)
-                            .size(if (isActive) 8.dp else 6.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(if (isActive) Primary else BgElevated)
+                            .width(36.dp)
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Primary)
                     )
+                }
+
+                ConceptContentCard(concept = concept)
+
+                if (images.isNotEmpty()) {
+                    ConceptImage(images = images)
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                androidx.compose.ui.graphics.Color.Transparent,
+                                BgPrimary.copy(alpha = 0.8f),
+                                BgPrimary
+                            )
+                        )
+                    )
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 24.dp, bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedButton(
-                    onClick = { viewModel.prevChapter() },
-                    enabled = currentIndex > 0,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, BgElevated),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = TextSecondary,
-                        disabledContentColor = TextSecondary.copy(alpha = 0.3f)
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "< 이전", fontSize = 14.sp)
+                    for (i in 0 until total) {
+                        val isActive = i == currentIndex
+                        Box(
+                            modifier = Modifier
+                                .padding(horizontal = 3.dp)
+                                .size(if (isActive) 8.dp else 6.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(if (isActive) Primary else BgElevated)
+                        )
+                    }
                 }
-                Button(
-                    onClick = {
-                        if (currentIndex == total - 1) {
-                            viewModel.completeCurrentNotionAndGoNext { onNextStepClick() }
-                        } else {
-                            viewModel.nextChapter()
-                        }
-                    },
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Primary,
-                        contentColor = BgPrimary
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = if (currentIndex == total - 1) "다음 단계 >" else "다음 >",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    OutlinedButton(
+                        onClick = { viewModel.prevChapter() },
+                        enabled = currentIndex > 0,
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, BgElevated),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = TextSecondary,
+                            disabledContentColor = TextSecondary.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Text(text = "< 이전", fontSize = 14.sp)
+                    }
+                    Button(
+                        onClick = {
+                            if (currentIndex == total - 1) {
+                                viewModel.completeCurrentNotionAndGoNext { onNextStepClick() }
+                            } else {
+                                viewModel.nextChapter()
+                            }
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Primary,
+                            contentColor = BgPrimary
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                    ) {
+                        Text(
+                            text = if (currentIndex == total - 1) "다음 단계 >" else "다음 >",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

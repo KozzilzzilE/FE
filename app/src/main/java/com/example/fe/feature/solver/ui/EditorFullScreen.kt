@@ -15,8 +15,11 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import android.app.Activity
+import android.view.WindowManager
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.fe.feature.solver.SolverViewModel
@@ -55,6 +58,18 @@ fun EditorFullScreen(
             }
         }
         wasSubmitting = uiState.isSubmitting
+    }
+
+    val activity = LocalContext.current as? Activity
+    DisposableEffect(Unit) {
+        val prev = activity?.window?.attributes?.softInputMode
+            ?: WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+        @Suppress("DEPRECATION")
+        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        onDispose {
+            @Suppress("DEPRECATION")
+            activity?.window?.setSoftInputMode(prev)
+        }
     }
 
     Box(

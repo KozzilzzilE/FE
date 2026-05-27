@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -306,8 +307,17 @@ private fun SubmitResultView(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .background(BgPrimary)
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                BgPrimary.copy(alpha = 0.8f),
+                                BgPrimary
+                            )
+                        )
+                    )
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 24.dp, bottom = 16.dp)
                     .navigationBarsPadding(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {

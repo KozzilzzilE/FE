@@ -32,6 +32,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.app.Activity
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import com.example.fe.feature.solver.SolveTab
@@ -244,8 +246,23 @@ fun SolveScreen(
                         }
 
                         SolveTab.EDITOR -> {
-                            // imePadding()으로 키보드가 올라오면 레이아웃 전체가 줄어들어
-                            // Sora Editor가 실제 뷰포트 높이를 정확히 인식
+                            // enableEdgeToEdge()가 SOFT_INPUT_ADJUST_NOTHING을 설정해서
+                            // Sora Editor 자동완성 팝업이 키보드 높이를 모름.
+                            // 에디터 탭 활성화 중에만 ADJUST_RESIZE로 전환해 팝업 위치를 보정.
+                            val activity = LocalContext.current as? Activity
+                            DisposableEffect(Unit) {
+                                val prev = activity?.window?.attributes?.softInputMode
+                                    ?: WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+                                @Suppress("DEPRECATION")
+                                activity?.window?.setSoftInputMode(
+                                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                                )
+                                onDispose {
+                                    @Suppress("DEPRECATION")
+                                    activity?.window?.setSoftInputMode(prev)
+                                }
+                            }
+
                             Column(
                                 modifier = Modifier.fillMaxSize().imePadding()
                             ) {

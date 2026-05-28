@@ -34,7 +34,8 @@ private val bgYellow = Color(0x1AF2F3C7)
 fun StepSelectionScreen(
     topicId: Long = 1,
     topicName: String = "해시",
-    onNavigate: (String) -> Unit,
+    onBottomNavClick: (String) -> Unit,
+    onStepClick: (String) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
@@ -72,7 +73,7 @@ fun StepSelectionScreen(
             BottomNavigationBar(
                 items = bottomNavItems,
                 currentRoute = "topic",
-                onNavigate = onNavigate
+                onNavigate = onBottomNavClick
             )
         }
     ) { innerPadding ->
@@ -118,7 +119,7 @@ fun StepSelectionScreen(
                     description = "슬라이드 형식으로 기초 지식 학습",
                     accentColor = accentAmber,
                     accentBg = bgAmber,
-                    onClick = { onNavigate(Routes.detailList(topicId, topicName, "concept")) }
+                    onClick = { onStepClick(Routes.detailList(topicId, topicName, "concept")) }
                 )
                 StepCard(
                     stepNumber = "02",
@@ -126,7 +127,7 @@ fun StepSelectionScreen(
                     description = "빈칸 채우기 문제로 알고리즘 연습",
                     accentColor = accentSalmon,
                     accentBg = bgSalmon,
-                    onClick = { onNavigate(Routes.detailList(topicId, topicName, "application")) }
+                    onClick = { onStepClick(Routes.detailList(topicId, topicName, "application")) }
                 )
                 StepCard(
                     stepNumber = "03",
@@ -134,7 +135,7 @@ fun StepSelectionScreen(
                     description = "코드 에디터로 실제 문제 해결",
                     accentColor = accentYellow,
                     accentBg = bgYellow,
-                    onClick = { onNavigate(Routes.detailList(topicId, topicName, "problem")) }
+                    onClick = { onStepClick(Routes.detailList(topicId, topicName, "problem")) }
                 )
                 
                 Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 16.dp))

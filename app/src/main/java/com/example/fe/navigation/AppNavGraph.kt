@@ -452,12 +452,15 @@ fun AppNavGraph() {
             StepSelectionScreen(
                 topicId = topicId,
                 topicName = topicName,
-                onNavigate = { route ->
+                onBottomNavClick = { route ->
                     navController.navigate(route) {
                         popUpTo(Routes.HOME) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
+                },
+                onStepClick = { route ->
+                    navController.navigate(route)
                 },
                 onNavigateBack = { navController.popBackStack() }
             )

@@ -81,14 +81,13 @@ fun AllProblemListScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 16.dp, bottom = 4.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "문제 목록",
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = TextPrimary
                 )
             }

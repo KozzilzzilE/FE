@@ -51,6 +51,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.fe.common.DetailTopBar
 import com.example.fe.common.highlight
 import com.example.fe.common.parseCodeFence
 import com.example.fe.ui.theme.BlankBorder
@@ -80,58 +81,24 @@ import com.example.fe.ui.theme.TopBarTitle
 fun PracticeHeaderBar(
     title: String,
     subtitle: String,
-    onBack: () -> Unit,
-    onHome: () -> Unit
+    currentIndex: Int,
+    totalCount: Int,
+    onBack: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(com.example.fe.ui.theme.BgPrimary)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "뒤로가기",
-                    tint = TopBarTitle,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TopBarTitle
-                )
-                if (subtitle.isNotBlank()) {
-                    Text(
-                        text = subtitle,
-                        fontSize = 11.sp,
-                        color = TopBarSub
-                    )
-                }
-            }
-
-            IconButton(onClick = onHome, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    imageVector = Icons.Outlined.Home,
-                    contentDescription = "홈",
-                    tint = TopBarTitle,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+    DetailTopBar(
+        title = title,
+        subtitle = subtitle.takeIf { it.isNotBlank() },
+        onBackClick = onBack,
+        rightContent = {
+            androidx.compose.material3.Text(
+                text = "${currentIndex + 1} / $totalCount",
+                color = com.example.fe.ui.theme.TextSecondary,
+                fontSize = 14.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+                modifier = androidx.compose.ui.Modifier.padding(end = 12.dp)
+            )
         }
-    }
+    )
 }
 
 @Composable

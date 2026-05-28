@@ -66,8 +66,9 @@ fun BlankScreen(
             PracticeHeaderBar(
                 title = "응용 학습",
                 subtitle = "알고리즘",
-                onBack = onBack,
-                onHome = onHome
+                currentIndex = currentIndex,
+                totalCount = totalCount,
+                onBack = onBack
             )
         },
         bottomBar = {

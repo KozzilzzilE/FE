@@ -45,6 +45,7 @@ import com.example.fe.feature.solver.component.SubmitTabContent
 import com.example.fe.feature.solver.component.SubmitSubScreen
 import com.example.fe.feature.solver.model.ProblemDetail
 import com.example.fe.feature.solver.model.TestCase
+import com.example.fe.common.DetailTopBar
 import com.example.fe.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -173,34 +174,10 @@ fun SolveScreen(
                     .padding(innerPadding)
             ) {
                 // 헤더
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(BgPrimary)
-                        .statusBarsPadding()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .padding(horizontal = 20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "뒤로",
-                                tint = TextPrimary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        Text(
-                            text = titleToShow.ifBlank { "문제 풀이" },
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary
-                        )
+                DetailTopBar(
+                    title = titleToShow.ifBlank { "문제 풀이" },
+                    onBackClick = onBack,
+                    rightContent = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(
                                 onClick = { viewModel.toggleBookmark() },
@@ -216,11 +193,12 @@ fun SolveScreen(
                             Text(
                                 text = "$bookmarkCount",
                                 fontSize = 13.sp,
-                                color = BgElevated
+                                color = BgElevated,
+                                modifier = Modifier.padding(end = 8.dp)
                             )
                         }
                     }
-                }
+                )
 
                 // 탭바
                 SolveTabBar(

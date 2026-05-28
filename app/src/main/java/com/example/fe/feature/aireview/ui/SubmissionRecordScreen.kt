@@ -153,10 +153,23 @@ private fun SubmissionCard(
                             .clip(CircleShape)
                             .background(Primary)
                     )
+                    // 날짜 포맷팅 (예: 2026-05-27T20:25:24.901 -> 2026-05-27 20:25)
+                    val formattedDate = try {
+                        if (entry.date.length >= 16) {
+                            entry.date.substring(0, 16).replace("T", " ")
+                        } else {
+                            entry.date
+                        }
+                    } catch (e: Exception) {
+                        entry.date
+                    }
+                    
                     Text(
-                        text = entry.date,
+                        text = formattedDate,
                         fontSize = 12.sp,
-                        color = TextSecondary
+                        color = TextSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

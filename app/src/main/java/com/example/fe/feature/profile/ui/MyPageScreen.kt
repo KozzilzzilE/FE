@@ -137,7 +137,7 @@ fun MyPageScreen(
                     text = "마이페이지",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White
+                    color = TextPrimary
                 )
                 IconButton(
                     onClick = onSettingsClick,

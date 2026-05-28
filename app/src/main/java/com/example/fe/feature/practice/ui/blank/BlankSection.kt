@@ -120,7 +120,7 @@ fun PracticeProgressHeader(
     Column {
         Text(
             text = "문제 ${currentIndex + 1} / $totalCount",
-            color = BodyText,
+            color = TextSecondary,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium
         )

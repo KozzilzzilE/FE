@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,9 +36,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.dp
@@ -131,12 +136,21 @@ fun ConceptDetailScreen(
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
-                    Box(
+                    val progress = ((currentIndex + 1).toFloat() / total.toFloat()).coerceIn(0f, 1f)
+                    val animatedProgress by animateFloatAsState(
+                        targetValue = progress,
+                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+                        label = "progress"
+                    )
+                    LinearProgressIndicator(
+                        progress = { animatedProgress },
                         modifier = Modifier
-                            .width(36.dp)
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(Primary)
+                            .fillMaxWidth()
+                            .height(4.dp),
+                        color = Primary,
+                        trackColor = com.example.fe.ui.theme.ProgressTrack,
+                        strokeCap = StrokeCap.Round,
+                        drawStopIndicator = {}
                     )
                 }
 

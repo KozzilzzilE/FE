@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fe.feature.aireview.SubmissionViewModel
 import com.example.fe.feature.aireview.model.SubmissionEntry
+import com.example.fe.common.TopBar
 import com.example.fe.ui.theme.*
 
 @Composable
@@ -47,7 +48,11 @@ fun SubmissionRecordScreen(
             .statusBarsPadding()
     ) {
         // 헤더
-        SrHeader(onBack = onBack)
+        TopBar(
+            title = "제출 기록 보기",
+            showBackIcon = true,
+            onBackClick = onBack
+        )
 
         if (entries.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -73,32 +78,6 @@ fun SubmissionRecordScreen(
     }
 }
 
-@Composable
-private fun SrHeader(onBack: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "뒤로",
-                tint = TextPrimary,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-        Text(
-            text = "제출 기록 보기",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary
-        )
-    }
-}
 
 @Composable
 private fun SubmissionCard(

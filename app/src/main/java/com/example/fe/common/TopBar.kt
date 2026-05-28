@@ -57,7 +57,15 @@ fun TopBar(
             }
         },
         navigationIcon = {
-            if (showBackIcon || leftContent != null) {
+            if (showBackIcon && leftContent == null) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "뒤로 가기",
+                        tint = TextPrimary
+                    )
+                }
+            } else if (showBackIcon || leftContent != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (showBackIcon) {
                         IconButton(onClick = onBackClick) {

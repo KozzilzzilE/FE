@@ -29,9 +29,10 @@ fun ProblemListCard(
 ) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         color = BgSurface,
-        modifier = Modifier.fillMaxWidth()
+        border = BorderStroke(1.dp, BgElevated),
+        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 72.dp)
     ) {
         Row(
             modifier = Modifier
@@ -46,7 +47,7 @@ fun ProblemListCard(
             // 제목
             Text(
                 text = problem.title,
-                fontSize = 14.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextPrimary,
                 modifier = Modifier.weight(1f),

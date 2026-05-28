@@ -142,9 +142,10 @@ private fun BookmarkCard(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = BgSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, BgElevated),
         modifier = Modifier
             .fillMaxWidth()
-            .height(68.dp)
+            .height(72.dp)
     ) {
         Row(
             modifier = Modifier
@@ -158,7 +159,7 @@ private fun BookmarkCard(
             Text(
                 text = item.title,
                 color = TextPrimary,
-                fontSize = 14.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,

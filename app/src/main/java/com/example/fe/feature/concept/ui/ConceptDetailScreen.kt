@@ -64,6 +64,7 @@ import com.example.fe.ui.theme.TextSecondary
 @Composable
 fun ConceptDetailScreen(
     topicId: Long,
+    topicName: String = "",
     initialIndex: Int = 0,
     viewModel: ConceptViewModel,
     onBack: () -> Unit,
@@ -83,7 +84,7 @@ fun ConceptDetailScreen(
     ) {
         DetailTopBar(
             title = "개념 학습",
-            subtitle = uiState.topicTitle.takeIf { it.isNotBlank() },
+            subtitle = if (topicName.isNotBlank()) "${topicName} 개념" else null,
             onBackClick = onBack,
             rightContent = {
                 if (uiState.concepts.isNotEmpty()) {
@@ -126,7 +127,8 @@ fun ConceptDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = uiState.topicTitle, fontSize = 12.sp, color = TextMuted)
+                    val displayTopic = if (topicName.isNotBlank()) "${topicName} 개념" else uiState.topicTitle
+                    Text(text = displayTopic, fontSize = 12.sp, color = TextMuted)
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

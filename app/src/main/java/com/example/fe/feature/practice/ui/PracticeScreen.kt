@@ -28,6 +28,7 @@ import com.example.fe.api.RetrofitClient
 @Composable
 fun PracticeScreen(
     topicId: Long,
+    topicName: String = "",
     initialIndex: Int = 0,
     viewModel: PracticeViewModel? = null, // 외부에서 전달받은 ViewModel (NavGraph에서 사용)
     onBack: () -> Unit = {},
@@ -64,6 +65,7 @@ fun PracticeScreen(
 
     PracticeContent(
         state = state,
+        topicName = topicName,
         initialIndex = initialIndex,
         onBack = onBack,
         onHome = onHome,
@@ -93,6 +95,7 @@ fun PracticeScreen(
 @Composable
 fun PracticeContent(
     state: PracticeUiState,
+    topicName: String = "",
     initialIndex: Int = 0,
     onBack: () -> Unit = {},
     onHome: () -> Unit = {},
@@ -136,6 +139,7 @@ fun PracticeContent(
                 // 빈칸 채우기 문제 화면
                 PracticeBlankContent(
                     quiz = quiz,
+                    topicName = topicName,
                     currentIndex = currentIndex,
                     totalCount = totalCount.coerceAtLeast(1),
 
@@ -178,6 +182,7 @@ fun PracticeContent(
 @Composable
 private fun PracticeBlankContent(
     quiz: QuizItemDto,
+    topicName: String = "",
     currentIndex: Int,
     totalCount: Int,
     onBack: () -> Unit,
@@ -218,6 +223,7 @@ private fun PracticeBlankContent(
 
     BlankScreen(
         quiz = quiz,
+        topicName = topicName,
         currentIndex = currentIndex,
         totalCount = totalCount,
         choiceOptions = buildChoiceOptions(quiz),

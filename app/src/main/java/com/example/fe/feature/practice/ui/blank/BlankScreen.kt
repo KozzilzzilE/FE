@@ -37,6 +37,7 @@ import com.example.fe.ui.theme.Error
 @Composable
 fun BlankScreen(
     quiz: QuizItemDto,
+    topicName: String = "",
     currentIndex: Int,
     totalCount: Int,
     choiceOptions: List<String>,
@@ -65,7 +66,7 @@ fun BlankScreen(
         topBar = {
             PracticeHeaderBar(
                 title = "응용 학습",
-                subtitle = "알고리즘",
+                subtitle = if (topicName.isNotBlank()) topicName else "알고리즘",
                 currentIndex = currentIndex,
                 totalCount = totalCount,
                 onBack = onBack
@@ -232,6 +233,7 @@ function countChars(str) {
 
     BlankScreen(
         quiz = previewQuiz,
+        topicName = "알고리즘",
         currentIndex = 0,
         totalCount = 2,
         choiceOptions = buildChoiceOptions(previewQuiz),

@@ -42,10 +42,8 @@ object Routes {
     const val SOLVE_ROUTE = "solve/{$PROBLEM_ID}?difficulty={difficulty}"
     const val EDITOR_ROUTE = "editor/{$PROBLEM_ID}"
     const val EDITOR_FULL_ROUTE = "editor_full/{$PROBLEM_ID}"
-    const val CONCEPT_ROUTE = "concept/{$TOPIC_ID}/{$INITIAL_INDEX}"
-
-    // Practice Route
-    const val PRACTICE_ROUTE = "practice/{$TOPIC_ID}/{$INITIAL_INDEX}"
+    const val CONCEPT_ROUTE = "concept/{$TOPIC_ID}/{$TOPIC_NAME}/{$INITIAL_INDEX}"
+    const val PRACTICE_ROUTE = "practice/{$TOPIC_ID}/{$TOPIC_NAME}/{$INITIAL_INDEX}"
 
     // Builders
     fun step(topicId: Long, topicName: String) = "step/$topicId/${Uri.encode(topicName)}"
@@ -54,8 +52,8 @@ object Routes {
         if (difficulty != null) "solve/$problemId?difficulty=$difficulty" else "solve/$problemId"
     fun editor(problemId: Long) = "editor/$problemId"
     fun editorFull(problemId: Long) = "editor_full/$problemId"
-    fun concept(topicId: Long, initialIndex: Int) = "concept/$topicId/$initialIndex"
+    fun concept(topicId: Long, topicName: String, initialIndex: Int) = "concept/$topicId/${Uri.encode(topicName)}/$initialIndex"
 
-    fun practice(topicId: Long, initialIndex: Int) = "practice/$topicId/$initialIndex"
+    fun practice(topicId: Long, topicName: String, initialIndex: Int) = "practice/$topicId/${Uri.encode(topicName)}/$initialIndex"
 }
 

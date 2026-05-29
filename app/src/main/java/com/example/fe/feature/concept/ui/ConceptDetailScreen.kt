@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,12 +36,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fe.common.DetailTopBar
 import com.example.fe.data.dto.NotionDto
 import com.example.fe.feature.concept.ConceptViewModel
 import com.example.fe.feature.concept.component.CodeExampleBox
@@ -57,6 +64,7 @@ import com.example.fe.ui.theme.TextSecondary
 @Composable
 fun ConceptDetailScreen(
     topicId: Long,
+    topicName: String = "",
     initialIndex: Int = 0,
     viewModel: ConceptViewModel,
     onBack: () -> Unit,
@@ -74,53 +82,22 @@ fun ConceptDetailScreen(
             .fillMaxSize()
             .background(BgPrimary)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(BgPrimary)
-                .statusBarsPadding()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "뒤로",
-                        tint = TextPrimary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        DetailTopBar(
+            title = "개념 학습",
+            subtitle = if (topicName.isNotBlank()) "${topicName} 개념" else null,
+            onBackClick = onBack,
+            rightContent = {
+                if (uiState.concepts.isNotEmpty()) {
                     Text(
-                        text = "개념 학습",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary
-                    )
-                    if (uiState.topicTitle.isNotBlank()) {
-                        Text(
-                            text = uiState.topicTitle,
-                            fontSize = 11.sp,
-                            color = TextMuted
-                        )
-                    }
-                }
-                IconButton(onClick = onHome, modifier = Modifier.size(40.dp)) {
-                    Icon(
-                        imageVector = Icons.Outlined.Home,
-                        contentDescription = "홈",
-                        tint = TextPrimary,
-                        modifier = Modifier.size(24.dp)
+                        text = "${uiState.currentIndex + 1} / ${uiState.concepts.size}",
+                        color = TextSecondary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(end = 12.dp)
                     )
                 }
             }
-        }
+        )
 
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -150,8 +127,8 @@ fun ConceptDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = uiState.topicTitle, fontSize = 12.sp, color = TextMuted)
-                    Text(text = "${currentIndex + 1} / $total", fontSize = 12.sp, color = TextSecondary)
+                    val displayTopic = if (topicName.isNotBlank()) "${topicName} 개념" else uiState.topicTitle
+                    Text(text = displayTopic, fontSize = 12.sp, color = TextMuted)
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -161,12 +138,21 @@ fun ConceptDetailScreen(
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
-                    Box(
+                    val progress = ((currentIndex + 1).toFloat() / total.toFloat()).coerceIn(0f, 1f)
+                    val animatedProgress by animateFloatAsState(
+                        targetValue = progress,
+                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+                        label = "progress"
+                    )
+                    LinearProgressIndicator(
+                        progress = { animatedProgress },
                         modifier = Modifier
-                            .width(36.dp)
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(Primary)
+                            .fillMaxWidth()
+                            .height(4.dp),
+                        color = Primary,
+                        trackColor = com.example.fe.ui.theme.ProgressTrack,
+                        strokeCap = StrokeCap.Round,
+                        drawStopIndicator = {}
                     )
                 }
 

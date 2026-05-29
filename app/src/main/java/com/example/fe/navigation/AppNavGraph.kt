@@ -452,12 +452,15 @@ fun AppNavGraph() {
             StepSelectionScreen(
                 topicId = topicId,
                 topicName = topicName,
-                onNavigate = { route ->
+                onBottomNavClick = { route ->
                     navController.navigate(route) {
                         popUpTo(Routes.HOME) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
+                },
+                onStepClick = { route ->
+                    navController.navigate(route)
                 },
                 onNavigateBack = { navController.popBackStack() }
             )
@@ -525,7 +528,7 @@ fun AppNavGraph() {
                             items = conceptItems,
                             onItemClick = { item ->
                                 val index = conceptItems.indexOf(item).coerceAtLeast(0)
-                                navController.navigate(Routes.concept(topicId, index))
+                                navController.navigate(Routes.concept(topicId, topicName, index))
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
@@ -590,7 +593,7 @@ fun AppNavGraph() {
                             items = applicationItems,
                             onItemClick = { item ->
                                 val index = applicationItems.indexOf(item).coerceAtLeast(0)
-                                navController.navigate(Routes.practice(topicId, index))
+                                navController.navigate(Routes.practice(topicId, topicName, index))
                             },
                             onNavigate = { route ->
                                 navController.navigate(route) {
@@ -683,10 +686,12 @@ fun AppNavGraph() {
             route = Routes.CONCEPT_ROUTE,
             arguments = listOf(
                 navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.TOPIC_NAME) { type = NavType.StringType },
                 navArgument(Routes.INITIAL_INDEX) { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
+            val topicName = backStackEntry.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
             val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0
             val conceptViewModelFactory = remember { ConceptViewModelFactory() }
             val conceptViewModel: ConceptViewModel = viewModel(factory = conceptViewModelFactory)
@@ -700,6 +705,7 @@ fun AppNavGraph() {
 
             ConceptDetailScreen(
                 topicId = topicId,
+                topicName = topicName,
                 initialIndex = initialIndex,
                 viewModel = conceptViewModel,
                 onBack = { navController.popBackStack() },
@@ -723,10 +729,12 @@ fun AppNavGraph() {
             route = Routes.PRACTICE_ROUTE,
             arguments = listOf(
                 navArgument(Routes.TOPIC_ID) { type = NavType.LongType },
+                navArgument(Routes.TOPIC_NAME) { type = NavType.StringType },
                 navArgument(Routes.INITIAL_INDEX) { type = NavType.IntType }
             )
         ) { backStackEntry ->
             val topicId = backStackEntry.arguments?.getLong(Routes.TOPIC_ID) ?: 0L
+            val topicName = backStackEntry.arguments?.getString(Routes.TOPIC_NAME) ?: "주제"
             val initialIndex = backStackEntry.arguments?.getInt(Routes.INITIAL_INDEX) ?: 0
 
             val factory = remember {
@@ -743,6 +751,7 @@ fun AppNavGraph() {
 
             PracticeScreen(
                 topicId = topicId,
+                topicName = topicName,
                 initialIndex = initialIndex,
                 viewModel = practiceViewModel,
                 onBack = { navController.popBackStack() },

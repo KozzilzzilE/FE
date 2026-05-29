@@ -38,9 +38,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,6 +55,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.fe.common.DetailTopBar
 import com.example.fe.common.highlight
 import com.example.fe.common.parseCodeFence
 import com.example.fe.ui.theme.BlankBorder
@@ -80,58 +85,24 @@ import com.example.fe.ui.theme.TopBarTitle
 fun PracticeHeaderBar(
     title: String,
     subtitle: String,
-    onBack: () -> Unit,
-    onHome: () -> Unit
+    currentIndex: Int,
+    totalCount: Int,
+    onBack: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(com.example.fe.ui.theme.BgPrimary)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "뒤로가기",
-                    tint = TopBarTitle,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TopBarTitle
-                )
-                if (subtitle.isNotBlank()) {
-                    Text(
-                        text = subtitle,
-                        fontSize = 11.sp,
-                        color = TopBarSub
-                    )
-                }
-            }
-
-            IconButton(onClick = onHome, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    imageVector = Icons.Outlined.Home,
-                    contentDescription = "홈",
-                    tint = TopBarTitle,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+    DetailTopBar(
+        title = title,
+        subtitle = subtitle.takeIf { it.isNotBlank() },
+        onBackClick = onBack,
+        rightContent = {
+            androidx.compose.material3.Text(
+                text = "${currentIndex + 1} / $totalCount",
+                color = com.example.fe.ui.theme.TextSecondary,
+                fontSize = 14.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+                modifier = androidx.compose.ui.Modifier.padding(end = 12.dp)
+            )
         }
-    }
+    )
 }
 
 @Composable
@@ -140,11 +111,16 @@ fun PracticeProgressHeader(
     totalCount: Int
 ) {
     val progress = ((currentIndex + 1).toFloat() / totalCount.toFloat()).coerceIn(0f, 1f)
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        label = "progress"
+    )
 
     Column {
         Text(
             text = "문제 ${currentIndex + 1} / $totalCount",
-            color = BodyText,
+            color = TextSecondary,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium
         )
@@ -152,12 +128,14 @@ fun PracticeProgressHeader(
         Spacer(modifier = Modifier.height(8.dp))
 
         LinearProgressIndicator(
-            progress = { progress },
+            progress = { animatedProgress },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(4.dp),
             color = Primary,
-            trackColor = ProgressTrack
+            trackColor = ProgressTrack,
+            strokeCap = StrokeCap.Round,
+            drawStopIndicator = {}
         )
     }
 }

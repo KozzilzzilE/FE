@@ -128,16 +128,15 @@ fun MyPageScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 16.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = "마이페이지",
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
                 )
                 IconButton(
                     onClick = onSettingsClick,

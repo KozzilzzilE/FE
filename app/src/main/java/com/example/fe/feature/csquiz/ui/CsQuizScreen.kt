@@ -130,7 +130,8 @@ fun CsQuizScreen(
 
                     OxButtons(
                         enabled = state.answered == null,
-                        onSelect = { viewModel.selectAnswer(it) }
+                        onSelect = { viewModel.selectAnswer(it) },
+                        selectedAnswer = state.answered
                     )
 
                     if (state.answered != null) {

@@ -92,6 +92,7 @@ fun PracticeHeaderBar(
     DetailTopBar(
         title = title,
         subtitle = subtitle.takeIf { it.isNotBlank() },
+        blurred = true,
         onBackClick = onBack,
         rightContent = {
             androidx.compose.material3.Text(

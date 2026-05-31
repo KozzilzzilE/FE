@@ -1,6 +1,5 @@
 package com.example.fe.feature.list.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,9 +27,32 @@ fun TopicListScreen(
     onTopicClick: (String) -> Unit = onNavigate
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val topicCount = (uiState as? TopicUiState.Success)?.topics?.size ?: 0
 
     Scaffold(
         containerColor = BgPrimary,
+        topBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "알고리즘 학습",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                Text(
+                    text = if (topicCount > 0) "${topicCount}개 주제" else "",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = TextMuted
+                )
+            }
+        },
         bottomBar = {
             BottomNavigationBar(
                 items = bottomNavItems,
@@ -54,33 +76,11 @@ fun TopicListScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = innerPadding.calculateTopPadding())
+                        .padding(innerPadding)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    // 헤더
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "알고리즘 학습",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                        Text(
-                            text = "${topics.size}개 주제",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = TextMuted
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // 토픽 목록
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -98,7 +98,7 @@ fun TopicListScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding() + 16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

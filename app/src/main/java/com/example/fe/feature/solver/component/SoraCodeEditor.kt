@@ -6,6 +6,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.fe.ui.theme.CodeBgDark
@@ -62,6 +63,7 @@ fun SoraCodeEditor(
                 scheme.setColor(EditorColorScheme.SELECTION_INSERT, primaryColor)
                 colorScheme = scheme
 
+                overScrollMode = android.view.View.OVER_SCROLL_NEVER
                 setEditorLanguage(JavaLanguage())
                 setText(currentCode)
 
@@ -147,19 +149,25 @@ fun SoraCodeEditor(
                 onEditorReady(this)
             }
         },
-        update = { editor ->
-            // Only call setText when the change originated from outside the editor
-            // (e.g., "reset code" button). If currentCode == lastCodeRef, the ViewModel
-            // is just echoing back what the editor already typed → skip to avoid cursor jump.
-            if (currentCode != lastCodeRef.get() && editor.text.toString() != currentCode) {
-                val line = editor.cursor.leftLine
-                val col  = editor.cursor.leftColumn
-                editor.setText(currentCode)
-                lastCodeRef.set(currentCode)
-                try { editor.setSelection(line, col) } catch (_: Exception) {}
+        update = {}
+    )
+
+    // External code reset (e.g. language switch): LaunchedEffect(code) restarts on every
+    // code change. After a short delay, if the code hasn't been echoed back by the user's
+    // own typing (lastCodeRef still differs), it's a genuine external reset → setText.
+    // This avoids the race where stale recompositions (currentCode lags behind lastCodeRef)
+    // incorrectly trigger setText and jump the cursor to line 0.
+    LaunchedEffect(code) {
+        val targetCode = code
+        delay(300)
+        val editor = editorInstance ?: return@LaunchedEffect
+        if (targetCode != lastCodeRef.get()) {
+            editor.post {
+                editor.setText(targetCode)
+                lastCodeRef.set(targetCode)
             }
         }
-    )
+    }
 
     LaunchedEffect(insertTextEvent) {
         insertTextEvent?.collect { text ->

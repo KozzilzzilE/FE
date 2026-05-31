@@ -85,6 +85,7 @@ fun ConceptDetailScreen(
         DetailTopBar(
             title = "개념 학습",
             subtitle = if (topicName.isNotBlank()) "${topicName} 개념" else null,
+            blurred = true,
             onBackClick = onBack,
             rightContent = {
                 if (uiState.concepts.isNotEmpty()) {

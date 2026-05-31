@@ -3,11 +3,10 @@ package com.example.fe.feature.solver.data
 object CodeTemplates {
     val JAVA = """
 import java.util.*;
-import java.io.*;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
 
     }
 }

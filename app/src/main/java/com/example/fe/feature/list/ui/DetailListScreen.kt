@@ -35,6 +35,7 @@ fun DetailListScreen(
         topBar = {
             TopBar(
                 title = screenTitle,
+                blurred = true,
                 onBackClick = onBackClick,
                 onHomeClick = { onNavigate("home") }
             )

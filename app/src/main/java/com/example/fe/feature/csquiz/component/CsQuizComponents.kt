@@ -85,12 +85,16 @@ fun QuestionCard(question: CsQuizQuestion) {
 @Composable
 fun OxButtons(
     enabled: Boolean,
-    onSelect: (Boolean) -> Unit
+    onSelect: (Boolean) -> Unit,
+    selectedAnswer: Boolean? = null
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        val oSelected = !enabled && selectedAnswer == true
+        val xSelected = !enabled && selectedAnswer == false
+
         Button(
             onClick = { onSelect(true) },
             enabled = enabled,
@@ -101,8 +105,8 @@ fun OxButtons(
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0x2022C55E),
                 contentColor = Success,
-                disabledContainerColor = BgElevated,
-                disabledContentColor = TextMuted
+                disabledContainerColor = if (oSelected) Color(0x2022C55E) else BgElevated,
+                disabledContentColor = if (oSelected) Success else TextMuted
             )
         ) {
             Text("O", fontSize = 32.sp, fontWeight = FontWeight.Bold)
@@ -118,8 +122,8 @@ fun OxButtons(
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0x20FB2C36),
                 contentColor = Error,
-                disabledContainerColor = BgElevated,
-                disabledContentColor = TextMuted
+                disabledContainerColor = if (xSelected) Color(0x20FB2C36) else BgElevated,
+                disabledContentColor = if (xSelected) Error else TextMuted
             )
         ) {
             Text("X", fontSize = 32.sp, fontWeight = FontWeight.Bold)

@@ -83,6 +83,7 @@ fun EditorScreen(
                 TopBar(
                     title = "문제 풀이",
                     showHomeIcon = true,
+                    blurred = true,
                     onBackClick = onBack,
                     onHomeClick = onHome
                 )

@@ -109,26 +109,12 @@ fun MyPageScreen(
 
     Scaffold(
         containerColor = BgPrimary,
-        bottomBar = {
-            BottomNavigationBar(
-                items = bottomNavItems,
-                currentRoute = Routes.MY,
-                onNavigate = onNavigate
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(BgPrimary)
-                .padding(top = innerPadding.calculateTopPadding())
-                .verticalScroll(rememberScrollState())
-        ) {
-            // ─── Top Bar ───
+        topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 4.dp),
+                    .statusBarsPadding()
+                    .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -150,8 +136,23 @@ fun MyPageScreen(
                     )
                 }
             }
-
-            Spacer(Modifier.height(16.dp))
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                items = bottomNavItems,
+                currentRoute = Routes.MY,
+                onNavigate = onNavigate
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BgPrimary)
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Spacer(Modifier.height(8.dp))
 
             // ─── myProfileCard ───
             Surface(

@@ -45,7 +45,7 @@ class SubmissionViewModel(private val apiService: ApiService) : ViewModel() {
                             problemTitle = history.title,
                             language = history.language,
                             date = formatDate(history.createdAt),
-                            isCorrect = history.status == "Accepted",
+                            isCorrect = history.status == "ACCEPTED",
                             sourceCode = history.sourceCode
                         )
                     }

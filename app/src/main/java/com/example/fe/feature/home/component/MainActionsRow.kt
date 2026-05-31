@@ -5,11 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,7 +19,6 @@ import androidx.compose.ui.unit.sp
 import com.example.fe.R
 import com.example.fe.ui.theme.BgElevated
 import com.example.fe.ui.theme.BgSurface
-import com.example.fe.ui.theme.Primary
 import com.example.fe.ui.theme.TextMuted
 import com.example.fe.ui.theme.TextPrimary
 
@@ -38,6 +34,7 @@ fun MainActionsRow(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        // 피그마 quickRow: 3카드 1행
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -74,11 +71,6 @@ fun MainActionsRow(
                     )
                 }
             )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
             QuickMenuCard(
                 title = "CS 퀴즈",
                 subtitle = "오늘의\n퀴즈",
@@ -95,21 +87,53 @@ fun MainActionsRow(
                     )
                 }
             )
-            QuickMenuCard(
-                title = "AI 코드 리뷰",
-                subtitle = "제출한\n코드 분석",
-                modifier = Modifier.weight(1f),
-                onClick = onAiReviewClick,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = null,
-                        tint = Primary,
-                        modifier = Modifier
-                            .offset(x = 42.dp, y = 32.dp)
-                            .size(64.dp)
-                    )
-                }
+        }
+
+        // AI 코드 리뷰: 피그마 기준 전체폭 80dp, Row 레이아웃
+        AiReviewCard(onClick = onAiReviewClick)
+    }
+}
+
+@Composable
+private fun AiReviewCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = BgSurface),
+        border = BorderStroke(1.dp, BgElevated),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 피그마: left=44, top=-11, width=126, height=100
+            Image(
+                painter = painterResource(id = R.drawable.img_ai_review),
+                contentDescription = null,
+                modifier = Modifier
+                    .offset(x = 44.dp, y = 4.dp)
+                    .size(width = 126.dp, height = 100.dp),
+                contentScale = ContentScale.Fit
+            )
+            // 피그마: left=155, top=20
+            Text(
+                text = "AI 코드 리뷰",
+                modifier = Modifier.offset(x = 155.dp, y = 20.dp),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+            // 피그마: left=155, top=44
+            Text(
+                text = "제출한 코드 리뷰 받기",
+                modifier = Modifier.offset(x = 155.dp, y = 44.dp),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Normal,
+                color = TextMuted
             )
         }
     }

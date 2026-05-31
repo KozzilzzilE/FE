@@ -44,7 +44,7 @@ class SubmissionViewModel(private val apiService: ApiService) : ViewModel() {
                             historyId = history.historyId,
                             problemTitle = history.title,
                             language = history.language,
-                            date = history.createdAt,
+                            date = formatDate(history.createdAt),
                             isCorrect = history.status == "Accepted",
                             sourceCode = history.sourceCode
                         )
@@ -141,6 +141,19 @@ class SubmissionViewModel(private val apiService: ApiService) : ViewModel() {
             }
             _isReviewLoading.value = false
         }
+    }
+}
+
+private fun formatDate(raw: String?): String {
+    if (raw.isNullOrBlank()) return "-"
+    return try {
+        val datePart = raw.substringBefore("T")
+        val timePart = raw.substringAfter("T").substringBefore(".")
+        val (y, m, d) = datePart.split("-")
+        val (h, min) = timePart.split(":")
+        "${y.takeLast(2)}.$m.$d $h:$min"
+    } catch (e: Exception) {
+        raw
     }
 }
 

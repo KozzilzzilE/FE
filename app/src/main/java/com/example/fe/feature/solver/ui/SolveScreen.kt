@@ -122,6 +122,16 @@ fun SolveScreen(
         codeEditor?.clearFocus()
     }
 
+    // 키보드가 스와이프 등으로 내려가면 onFocusChange가 안 불리는 경우가 있어서
+    // IME visibility를 직접 감지해 포커스를 즉시 해제
+    val isKeyboardVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
+    LaunchedEffect(isKeyboardVisible) {
+        if (!isKeyboardVisible && editorHasCursor) {
+            editorHasCursor = false
+            codeEditor?.clearFocus()
+        }
+    }
+
     LaunchedEffect(selectedTab) {
         if (selectedTab != SolveTab.EDITOR) {
             hideKeyboard()

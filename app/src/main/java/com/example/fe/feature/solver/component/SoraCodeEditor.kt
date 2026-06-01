@@ -13,6 +13,7 @@ import com.example.fe.ui.theme.CodeBgDark
 import com.example.fe.ui.theme.Primary
 import com.example.fe.ui.theme.TextPrimary
 import io.github.rosemoe.sora.event.ContentChangeEvent
+import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.langs.java.JavaLanguage
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
@@ -128,6 +129,35 @@ fun SoraCodeEditor(
                         } finally {
                             processingSmartBrace = false
                         }
+                    }
+                }
+
+                // 커서 이동 시 부드럽게 화면 중앙 정렬
+                // 타이핑으로 인한 변경(isSelected=false, 한 글자씩 이동)은 Sora가 자체 처리
+                // 탭으로 커서 점프할 때만 수동으로 중앙 스크롤
+                var lastScrollLine = -1
+                subscribeEvent<SelectionChangeEvent> { event, _ ->
+                    if (event.isSelected) return@subscribeEvent
+                    val targetLine = cursor.leftLine
+                    if (kotlin.math.abs(targetLine - lastScrollLine) < 2) return@subscribeEvent
+                    lastScrollLine = targetLine
+                    post {
+                        try {
+                            val lineHeightPx = rowHeight.toFloat()
+                            val cursorY = targetLine * lineHeightPx
+                            val visibleTop = scrollY.toFloat()
+                            val visibleBottom = scrollY + height.toFloat()
+                            // 커서가 화면 밖이거나 상단/하단 20% 안에 있으면 중앙으로 이동
+                            if (cursorY < visibleTop + height * 0.2f || cursorY > visibleBottom - height * 0.2f) {
+                                val targetScrollY = (cursorY - height * 0.35f).coerceAtLeast(0f).toInt()
+                                android.animation.ObjectAnimator.ofInt(this, "scrollY", scrollY, targetScrollY)
+                                    .apply {
+                                        duration = 120
+                                        interpolator = android.view.animation.DecelerateInterpolator()
+                                        start()
+                                    }
+                            }
+                        } catch (_: Exception) {}
                     }
                 }
 

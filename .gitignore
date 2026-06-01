@@ -26,12 +26,11 @@ secrets.properties
 *.keystore
 google-services.json
 
-# Markdown Docs (as requested previously)
-DESIGN_PROGRESS.md
-/DESIGN_PROGRESS.md
-API_GUIDE.md
-TODO.md
-/TODO.md
+# Markdown Docs (README.md 및 GitHub 템플릿 제외 전체)
+*.md
+!README.md
+!**/README.md
+!.github/**/*.md
 
 # Agent & AI Tools
 .claude/

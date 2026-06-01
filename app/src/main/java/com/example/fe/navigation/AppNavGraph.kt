@@ -234,6 +234,14 @@ fun AppNavGraph() {
         }
 
         composable("problem") {
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) problemListViewModel.loadAllProblems()
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+            }
             val viewModel = problemListViewModel
             val uiState by viewModel.uiState.collectAsState()
             val currentPage by viewModel.currentPage.collectAsState()
@@ -424,6 +432,14 @@ fun AppNavGraph() {
         }
 
         composable(route = Routes.TOPIC) {
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(lifecycleOwner) {
+                val observer = LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) topicViewModel.fetchTopics()
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+            }
             TopicListScreen(
                 viewModel = topicViewModel,
                 onNavigate = { route ->

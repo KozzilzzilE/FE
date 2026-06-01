@@ -42,6 +42,7 @@ class AllProblemListViewModel(private val repository: ProblemRepository) : ViewM
      */
     fun loadAllProblems(page: Int = _currentPage.value, difficulty: String? = _selectedDifficulty.value) {
         if (_uiState.value is ProblemUiState.Success
+            && _uiState.value !is ProblemUiState.Error
             && page == _currentPage.value
             && difficulty == _selectedDifficulty.value) return
 

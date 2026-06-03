@@ -396,7 +396,7 @@ private fun SubmitResultView(
 
 @Composable
 private fun ExecutionResultView(viewModel: SolverViewModel) {
-    val executionResult by viewModel.executionResult.collectAsState()
+    val runResults by viewModel.runResults.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
     val testCases by viewModel.testCases.collectAsState()
 
@@ -426,6 +426,7 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
         return
     }
 
+    val executionResult = runResults.getOrNull(selectedIndex)
     val hasResult = executionResult != null
     val tc = testCases[selectedIndex]
 
@@ -497,31 +498,37 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
 
         // statRow — 결과 상태 (결과가 있을 때만 표시)
         if (passed != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val isCorrect = passed == true
-                val statusLabel = executionResult?.statusLabel?.takeIf { it.isNotBlank() }
-                    ?: if (isCorrect) "맞았습니다" else "틀렸습니다"
-                Icon(
-                    imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
-                    contentDescription = null,
-                    tint = if (isCorrect) Color(0xFF22C55E) else Error,
-                    modifier = Modifier.size(24.dp)
-                )
-                Text(
-                    text = if (isCorrect) "맞았습니다" else statusLabel,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isCorrect) Color(0xFF22C55E) else Error
-                )
-                
-                val time = executionResult?.runtimeMs
-                if (time != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
+            val isCorrect = passed == true
+            val statusLabel = executionResult?.statusLabel?.takeIf { it.isNotBlank() }
+                ?: if (isCorrect) "맞았습니다" else "틀렸습니다"
+            val time = executionResult?.runtimeMs
+
+            // 상태 텍스트와 실행 시간을 세로로 배치한다.
+            // (한 줄에 두면 라벨이 길 때 — 예: "런타임 오류" — 실행 시간이 줄바꿈되어 깨져 보임)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
+                        contentDescription = null,
+                        tint = if (isCorrect) Color(0xFF22C55E) else Error,
+                        modifier = Modifier.size(24.dp)
+                    )
                     Text(
-                        text = "(실행 시간: ${time}ms)",
+                        text = if (isCorrect) "맞았습니다" else statusLabel,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isCorrect) Color(0xFF22C55E) else Error
+                    )
+                }
+
+                if (time != null) {
+                    Text(
+                        // 아이콘(24dp) + Row 간격(8dp) 만큼 들여써 상태 텍스트 아래에 정렬
+                        modifier = Modifier.padding(start = 32.dp),
+                        text = "실행 시간: ${time}ms",
                         fontSize = 14.sp,
                         color = TextMuted
                     )

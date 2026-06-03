@@ -114,11 +114,17 @@ fun ConceptDetailScreen(
         val concept = uiState.concepts[currentIndex]
         val images = listOfNotNull(concept.imgUrl)
 
+        val scrollState = rememberScrollState()
+
+        LaunchedEffect(uiState.currentIndex) {
+            scrollState.scrollTo(0)
+        }
+
         Box(modifier = Modifier.weight(1f)) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState)
                     .padding(horizontal = 20.dp)
                     .padding(top = 8.dp, bottom = 140.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)

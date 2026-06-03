@@ -12,7 +12,7 @@ data class SolverUiState(
     val testCases: List<TestCase> = emptyList(),
 
     val isRunning: Boolean = false,
-    val runResult: RunResult? = null,
+    val runResults: List<RunResult?> = emptyList(),
 
     val isSubmitting: Boolean = false,
     val submitResult: SubmitResult? = null,
@@ -21,5 +21,5 @@ data class SolverUiState(
     val isLoadingSolution: Boolean = false,
     val solution: SolutionDetail? = null,
 
-    val errorToast: String? = null
+    val toastMessage: String? = null
 )

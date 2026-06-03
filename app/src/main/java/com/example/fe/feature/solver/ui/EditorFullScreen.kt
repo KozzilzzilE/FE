@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.CloseFullscreen
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import androidx.compose.ui.zIndex
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
 import com.example.fe.feature.solver.component.SoraCodeEditor
+import com.example.fe.feature.solver.component.smartInsert
 import com.example.fe.ui.theme.*
 
 @Composable
@@ -41,7 +43,7 @@ fun EditorFullScreen(
     var wasRunning by remember { mutableStateOf(false) }
     LaunchedEffect(uiState.isRunning) {
         if (wasRunning && !uiState.isRunning) {
-            if (uiState.runResult != null) {
+            if (uiState.runResults.any { it != null }) {
                 viewModel.pendingNavigationTarget = "RESULT"
                 onGoSubmit()
             }
@@ -125,6 +127,21 @@ fun EditorFullScreen(
                         )
                     }
 
+                    // 초기화(휴지통) 버튼
+                    IconButton(
+                        onClick = { viewModel.updateCode("") },
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.DeleteOutline,
+                            contentDescription = "코드 초기화",
+                            tint = TextMuted,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    Spacer(Modifier.width(8.dp))
+
                     // 실행 버튼
                     IconButton(
                         onClick = { if (!uiState.isRunning) viewModel.runCode() },
@@ -182,7 +199,7 @@ fun EditorFullScreen(
                     exit = shrinkVertically(animationSpec = tween(180))
                 ) {
                     SmartKeyboardPanel(
-                        onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
+                        onInsert = { insert -> codeEditor?.smartInsert(insert) },
                         language = uiState.language,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -192,16 +209,16 @@ fun EditorFullScreen(
             }
         }
 
-        // 닫기 버튼 플로팅 (에디터 우상단)
+        // 닫기 버튼 플로팅 (에디터 우상단). 초기화 버튼은 하단 실행/제출 버튼 옆으로 이동했다.
         IconButton(
             onClick = onBack,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
-                .padding(8.dp)
+                .padding(top = 16.dp, end = 20.dp)
+                .zIndex(2f)
                 .size(36.dp)
                 .background(BgSurface.copy(alpha = 0.75f), RoundedCornerShape(8.dp))
-                .zIndex(2f)
         ) {
             Icon(
                 imageVector = Icons.Default.CloseFullscreen,

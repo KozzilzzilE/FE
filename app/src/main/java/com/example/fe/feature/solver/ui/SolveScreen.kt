@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -85,10 +86,10 @@ fun SolveScreen(
 
 
     val context = LocalContext.current
-    LaunchedEffect(uiState.errorToast) {
-        uiState.errorToast?.let {
+    LaunchedEffect(uiState.toastMessage) {
+        uiState.toastMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            viewModel.clearErrorToast()
+            viewModel.clearToastMessage()
         }
     }
 
@@ -121,13 +122,14 @@ fun SolveScreen(
     val codeFromVm = uiState.code
     var smartPanelExpanded by remember { mutableStateOf(true) }
 
-    val executionLines = uiState.runResult?.terminalLines
     val testCases = uiState.testCases
 
     var selectedResultIndex by remember { mutableIntStateOf(0) }
     LaunchedEffect(testCases.size) {
         if (selectedResultIndex > testCases.lastIndex) selectedResultIndex = 0
     }
+
+    val executionLines = uiState.runResults.getOrNull(selectedResultIndex)?.terminalLines
 
     val detail = uiState.problemDetail
     val titleToShow = detail?.title.orEmpty()
@@ -332,6 +334,18 @@ fun SolveScreen(
 
                                         Spacer(modifier = Modifier.width(4.dp))
                                         DraftSaveButton(onClick = { viewModel.saveDraft() })
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        IconButton(
+                                            onClick = { viewModel.updateCode("") },
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.DeleteOutline,
+                                                contentDescription = "코드 초기화",
+                                                tint = TextSecondary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
                                         Spacer(modifier = Modifier.width(4.dp))
                                         IconButton(
                                             onClick = { onOpenEditorFull(problemId) },

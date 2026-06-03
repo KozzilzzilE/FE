@@ -61,9 +61,9 @@ class SolverViewModel(
         uiState.map { it.isRunning }
             .stateIn(viewModelScope, started, _uiState.value.isRunning)
 
-    val executionResult: StateFlow<com.example.fe.feature.solver.model.RunResult?> =
-        uiState.map { it.runResult }
-            .stateIn(viewModelScope, started, _uiState.value.runResult)
+    val runResults: StateFlow<List<com.example.fe.feature.solver.model.RunResult?>> =
+        uiState.map { it.runResults }
+            .stateIn(viewModelScope, started, _uiState.value.runResults)
 
     val submissions: StateFlow<List<SubmissionRecord>> =
         uiState.map { it.submissions }
@@ -129,7 +129,7 @@ class SolverViewModel(
                 _uiState.update {
                     it.copy(
                         isLoadingProblem = false,
-                        errorToast = "문제 로드 실패: ${e.message}"
+                        toastMessage = "문제 로드 실패: ${e.message}"
                     )
                 }
             }
@@ -175,7 +175,7 @@ class SolverViewModel(
                             isBookmarked = currentState,
                             bookmarkCount = currentCount
                         ),
-                        errorToast = "찜하기 변경에 실패했습니다."
+                        toastMessage = "찜하기 변경에 실패했습니다."
                     )
                 }
             }
@@ -209,8 +209,10 @@ class SolverViewModel(
                     code = state.code
                 )
                 Log.d("SolverViewModel", "서버 임시 저장 성공")
+                _uiState.update { it.copy(toastMessage = "임시저장되었습니다.") }
             } catch (e: Exception) {
                 Log.e("SolverViewModel", "서버 임시 저장 실패", e)
+                _uiState.update { it.copy(toastMessage = "임시저장에 실패했습니다.") }
             }
         }
     }
@@ -222,12 +224,12 @@ class SolverViewModel(
         val state = _uiState.value
 
         if (state.problemId == 0L) {
-            _uiState.update { it.copy(errorToast = "problemId가 없습니다.") }
+            _uiState.update { it.copy(toastMessage = "problemId가 없습니다.") }
             return
         }
 
         // 탭 전환 전에 동기적으로 이전 결과를 지워 스타일 flash 방지
-        _uiState.update { it.copy(isRunning = true, runResult = null) }
+        _uiState.update { it.copy(isRunning = true, runResults = List(state.testCases.size) { null }) }
 
         viewModelScope.launch {
             try {
@@ -236,27 +238,26 @@ class SolverViewModel(
 
                 Log.d("RunCode", "실행 요청 시작 — problemId=${state.problemId}, language=${state.language}")
 
-                val runToken = repository.runCode(
+                val runTokens = repository.runCode(
                     token = token,
                     problemId = state.problemId,
                     code = state.code,
                     language = state.language
                 )
 
-                Log.d("RunCode", "runToken 수신: $runToken")
+                Log.d("RunCode", "runTokens 수신: $runTokens")
 
-                val originalInput = state.testCases.firstOrNull()?.input
-                pollRunResult(
+                pollRunResults(
                     accessToken = token,
-                    runToken = runToken,
-                    originalInput = originalInput
+                    runTokens = runTokens,
+                    testCases = state.testCases
                 )
             } catch (e: Exception) {
                 Log.e("RunCode", "실행 실패", e)
                 _uiState.update {
                     it.copy(
                         isRunning = false,
-                        errorToast = "코드 실행 실패: ${e.message}"
+                        toastMessage = "코드 실행 실패: ${e.message}"
                     )
                 }
             }
@@ -264,76 +265,71 @@ class SolverViewModel(
     }
 
     /**
-     * 실행 결과 polling
+     * 실행 결과 polling (다중 테스트케이스)
      */
-    private suspend fun pollRunResult(
+    private suspend fun pollRunResults(
         accessToken: String,
-        runToken: String,
-        originalInput: String?
+        runTokens: List<String>,
+        testCases: List<TestCase>
     ) {
-        var attempt = 0
-        var noResponseCount = 0
-        while (attempt < 20) {
-            attempt++
-            try {
-                val result = repository.getRunResult(accessToken, runToken, originalInput)
+        kotlinx.coroutines.coroutineScope {
+            runTokens.forEachIndexed { index, runToken ->
+                launch {
+                    val originalInput = testCases.getOrNull(index)?.input
+                    var attempt = 0
+                    var noResponseCount = 0
+                    while (attempt < 20) {
+                        attempt++
+                        try {
+                            val result = repository.getRunResult(accessToken, runToken, originalInput)
+                            Log.d("RunCode", "poll[$index][$attempt] statusId=${result.statusId} label=${result.statusLabel}")
 
-                Log.d("RunCode", "poll[$attempt] statusId=${result.statusId} label=${result.statusLabel}")
-
-                _uiState.update { it.copy(runResult = result) }
-
-                when {
-                    // 정상 대기/처리 중 → 계속 폴링
-                    Judge0Status.isStillProcessing(result.statusId) -> {
-                        delay(1500)
-                    }
-                    // -1: 백엔드가 Judge0 응답을 아직 못 받은 일시적 상태일 수 있음
-                    // 최대 5회까지 재시도, 그 이후엔 에러 처리
-                    result.statusId == Judge0Status.NO_RESPONSE -> {
-                        noResponseCount++
-                        Log.w("RunCode", "poll[$attempt] Judge0 연결 실패 ($noResponseCount/5)")
-                        if (noResponseCount >= 5) {
-                            _uiState.update {
-                                it.copy(
-                                    isRunning = false,
-                                    errorToast = "코드 실행 서버(Judge0)에 연결할 수 없습니다."
-                                )
+                            _uiState.update { state ->
+                                val newResults = state.runResults.toMutableList()
+                                if (index < newResults.size) {
+                                    newResults[index] = result
+                                }
+                                state.copy(runResults = newResults)
                             }
-                            return
+
+                            when {
+                                Judge0Status.isStillProcessing(result.statusId) -> {
+                                    delay(1500)
+                                }
+                                result.statusId == Judge0Status.NO_RESPONSE -> {
+                                    noResponseCount++
+                                    Log.w("RunCode", "poll[$index][$attempt] Judge0 연결 실패 ($noResponseCount/5)")
+                                    if (noResponseCount >= 5) {
+                                        break
+                                    }
+                                    delay(2000)
+                                }
+                                else -> {
+                                    Log.d("RunCode", "poll[$index] 완료 — statusId=${result.statusId}")
+                                    if (result.statusId == Judge0Status.INTERNAL_ERROR) {
+                                        _uiState.update { it.copy(toastMessage = "채점 시스템 내부 오류가 발생했습니다.") }
+                                    }
+                                    break
+                                }
+                            }
+                        } catch (e: kotlinx.coroutines.CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Log.w("RunCode", "poll[$index][$attempt] API 오류 (재시도): ${e.message}")
+                            delay(1500)
                         }
-                        delay(2000)
-                    }
-                    // 최종 결과 (정답, 오답, 컴파일오류, 시간초과 등)
-                    else -> {
-                        Log.d("RunCode", "poll 완료 — statusId=${result.statusId}, output=${result.rawOutput}")
-                        val toast = if (result.statusId == Judge0Status.INTERNAL_ERROR)
-                            "채점 시스템 내부 오류가 발생했습니다." else null
-                        _uiState.update { it.copy(isRunning = false, errorToast = toast) }
-                        return
                     }
                 }
-
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.w("RunCode", "poll[$attempt] API 오류 (재시도): ${e.message}")
-                delay(1500)
             }
         }
-
-        _uiState.update {
-            it.copy(
-                isRunning = false,
-                errorToast = "실행 결과 조회 시간이 초과되었습니다."
-            )
-        }
+        _uiState.update { it.copy(isRunning = false) }
     }
 
     /**
      * 실행 결과 초기화
      */
     fun clearRunResult() {
-        _uiState.update { it.copy(runResult = null) }
+        _uiState.update { it.copy(runResults = emptyList()) }
     }
 
     /**
@@ -343,7 +339,7 @@ class SolverViewModel(
         val state = _uiState.value
 
         if (state.problemId == 0L) {
-            _uiState.update { it.copy(errorToast = "problemId가 없습니다.") }
+            _uiState.update { it.copy(toastMessage = "problemId가 없습니다.") }
             return
         }
 
@@ -379,7 +375,7 @@ class SolverViewModel(
                 _uiState.update {
                     it.copy(
                         isSubmitting = false,
-                        errorToast = "코드 제출 실패: ${e.message}"
+                        toastMessage = "코드 제출 실패: ${e.message}"
                     )
                 }
             }
@@ -430,7 +426,7 @@ class SolverViewModel(
         _uiState.update {
             it.copy(
                 isSubmitting = false,
-                errorToast = "채점 결과 조회 시간이 초과되었습니다."
+                toastMessage = "채점 결과 조회 시간이 초과되었습니다."
             )
         }
     }
@@ -455,7 +451,7 @@ class SolverViewModel(
 
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(errorToast = "제출 기록 조회 실패: ${e.message}")
+                    it.copy(toastMessage = "제출 기록 조회 실패: ${e.message}")
                 }
             }
         }
@@ -492,7 +488,7 @@ class SolverViewModel(
                 _uiState.update {
                     it.copy(
                         isLoadingSolution = false,
-                        errorToast = "모범 답안 로드 실패: ${e.message}"
+                        toastMessage = "모범 답안 로드 실패: ${e.message}"
                     )
                 }
             }
@@ -541,7 +537,7 @@ class SolverViewModel(
     /**
      * 에러 토스트 초기화
      */
-    fun clearErrorToast() {
-        _uiState.update { it.copy(errorToast = null) }
+    fun clearToastMessage() {
+        _uiState.update { it.copy(toastMessage = null) }
     }
 }

@@ -6,7 +6,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.fe.ui.theme.CodeBgDark
@@ -64,71 +63,36 @@ fun SoraCodeEditor(
                 scheme.setColor(EditorColorScheme.SELECTION_INSERT, primaryColor)
                 colorScheme = scheme
 
+                // 오버스크롤 완전 제거.
+                // setEdgeEffectColor(투명) 만으로는 Android 12+ 의 stretch 오버스크롤
+                // (콘텐츠가 물리적으로 늘어나 어두운 배경이 검게 보임)을 막지 못한다.
+                // sora 는 EdgeEffect 필드(edgeEffectVertical/Horizontal)를 직접 그리므로,
+                // 아무 동작도 하지 않는 EdgeEffect 로 두 필드를 교체해 글로우/stretch 를 원천 차단한다.
                 overScrollMode = android.view.View.OVER_SCROLL_NEVER
+                props.overScrollEnabled = false
+                runCatching {
+                    val editor = this
+                    for (fieldName in listOf("edgeEffectVertical", "edgeEffectHorizontal")) {
+                        CodeEditor::class.java.getDeclaredField(fieldName).apply {
+                            isAccessible = true
+                            set(editor, NoOverScrollEdgeEffect(context))
+                        }
+                    }
+                }
+
                 setEditorLanguage(JavaLanguage())
                 setText(currentCode)
 
-                // 코드 변경 → ViewModel 동기화
+                // 코드 변경 → ViewModel 동기화.
+                // 괄호 자동완성( (^) )과 중괄호 Enter 확장( {\n  ^\n} )은 sora-editor 내장 기능
+                // (JavaLanguage 의 DefaultSymbolPairs + BraceHandler, props.symbolPairAutoCompletion=true)
+                // 에 위임한다. 과거의 수동 ContentChangeEvent 핸들러는 내장 기능과 충돌하여
+                // 닫는 괄호 중복 삽입 / 커서 튐을 유발했으므로 제거했다.
                 subscribeEvent<ContentChangeEvent> { _, _ ->
                     val newCode = text.toString()
                     if (newCode != currentCode) {
                         lastCodeRef.set(newCode)
                         currentOnCodeChange(newCode)
-                    }
-                }
-
-                // 스마트 중괄호 Enter: { + Enter → {\n    |\n}
-                var processingSmartBrace = false
-                subscribeEvent<ContentChangeEvent> { event, _ ->
-                    if (processingSmartBrace) return@subscribeEvent
-                    if (event.action != ContentChangeEvent.ACTION_INSERT) return@subscribeEvent
-                    if (!event.changedText.toString().startsWith("\n")) return@subscribeEvent
-                    if (event.changeStart.line + 1 >= text.lineCount) return@subscribeEvent
-
-                    val insertedLine = event.changeStart.line
-                    val lineBefore = text.getLine(insertedLine).toString()
-                    val lineAfter  = text.getLine(insertedLine + 1).toString()
-
-                    val indent      = lineBefore.takeWhile { it == ' ' || it == '\t' }
-                    val innerIndent = "$indent    "
-
-                    // Case A: {|} → \n 삽입 후 lineBefore="{", lineAfter="}"
-                    val caseA = lineBefore.trimEnd().endsWith("{") &&
-                                lineAfter.trimStart().startsWith("}")
-                    // Case B: {}| → \n 삽입 후 lineBefore="{}", lineAfter=""
-                    val caseB = !caseA && lineBefore.trimEnd().endsWith("{}")
-
-                    if (!caseA && !caseB) return@subscribeEvent
-
-                    post {
-                        if (processingSmartBrace) return@post
-                        processingSmartBrace = true
-                        try {
-                            if (caseA) {
-                                // } 의 들여쓰기가 부족하면 맞춤
-                                val closingIndent = lineAfter.takeWhile { it == ' ' || it == '\t' }
-                                if (closingIndent.length < indent.length) {
-                                    if (closingIndent.isNotEmpty()) {
-                                        text.delete(insertedLine + 1, 0,
-                                                    insertedLine + 1, closingIndent.length)
-                                    }
-                                    if (indent.isNotEmpty()) {
-                                        text.insert(insertedLine + 1, 0, indent)
-                                    }
-                                }
-                                // } 앞에 빈 들여쓰기 줄 삽입
-                                text.insert(insertedLine + 1, 0, "$innerIndent\n")
-                                setSelection(insertedLine + 1, innerIndent.length)
-                            } else {
-                                // lineBefore 끝 } 제거 후 새 두 줄 삽입
-                                val braceCol = lineBefore.trimEnd().length - 1
-                                text.delete(insertedLine, braceCol, insertedLine, braceCol + 1)
-                                text.insert(insertedLine + 1, 0, "$innerIndent\n$indent}")
-                                setSelection(insertedLine + 1, innerIndent.length)
-                            }
-                        } finally {
-                            processingSmartBrace = false
-                        }
                     }
                 }
 
@@ -182,37 +146,82 @@ fun SoraCodeEditor(
         update = {}
     )
 
-    // External code reset (e.g. language switch): LaunchedEffect(code) restarts on every
-    // code change. After a short delay, if the code hasn't been echoed back by the user's
-    // own typing (lastCodeRef still differs), it's a genuine external reset → setText.
-    // This avoids the race where stale recompositions (currentCode lags behind lastCodeRef)
-    // incorrectly trigger setText and jump the cursor to line 0.
+    // 외부에서 코드가 통째로 교체된 경우(언어 변경 / 서버 임시저장 코드 로드)에만 setText 한다.
+    // 사용자의 타이핑으로 인한 변경은 에디터가 이미 화면에 반영하고 있으므로 건너뛴다.
+    //  - code == 에디터 현재 내용  → 이미 동일, 무시
+    //  - code == lastCodeRef       → 에디터가 직접 내보낸(중간) 값, 무시
+    // 위 두 가드로 과거의 delay(300) 휴리스틱이 타이핑 중 잘못 setText 하여
+    // 커서를 1번 줄로 튕기던 현상을 제거한다. 진짜 외부 교체일 때만 커서 위치를 보존하며 갱신.
     LaunchedEffect(code) {
-        val targetCode = code
-        delay(300)
         val editor = editorInstance ?: return@LaunchedEffect
-        if (targetCode != lastCodeRef.get()) {
-            editor.post {
-                editor.setText(targetCode)
-                lastCodeRef.set(targetCode)
-            }
+        val current = editor.text.toString()
+        if (code == current || code == lastCodeRef.get()) return@LaunchedEffect
+
+        val oldLine = editor.cursor.leftLine
+        val oldCol = editor.cursor.leftColumn
+        editor.setText(code)
+        lastCodeRef.set(code)
+        runCatching {
+            val ln = oldLine.coerceIn(0, (editor.text.lineCount - 1).coerceAtLeast(0))
+            val cc = oldCol.coerceIn(0, editor.text.getColumnCount(ln))
+            editor.setSelection(ln, cc)
         }
     }
 
+    // 스마트 키보드 입력(SharedFlow 경로 — SolveScreen 등에서 사용)
     LaunchedEffect(insertTextEvent) {
-        insertTextEvent?.collect { text ->
-            val editor = editorInstance
-            if (editor != null) {
-                val line = editor.cursor.leftLine
-                val col = editor.cursor.leftColumn
-                editor.text.insert(line, col, text)
-                val newlineCount = text.count { it == '\n' }
-                val newLine = line + newlineCount
-                val newCol = if (newlineCount > 0) text.substringAfterLast('\n').length else col + text.length
-                try { editor.setSelection(newLine, newCol) } catch (_: Exception) {}
-            }
+        insertTextEvent?.collect { input ->
+            editorInstance?.smartInsert(input)
         }
     }
+}
+
+/**
+ * 스마트 키보드 등으로 텍스트를 삽입할 때 사용하는 공통 입력 함수.
+ *
+ * CodeEditor.insertText() 는 IME(commitText) 경로가 아니라서 sora 내장 괄호 페어링이
+ * 동작하지 않는다. 그래서 여는 괄호/따옴표는 여기서 직접 짝을 함께 넣고 커서를 가운데에 둔다 → ( ^ )
+ * 일반 키보드(IME)는 sora 내장 DefaultSymbolPairs 가 동일하게 처리하므로, 두 경로의 동작이 통일된다.
+ */
+fun CodeEditor.smartInsert(input: String) {
+    val line = cursor.leftLine
+    val col = cursor.leftColumn
+
+    val closing = when (input) {
+        "(" -> ")"
+        "{" -> "}"
+        "[" -> "]"
+        "\"" -> "\""
+        "'" -> "'"
+        else -> null
+    }
+
+    if (closing != null) {
+        text.insert(line, col, input + closing)
+        runCatching { setSelection(line, col + 1) }
+    } else {
+        text.insert(line, col, input)
+        val newlineCount = input.count { it == '\n' }
+        val newLine = line + newlineCount
+        val newCol = if (newlineCount > 0) input.substringAfterLast('\n').length else col + input.length
+        runCatching { setSelection(newLine, newCol) }
+    }
+}
+
+/**
+ * 어떤 입력에도 반응하지 않는 EdgeEffect.
+ * sora 의 오버스크롤(글로우 / Android 12+ stretch)을 완전히 비활성화하기 위해
+ * CodeEditor 의 edgeEffectVertical / edgeEffectHorizontal 필드에 주입한다.
+ */
+private class NoOverScrollEdgeEffect(context: Context) : android.widget.EdgeEffect(context) {
+    override fun onPull(deltaDistance: Float) {}
+    override fun onPull(deltaDistance: Float, displacement: Float) {}
+    override fun onPullDistance(deltaDistance: Float, displacement: Float): Float = 0f
+    override fun onAbsorb(velocity: Int) {}
+    override fun onRelease() {}
+    override fun draw(canvas: android.graphics.Canvas): Boolean = false
+    override fun isFinished(): Boolean = true
+    override fun getDistance(): Float = 0f
 }
 
 fun CodeEditor.moveCursor(left: Boolean) {

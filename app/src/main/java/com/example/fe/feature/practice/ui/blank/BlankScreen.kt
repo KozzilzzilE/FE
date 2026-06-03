@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -83,6 +84,12 @@ fun BlankScreen(
             )
         }
     ) { innerPadding ->
+        val scrollState = rememberScrollState()
+
+        LaunchedEffect(currentIndex) {
+            scrollState.scrollTo(0)
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -92,7 +99,7 @@ fun BlankScreen(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState)
                     .padding(horizontal = 8.dp, vertical = 10.dp)
             ) {
                 PracticeProgressHeader(

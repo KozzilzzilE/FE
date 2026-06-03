@@ -24,11 +24,15 @@ class HomeRepository(private val apiService: ApiService) {
                     if (body != null && body.isSuccess) {
                         val result = body.result
                         if (result != null) {
-                            val contributionData = result.totalSolvedDetails
+                            val realContributionData = result.totalSolvedDetails
                                 .mapNotNull { detail ->
                                     runCatching { LocalDate.parse(detail.date) to detail.count }.getOrNull()
                                 }
                                 .toMap()
+
+                            // 데모용 더미 잔디 채움(빈 날만, 스트릭은 2일째로 고정).
+                            // 실서비스 전환 시 ContributionDummy.ENABLED = false
+                            val contributionData = ContributionDummy.enrich(realContributionData)
 
                             // 연속 학습 일수(스트릭) 계산 로직
                             val today = LocalDate.now()

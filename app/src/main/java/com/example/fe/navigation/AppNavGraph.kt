@@ -875,8 +875,13 @@ fun AppNavGraph() {
                 .getLanguage(context)
                 .ifBlank { "JAVA" }
 
+            // EditorScreen 은 SolveScreen 과 같은 solverViewModel 을 공유하는 하위 화면이다.
+            // 진입할 때마다 재로드하면 사용자가 편집/초기화한 코드가 서버 임시저장본·템플릿으로
+            // 덮어써지므로, 아직 해당 문제가 로드되지 않은 경우(직접 진입)에만 로드한다.
             LaunchedEffect(problemId, preferredLanguage) {
-                solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+                if (solverViewModel.uiState.value.problemId != problemId) {
+                    solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+                }
             }
 
             EditorScreen(
@@ -917,8 +922,12 @@ fun AppNavGraph() {
                 .getLanguage(context)
                 .ifBlank { "JAVA" }
 
+            // EditorFullScreen 도 solverViewModel 을 공유하는 하위 화면이다. (위 EDITOR_ROUTE 와 동일)
+            // 이미 로드된 문제면 재로드하지 않아, 일반 화면 ↔ 전체화면 간 코드 상태를 그대로 유지한다.
             LaunchedEffect(problemId, preferredLanguage) {
-                solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+                if (solverViewModel.uiState.value.problemId != problemId) {
+                    solverViewModel.loadProblemDetail(problemId, preferredLanguage)
+                }
             }
 
             EditorFullScreen(

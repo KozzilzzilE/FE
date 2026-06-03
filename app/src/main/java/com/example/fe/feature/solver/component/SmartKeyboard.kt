@@ -81,7 +81,10 @@ fun SmartKeyboardPanel(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            ActionKey(text = "Tab", modifier = Modifier.weight(1f)) { onInsert("\t") }
+            // Tab 은 리터럴 탭(\t) 대신 공백 4칸을 삽입한다.
+            // sora 자동 들여쓰기(JavaLanguage.useTab=false)와 코드 템플릿이 모두 공백을 쓰므로,
+            // 탭/공백이 섞이면 Python 에서 TabError(런타임 NZEC)가 발생한다. → 공백으로 통일.
+            ActionKey(text = "Tab", modifier = Modifier.weight(1f)) { onInsert("    ") }
             ActionKey(text = "줄바꿈", modifier = Modifier.weight(1f)) { onInsert("\n") }
             ActionKey(text = "주석", modifier = Modifier.weight(1f)) { onInsert(CodeTemplates.commentPrefix(language)) }
         }

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,6 +32,7 @@ import com.example.fe.common.TopBar
 import com.example.fe.feature.solver.SolverViewModel
 import com.example.fe.feature.solver.component.SmartKeyboardPanel
 import com.example.fe.feature.solver.component.SoraCodeEditor
+import com.example.fe.feature.solver.component.smartInsert
 import com.example.fe.ui.theme.*
 
 @Composable
@@ -49,7 +51,7 @@ fun EditorScreen(
     var wasRunning by remember { mutableStateOf(false) }
     LaunchedEffect(uiState.isRunning) {
         if (wasRunning && !uiState.isRunning) {
-            if (uiState.runResult != null) {
+            if (uiState.runResults.any { it != null }) {
                 viewModel.pendingNavigationTarget = "RESULT"
                 onGoSubmit()
             }
@@ -134,19 +136,35 @@ fun EditorScreen(
                             .border(1.dp, BgDivider, RoundedCornerShape(18.dp))
                     ) {
                         // 전체화면 버튼
-                        IconButton(
-                            onClick = onFullscreenClick,
+                        Row(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(8.dp)
-                                .zIndex(1f)
+                                .zIndex(1f),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.OpenInFull,
-                                contentDescription = "전체화면",
-                                tint = TextPrimary,
-                                modifier = Modifier.size(20.dp)
-                            )
+                            IconButton(
+                                onClick = { viewModel.updateCode("") },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.DeleteOutline,
+                                    contentDescription = "코드 초기화",
+                                    tint = TextPrimary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            IconButton(
+                                onClick = onFullscreenClick,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.OpenInFull,
+                                    contentDescription = "전체화면",
+                                    tint = TextPrimary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
 
                         SoraCodeEditor(
@@ -199,7 +217,7 @@ fun EditorScreen(
                 Column {
                     HorizontalDivider(color = BgDivider)
                     SmartKeyboardPanel(
-                        onInsert = { insert -> codeEditor?.insertText(insert, insert.length) },
+                        onInsert = { insert -> codeEditor?.smartInsert(insert) },
                         language = uiState.language,
                         modifier = Modifier
                             .fillMaxWidth()

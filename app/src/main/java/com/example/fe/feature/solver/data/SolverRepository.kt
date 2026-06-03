@@ -103,7 +103,7 @@ class SolverRepository(
         problemId: Long,
         code: String,
         language: String
-    ): String {
+    ): List<String> {
         val response = apiService.runCode(
             token = "Bearer $token",
             problemId = problemId,
@@ -124,12 +124,10 @@ class SolverRepository(
             throw Exception(body.message)
         }
 
-        val runToken = body.result
-            ?.firstOrNull()
-            ?.token
+        val runTokens = body.result?.map { it.token }
             ?: throw Exception("실행 토큰이 없습니다.")
 
-        return runToken
+        return runTokens
     }
 
     /**

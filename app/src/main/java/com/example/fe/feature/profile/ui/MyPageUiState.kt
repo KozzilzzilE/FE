@@ -11,6 +11,7 @@ data class MyPageUiState(
     val userName: String = "",
     val email: String = "",
     val currentProfileImgUrl: String? = null,
+    val currentProfileId: Int? = null,
     val languageName: String = "",
     val languageOptions: List<LanguageResult> = emptyList(),
     val profileImages: List<ProfileImageItem> = emptyList(),

@@ -95,7 +95,16 @@ class MyPageViewModel(
             _uiState.value = _uiState.value.copy(isLoadingImages = true)
             try {
                 val images = repository.getProfileImages()
-                _uiState.value = _uiState.value.copy(profileImages = images, isLoadingImages = false)
+                // 현재 프로필 이미지 URL로 기존 profileId를 찾아 보존
+                val currentUrl = _uiState.value.currentProfileImgUrl
+                val matchedId = if (currentUrl != null) {
+                    images.find { it.imgUrl == currentUrl }?.profileId
+                } else null
+                _uiState.value = _uiState.value.copy(
+                    profileImages = images,
+                    isLoadingImages = false,
+                    currentProfileId = matchedId ?: _uiState.value.currentProfileId
+                )
             } catch (e: Exception) {
                 android.util.Log.e("MyPageViewModel", "프로필 이미지 목록 조회 실패: ${e.message}")
                 _uiState.value = _uiState.value.copy(isLoadingImages = false)
@@ -170,9 +179,12 @@ class MyPageViewModel(
             _uiState.value = _uiState.value.copy(isSaving = true, error = null)
 
             try {
+                // 이미지를 새로 선택하지 않았으면 기존 profileId 유지
+                val profileIdToSend = _uiState.value.selectedProfileId
+                    ?: _uiState.value.currentProfileId
                 val result = repository.updateProfile(
                     nickname = name,
-                    profileId = _uiState.value.selectedProfileId
+                    profileId = profileIdToSend
                 )
 
                 _uiState.value = _uiState.value.copy(

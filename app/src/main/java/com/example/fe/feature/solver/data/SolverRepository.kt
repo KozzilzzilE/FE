@@ -138,7 +138,8 @@ class SolverRepository(
      */
     suspend fun getRunResult(
         token: String,
-        runToken: String
+        runToken: String,
+        originalInput: String? = null
     ): RunResult {
         val response = apiService.getRunResult(
             token = "Bearer $token",
@@ -161,6 +162,10 @@ class SolverRepository(
         val isPassed = Judge0Status.isAccepted(statusId)
         val statusLabel = Judge0Status.toKoreanLabel(statusId)
 
+        val stdout = result.output?.trim()
+        val stderr = result.stderr?.trim()
+        val compileOut = result.compileOutput?.trim()
+
         return RunResult(
             statusId = statusId,
             statusLabel = statusLabel,
@@ -171,12 +176,27 @@ class SolverRepository(
                 isPassed -> null
                 else -> statusLabel
             },
-            rawOutput = result.output?.trim(),
+            rawOutput = stdout,
+            stderr = stderr,
+            compileOutput = compileOut,
             terminalLines = buildList {
                 add("\$ Running...")
                 add("상태: $statusLabel")
-                if (!result.input.isNullOrBlank()) add("입력: ${result.input}")
-                if (!result.output.isNullOrBlank()) add("출력: ${result.output.trim()}")
+                
+                val displayInput = result.input ?: originalInput
+                if (!displayInput.isNullOrBlank()) add("입력: $displayInput")
+                
+                if (stdout != null) add("출력: $stdout")
+                if (stderr != null) add("에러: $stderr")
+                if (compileOut != null) add("컴파일 출력: $compileOut")
+                
+                if (stdout == null && stderr == null && compileOut == null) {
+                    if (isPassed) {
+                        add("출력: (없음)")
+                    } else if (!isStillProcessing) {
+                        add("에러: 출력된 상세 메시지가 없습니다.")
+                    }
+                }
             }
         )
     }
@@ -248,6 +268,13 @@ class SolverRepository(
         )
     }
 
+    data class SubmissionPollData(
+        val isCorrect: Boolean,
+        val status: String,
+        val progress: Double?,
+        val message: String?
+    )
+
     /**
      * 채점 결과 조회 (폴링용)
      * GET /api/v1/problems/submissions/{historyId}/results
@@ -255,7 +282,7 @@ class SolverRepository(
     suspend fun getSubmissionResult(
         token: String,
         historyId: Long
-    ): Pair<Boolean, String> {
+    ): SubmissionPollData {
         val response = apiService.getSubmissionResult(
             token = "Bearer $token",
             historyId = historyId
@@ -274,8 +301,10 @@ class SolverRepository(
 
         val status = result.status
         val isCorrect = status == "ACCEPTED"
+        val progress = result.progress
+        val message = result.message
 
-        return Pair(isCorrect, status)
+        return SubmissionPollData(isCorrect, status, progress, message)
     }
 
     /**

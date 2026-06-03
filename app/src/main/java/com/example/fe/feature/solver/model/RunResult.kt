@@ -7,5 +7,7 @@ data class RunResult(
     val runtimeMs: Long? = null,
     val errorMessage: String? = null,
     val rawOutput: String? = null,
+    val stderr: String? = null,
+    val compileOutput: String? = null,
     val terminalLines: List<String> = emptyList()
 )

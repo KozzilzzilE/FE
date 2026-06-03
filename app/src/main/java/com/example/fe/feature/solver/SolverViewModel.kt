@@ -245,9 +245,11 @@ class SolverViewModel(
 
                 Log.d("RunCode", "runToken 수신: $runToken")
 
+                val originalInput = state.testCases.firstOrNull()?.input
                 pollRunResult(
                     accessToken = token,
-                    runToken = runToken
+                    runToken = runToken,
+                    originalInput = originalInput
                 )
             } catch (e: Exception) {
                 Log.e("RunCode", "실행 실패", e)
@@ -266,14 +268,15 @@ class SolverViewModel(
      */
     private suspend fun pollRunResult(
         accessToken: String,
-        runToken: String
+        runToken: String,
+        originalInput: String?
     ) {
         var attempt = 0
         var noResponseCount = 0
         while (attempt < 20) {
             attempt++
             try {
-                val result = repository.getRunResult(accessToken, runToken)
+                val result = repository.getRunResult(accessToken, runToken, originalInput)
 
                 Log.d("RunCode", "poll[$attempt] statusId=${result.statusId} label=${result.statusLabel}")
 
@@ -392,28 +395,32 @@ class SolverViewModel(
         language: String
     ) {
         repeat(15) {
-            val (isCorrect, status) = repository.getSubmissionResult(
+            val pollData = repository.getSubmissionResult(
                 token = accessToken,
                 historyId = historyId
             )
 
-            if (Judge0Status.isServerStatusProcessing(status)) {
-                delay(1500)
-                return@repeat
-            }
+            val isProcessing = Judge0Status.isServerStatusProcessing(pollData.status)
 
             val submitResult = SubmitResult(
-                isCorrect = isCorrect,
-                statusLabel = Judge0Status.serverStatusToKorean(status),
+                isCorrect = pollData.isCorrect,
+                statusLabel = Judge0Status.serverStatusToKorean(pollData.status),
                 runtimeMs = null,
-                errorMessage = if (isCorrect) null else status
+                errorMessage = pollData.message ?: if (pollData.isCorrect) null else pollData.status,
+                isProcessing = isProcessing,
+                progress = pollData.progress
             )
 
             _uiState.update {
                 it.copy(
-                    isSubmitting = false,
+                    isSubmitting = isProcessing, // 계속 처리중이면 isSubmitting = true 유지
                     submitResult = submitResult
                 )
+            }
+
+            if (isProcessing) {
+                delay(1500)
+                return@repeat
             }
 
             loadSubmissionHistory(_uiState.value.problemId)

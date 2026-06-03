@@ -207,21 +207,64 @@ private fun SubmitResultView(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     if (latestResult != null || submissions.isNotEmpty()) {
+                        val isProcessing = latestResult?.isProcessing == true
                         val isCorrect = latestResult?.isCorrect ?: submissions.firstOrNull()?.isCorrect ?: false
                         val resultLabel = latestResult?.statusLabel
                             ?: if (isCorrect) "정답" else submissions.firstOrNull()?.result ?: "오답"
-                        Icon(
-                            imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
-                            contentDescription = null,
-                            tint = if (isCorrect) Success else Error,
-                            modifier = Modifier.size(52.dp)
-                        )
+                        
+                        val tintColor = if (isProcessing) Color(0xFFF59E0B) else if (isCorrect) Success else Error
+                        
+                        if (isProcessing) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(52.dp)) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(52.dp),
+                                    color = tintColor,
+                                    strokeWidth = 4.dp
+                                )
+                                val progress = latestResult?.progress
+                                if (progress != null) {
+                                    Text(
+                                        text = "${progress.toInt()}%",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = tintColor
+                                    )
+                                }
+                            }
+                        } else {
+                            Icon(
+                                imageVector = if (isCorrect) Icons.Outlined.CheckCircle else Icons.Outlined.Cancel,
+                                contentDescription = null,
+                                tint = tintColor,
+                                modifier = Modifier.size(52.dp)
+                            )
+                        }
                         Text(
-                            text = if (isCorrect) "정답입니다!" else "${resultLabel}입니다.",
+                            text = if (isProcessing) resultLabel else if (isCorrect) "정답입니다!" else "${resultLabel}입니다.",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isCorrect) Success else Error
+                            color = tintColor
                         )
+                        
+                        val latestHistory = submissions.firstOrNull()
+                        if (latestHistory != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "언어: ${latestHistory.language}  |  제출 시간: ${latestHistory.date}",
+                                fontSize = 13.sp,
+                                color = TextMuted,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                        
+                        val execTime = latestResult?.runtimeMs
+                        if (execTime != null) {
+                            Text(
+                                text = "(실행 시간: ${execTime}ms)",
+                                fontSize = 13.sp,
+                                color = TextMuted
+                            )
+                        }
                         HorizontalDivider(thickness = 1.dp, color = BgElevated)
                     } else {
                         // 제출 전 placeholder
@@ -473,6 +516,16 @@ private fun ExecutionResultView(viewModel: SolverViewModel) {
                     fontWeight = FontWeight.Bold,
                     color = if (isCorrect) Color(0xFF22C55E) else Error
                 )
+                
+                val time = executionResult?.runtimeMs
+                if (time != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "(실행 시간: ${time}ms)",
+                        fontSize = 14.sp,
+                        color = TextMuted
+                    )
+                }
             }
         }
 

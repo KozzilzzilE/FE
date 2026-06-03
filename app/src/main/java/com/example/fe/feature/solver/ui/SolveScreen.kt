@@ -82,27 +82,7 @@ fun SolveScreen(
         viewModel.pendingNavigationTarget = null
     }
 
-    var wasRunning by remember { mutableStateOf(false) }
-    LaunchedEffect(uiState.isRunning) {
-        if (wasRunning && !uiState.isRunning) {
-            if (uiState.runResult != null) {
-                selectedTab = SolveTab.SUBMIT
-                selectedSubmitSubScreen = SubmitSubScreen.RESULT
-            }
-        }
-        wasRunning = uiState.isRunning
-    }
 
-    var wasSubmitting by remember { mutableStateOf(false) }
-    LaunchedEffect(uiState.isSubmitting) {
-        if (wasSubmitting && !uiState.isSubmitting) {
-            if (uiState.submitResult != null) {
-                selectedTab = SolveTab.SUBMIT
-                selectedSubmitSubScreen = SubmitSubScreen.MAIN
-            }
-        }
-        wasSubmitting = uiState.isSubmitting
-    }
 
     val context = LocalContext.current
     LaunchedEffect(uiState.errorToast) {
@@ -293,7 +273,13 @@ fun SolveScreen(
                                                 )
                                             } else {
                                                 IconButton(
-                                                    onClick = { if (!uiState.isSubmitting) viewModel.runCode() },
+                                                    onClick = { 
+                                                        if (!uiState.isSubmitting) {
+                                                            viewModel.runCode()
+                                                            selectedTab = SolveTab.SUBMIT
+                                                            selectedSubmitSubScreen = SubmitSubScreen.RESULT
+                                                        }
+                                                    },
                                                     modifier = Modifier.size(30.dp)
                                                 ) {
                                                     Icon(
@@ -325,7 +311,13 @@ fun SolveScreen(
                                                 )
                                             } else {
                                                 IconButton(
-                                                    onClick = { if (!uiState.isRunning) viewModel.submitCode() },
+                                                    onClick = { 
+                                                        if (!uiState.isRunning) {
+                                                            viewModel.submitCode()
+                                                            selectedTab = SolveTab.SUBMIT
+                                                            selectedSubmitSubScreen = SubmitSubScreen.MAIN
+                                                        }
+                                                    },
                                                     modifier = Modifier.size(30.dp)
                                                 ) {
                                                     Icon(

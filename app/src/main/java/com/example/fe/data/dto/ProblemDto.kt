@@ -157,6 +157,8 @@ data class RunResultDto(
     @SerializedName("status") val status: String,
     @SerializedName("input") val input: String?,
     @SerializedName("output") val output: String?,
+    @SerializedName("stderr") val stderr: String?,
+    @SerializedName("compile_output") val compileOutput: String?,
     @SerializedName("time") val time: Double?
 )
 
@@ -175,8 +177,8 @@ data class SubmissionResultResponseDto(
 data class SubmissionResultDto(
     @SerializedName("success") val success: Boolean,
     @SerializedName("status") val status: String,
-    @SerializedName("message") val message: String,
-    @SerializedName("progress") val progress: Int?
+    @SerializedName("message") val message: String?,
+    @SerializedName("progress") val progress: Double?
 )
 
 /**

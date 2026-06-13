@@ -30,6 +30,20 @@
 
 <br />
 
+## 💁‍♂️ 프로젝트 팀원
+
+<!-- 
+  ⚠️ GitHub 사용자명을 실제 팀원 것으로 교체해주세요!
+  img src의 ?size=120 부분은 프로필 이미지 크기입니다.
+-->
+
+|팀원 1|팀원 2|팀원 3|팀원 4|팀원 5|
+|:---:|:---:|:---:|:---:|:---:|
+| ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) |
+|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|
+
+<br />
+
 ## 🎯 핵심 기능
 
 ### 4단계 학습 플로우
@@ -50,6 +64,19 @@
 | ⭐ **즐겨찾기** | 문제 북마크 및 모아보기 |
 | 📋 **제출 기록** | 전체 제출 이력 및 정답/오답 확인 |
 
+
+
+<br />
+
+## 🎬 시연 영상
+
+
+<div align="center">
+
+[![POCKETCO 시연 영상](images/youtube_thumbnail.jpg)](https://www.youtube.com/watch?v=FnfCaYPbP0E)
+
+</div>
+
 <br />
 
 ## 📱 화면 구성
@@ -62,22 +89,22 @@
 
 |로그인 화면|홈 화면|
 |:---:|:---:|
-|`스크린샷을 넣어주세요`|`스크린샷을 넣어주세요`|
+|<img src="https://github.com/user-attachments/assets/66c75a1f-bf00-4c91-b2fb-c8e566e5dfe4" width="250" />|<img src="https://github.com/user-attachments/assets/db8f6de7-1409-43c2-b3dd-927c4d48258f" width="250" />|
 |Google / GitHub / Email 소셜 로그인 지원|잔디 그래프, 스트릭, 빠른 메뉴|
 
 |개념 학습|응용 학습|
 |:---:|:---:|
-|`스크린샷을 넣어주세요`|`스크린샷을 넣어주세요`|
+|<img src="https://github.com/user-attachments/assets/51e88e2e-cde2-4213-bb19-74462c6b9461" width="250" />|<img src="https://github.com/user-attachments/assets/9acee430-5317-4dee-a34e-d534ad1f6f02" width="250" />|
 |슬라이드 형식의 개념 학습 + 마크다운 렌더링|빈칸 채우기로 코드 이해도 확인|
 
 |코드 에디터|실행 결과|
 |:---:|:---:|
-|`스크린샷을 넣어주세요`|`스크린샷을 넣어주세요`|
+|<img src="https://github.com/user-attachments/assets/f1a9c7d3-5d45-4ac4-9b40-cb71c892a19b" width="250" />|<img src="https://github.com/user-attachments/assets/da0b179a-a165-4983-b6b2-23a384f503cc" width="250" />|
 |Sora Editor 기반 코드 에디터 + 스마트 키보드|테스트 케이스별 실행 결과 확인|
 
 |AI 코드 리뷰|CS 퀴즈|
 |:---:|:---:|
-|`스크린샷을 넣어주세요`|`스크린샷을 넣어주세요`|
+|<img src="https://github.com/user-attachments/assets/7ccf1782-f7ce-4ebc-9224-84d081374a1d" width="250" />|<img src="https://github.com/user-attachments/assets/ef3156e1-cf24-4f71-ad0b-983d6a1b6c28" width="250" />|
 |코드 분석 + 개선 사항 + 개선 코드 제안|OX 형식의 CS 지식 퀴즈|
 
 <br />
@@ -129,6 +156,7 @@ app/src/main/java/com/example/fe/
 <div>
 <img src="https://img.shields.io/badge/Firebase_Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black">
 <img src="https://img.shields.io/badge/Google_Sign_In-4285F4?style=for-the-badge&logo=google&logoColor=white">
+<img src="https://img.shields.io/badge/GitHub_Sign_In-181717?style=for-the-badge&logo=github&logoColor=white">
 <img src="https://img.shields.io/badge/Judge0_API-333333?style=for-the-badge&logo=&logoColor=white">
 </div>
 
@@ -143,27 +171,10 @@ app/src/main/java/com/example/fe/
 
 ## 📐 아키텍처
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    UI Layer (Compose)                     │
-│  Composable Functions → StateFlow 구독 → 자동 UI 갱신     │
-├─────────────────────────────────────────────────────────┤
-│                  ViewModel Layer                         │
-│  MutableStateFlow → 단방향 데이터 흐름 → 비즈니스 로직     │
-├─────────────────────────────────────────────────────────┤
-│                  Repository Layer                        │
-│  API 호출 추상화 → DTO ↔ Domain Model 변환               │
-├─────────────────────────────────────────────────────────┤
-│                  Network Layer                           │
-│  Retrofit + OkHttp (Interceptor, Logging)                │
-└─────────────────────────────────────────────────────────┘
-```
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/3d757e8b-47b9-43b0-8db5-bd2e198e6d6a" width="80%" />
+</div>
 
-- **단방향 데이터 흐름**: ViewModel의 StateFlow를 UI에서 구독하여 상태 변화 시 자동 갱신
-- **기능별 패키지 분리**: feature/home, feature/solver, feature/concept 등 독립적 구조
-- **Lifecycle 연동**: ON_RESUME 이벤트를 관찰하여 화면 복귀 시 데이터 자동 갱신
-
-<br />
 
 ## 🔧 주요 구현 포인트
 
@@ -257,16 +268,4 @@ BASE_URL=http://your-server-url:8080/
 | 플랫폼 | **모바일 네이티브 (Android)** | 웹 중심 |
 | 코드 에디터 | 문법 하이라이팅 + 스마트 키보드 | 웹 에디터 |
 
-<br />
 
-## 💁‍♂️ 프로젝트 팀원
-
-<!-- 
-  ⚠️ GitHub 사용자명을 실제 팀원 것으로 교체해주세요!
-  img src의 ?size=120 부분은 프로필 이미지 크기입니다.
--->
-
-|팀원 1|팀원 2|팀원 3|팀원 4|팀원 5|
-|:---:|:---:|:---:|:---:|:---:|
-| ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) |
-|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|

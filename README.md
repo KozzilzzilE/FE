@@ -38,6 +38,8 @@
 | [이성규](https://github.com/leesk0007) | [권오현](https://github.com/ohyun0628) | [김승윤](https://github.com/hs-2171395-seungyoonkim) | [김완수](https://github.com/okjunges) | [김하은](https://github.com/rlagkdms11) |
 | Android 개발 | Android 개발 | Data 관리 | Backend 개발 | Backend 개발 |
 
+<br />
+
 ## 🎯 핵심 기능
 
 ### 4단계 학습 플로우
@@ -100,6 +102,16 @@
 |:---:|:---:|
 |<img src="https://github.com/user-attachments/assets/7ccf1782-f7ce-4ebc-9224-84d081374a1d" width="250" />|<img src="https://github.com/user-attachments/assets/ef3156e1-cf24-4f71-ad0b-983d6a1b6c28" width="250" />|
 |코드 분석 + 개선 사항 + 개선 코드 제안|OX 형식의 CS 지식 퀴즈|
+
+<br />
+
+## 🎬 시연 영상
+
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=FnfCaYPbP0E">
+    <img src="https://img.shields.io/badge/YouTube-▶_시연_영상_보기-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="시연 영상 보기" />
+  </a>
+</div>
 
 <br />
 
@@ -169,6 +181,12 @@ app/src/main/java/com/example/fe/
   <img src="https://github.com/user-attachments/assets/3d757e8b-47b9-43b0-8db5-bd2e198e6d6a" width="80%" />
 </div>
 
+<br />
+- **단방향 데이터 흐름**: ViewModel의 StateFlow를 UI에서 구독하여 상태 변화 시 자동 갱신
+- **기능별 패키지 분리**: feature/home, feature/solver, feature/concept 등 독립적 구조
+- **Lifecycle 연동**: ON_RESUME 이벤트를 관찰하여 화면 복귀 시 데이터 자동 갱신
+
+<br />
 
 ## 🔧 주요 구현 포인트
 

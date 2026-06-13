@@ -181,12 +181,6 @@ app/src/main/java/com/example/fe/
   <img src="https://github.com/user-attachments/assets/3d757e8b-47b9-43b0-8db5-bd2e198e6d6a" width="80%" />
 </div>
 
-<br />
-- **단방향 데이터 흐름**: ViewModel의 StateFlow를 UI에서 구독하여 상태 변화 시 자동 갱신
-- **기능별 패키지 분리**: feature/home, feature/solver, feature/concept 등 독립적 구조
-- **Lifecycle 연동**: ON_RESUME 이벤트를 관찰하여 화면 복귀 시 데이터 자동 갱신
-
-<br />
 
 ## 🔧 주요 구현 포인트
 

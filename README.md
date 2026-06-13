@@ -32,17 +32,10 @@
 
 ## 💁‍♂️ 프로젝트 팀원
 
-<!-- 
-  ⚠️ GitHub 사용자명을 실제 팀원 것으로 교체해주세요!
-  img src의 ?size=120 부분은 프로필 이미지 크기입니다.
--->
-
-|팀장|팀원|팀원|팀원|팀원|
+| 팀장 / Android | 팀원 / Android | 팀원 / Data | 팀원 / Backend | 팀원 / Backend |
 |:---:|:---:|:---:|:---:|:---:|
-| ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) |
-|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|
-
-<br />
+| ![](https://github.com/leesk0007.png?size=120) | ![](https://github.com/ohyun0628.png?size=120) | ![](https://github.com/hs-2171395-seungyoonkim.png?size=120) | ![](https://github.com/okjunges.png?size=120) | ![](https://github.com/rlagkdms11.png?size=120) |
+| [이성규](https://github.com/leesk0007) | [권오현](https://github.com/ohyun0628) | [김승윤](https://github.com/hs-2171395-seungyoonkim) | [김완수](https://github.com/okjunges) | [김하은](https://github.com/rlagkdms11) |
 
 ## 🎯 핵심 기능
 

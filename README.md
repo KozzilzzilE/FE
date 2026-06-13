@@ -37,7 +37,7 @@
   img src의 ?size=120 부분은 프로필 이미지 크기입니다.
 -->
 
-|팀원 1|팀원 2|팀원 3|팀원 4|팀원 5|
+|팀장|팀원|팀원|팀원|팀원|
 |:---:|:---:|:---:|:---:|:---:|
 | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) | ![](https://github.com/깃허브_사용자명.png?size=120) |
 |[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|[이름](https://github.com/깃허브_사용자명)|
@@ -72,9 +72,9 @@
 
 
 <div align="center">
-
-[![POCKETCO 시연 영상](images/youtube_thumbnail.jpg)](https://www.youtube.com/watch?v=FnfCaYPbP0E)
-
+  <a href="https://www.youtube.com/watch?v=FnfCaYPbP0E">
+    <img src="https://img.shields.io/badge/YouTube-▶_시연_영상_보기-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="시연 영상 보기" />
+  </a>
 </div>
 
 <br />
